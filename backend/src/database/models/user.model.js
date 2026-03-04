@@ -36,6 +36,22 @@ export const UserModel = {
       default: false,
       description: 'Required for merchants to start selling'
     },
+    password: { 
+      type: 'String', 
+      required: false,
+      description: 'Hashed password for email login'
+    },
+    phone: { 
+      type: 'String', 
+      unique: true, 
+      required: false,
+      description: 'Required for future OTP login'
+    },
+    otpExpiresAt: { 
+      type: 'Date', 
+      required: false,
+      description: 'Expiration timestamp for OTP'
+    },
     otpHash: { type: 'String', required: false },
     createdAt: { type: 'Date' },
     updatedAt: { type: 'Date' }
