@@ -31,6 +31,11 @@ export const UserModel = {
       default: UserRole.CUSTOMER,
       required: true 
     },
+    isApproved: { 
+      type: 'Boolean', 
+      default: false,
+      description: 'Required for merchants to start selling'
+    },
     otpHash: { type: 'String', required: false },
     createdAt: { type: 'Date' },
     updatedAt: { type: 'Date' }
