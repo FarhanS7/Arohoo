@@ -31,7 +31,7 @@ export const Permissions = {
     'products:delete_any',
     'orders:view_all',
     'orders:manage_any',
-    'orders:update_status',
+    'orders:update_status', // Explicit authority for state transitions
     'dashboard:view_global_analytics',
     'users:view_all',
     'users:manage_any',
