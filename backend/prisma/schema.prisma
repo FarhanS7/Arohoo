@@ -13,20 +13,63 @@ enum UserRole {
   ADMIN
 }
 
+enum OrderStatus {
+  NEW_ORDER
+  PROCESSING
+  SHIPPED
+  DELIVERED
+}
+
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  password     String?
-  phone        String?   @unique
-  role         UserRole  @default(CUSTOMER)
-  isApproved   Boolean   @default(false)
-  otpHash      String?
-  otpExpiresAt DateTime?
-  products     Product[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id            String      @id @default(uuid())
+  email         String      @unique
+  password      String?
+  phone         String?     @unique
+  role          UserRole    @default(CUSTOMER)
+  isApproved    Boolean     @default(false)
+  otpHash       String?
+  otpExpiresAt  DateTime?
+  products      Product[]
+  orders        Order[]
+  merchantItems OrderItem[] @relation("MerchantItems")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   @@map("users")
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  shippingAddress Json
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  status          OrderStatus @default(NEW_ORDER)
+  orderItems      OrderItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([userId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String      @id @default(uuid())
+  orderId    String
+  order      Order       @relation(fields: [orderId], references: [id])
+  productId  String
+  product    Product     @relation(fields: [productId], references: [id])
+  merchantId String
+  merchant   User        @relation(name: "MerchantItems", fields: [merchantId], references: [id])
+  quantity   Int
+  price      Decimal     @db.Decimal(10, 2)
+  status     OrderStatus @default(NEW_ORDER)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([orderId])
+  @@index([merchantId])
+  @@map("order_items")
 }
 
 model Category {

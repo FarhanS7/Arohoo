@@ -1,19 +1,18 @@
 /**
- * Standardized order statuses for the marketplace.
+ * Order statuses refined for the Order Domain implementation.
  */
 export const OrderStatus = {
-  PENDING: 'PENDING',     // Initial state
-  CONFIRMED: 'CONFIRMED', // Manually confirmed by admin
-  SHIPPED: 'SHIPPED',     // Handed over to logistics
-  DELIVERED: 'DELIVERED', // Final state
-  CANCELLED: 'CANCELLED', // Terminated
+  NEW_ORDER: 'NEW_ORDER',
+  PROCESSING: 'PROCESSING',
+  SHIPPED: 'SHIPPED',
+  DELIVERED: 'DELIVERED',
 };
 
 /**
- * Payment statuses specifically for COD workflow.
+ * Payment statuses remain consistent for COD.
  */
 export const PaymentStatus = {
-  COD_PENDING: 'COD_PENDING', // Awaiting cash on delivery
-  PAID: 'PAID',               // Cash received
-  REFUNDED: 'REFUNDED',       // Returned and refunded
+  COD_PENDING: 'COD_PENDING',
+  PAID: 'PAID',
+  REFUNDED: 'REFUNDED',
 };
