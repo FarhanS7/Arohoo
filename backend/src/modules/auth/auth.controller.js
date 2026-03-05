@@ -85,3 +85,19 @@ export const login = asyncHandler(async (req, res, next) => {
     token,
   });
 });
+
+/**
+ * Controller to fetch current authenticated user profile.
+ */
+export const getMe = asyncHandler(async (req, res, next) => {
+  // 1. Get user ID from the 'protect' middleware (req.user)
+  const user = await authService.getUserById(req.user.userId);
+
+  // 2. Send response
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user,
+    },
+  });
+});

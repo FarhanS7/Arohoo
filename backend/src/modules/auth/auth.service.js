@@ -125,4 +125,42 @@ export class AuthService {
 
     return token;
   }
+
+  /**
+   * Retrieves a user by their ID.
+   * @param {string} userId - The unique ID of the user.
+   * @returns {Promise<Object>} - The user object.
+   */
+  async getUserById(userId) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        merchant: {
+          select: {
+            id: true,
+            storeName: true,
+            isApproved: true,
+          }
+        }
+      }
+    });
+
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+
+    // Flatten merchant info if it exists
+    const merchantId = user.merchant?.id || null;
+    
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      merchantId,
+      merchant: user.merchant
+    };
+  }
 }
