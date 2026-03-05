@@ -1,3 +1,4 @@
+import express from 'express';
 import { protect } from '../../common/middleware/auth.middleware.js';
 import { getMe, login, register, registerMerchant } from './auth.controller.js';
 

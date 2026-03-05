@@ -32,3 +32,31 @@ export const getPendingMerchants = asyncHandler(async (req, res, next) => {
     },
   });
 });
+
+/**
+ * Controller to handle merchant approval.
+ */
+export const approveMerchant = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  await adminService.approveMerchant(id);
+
+  res.status(200).json({
+    status: 'success',
+    data: null,
+  });
+});
+
+/**
+ * Controller to handle merchant rejection.
+ */
+export const rejectMerchant = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  await adminService.rejectMerchant(id);
+
+  res.status(200).json({
+    status: 'success',
+    data: null,
+  });
+});
