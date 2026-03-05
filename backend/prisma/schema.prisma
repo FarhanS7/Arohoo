@@ -40,16 +40,23 @@ model User {
   @@map("users")
 }
 
+enum MerchantStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Merchant {
-  id          String      @id @default(uuid())
+  id          String         @id @default(uuid())
   storeName   String
-  isApproved  Boolean     @default(false)
-  userId      String      @unique
-  user        User        @relation(fields: [userId], references: [id])
+  isApproved  Boolean        @default(false)
+  status      MerchantStatus @default(PENDING)
+  userId      String         @unique
+  user        User           @relation(fields: [userId], references: [id])
   products    Product[]
   orderItems  OrderItem[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   @@map("merchants")
 }
