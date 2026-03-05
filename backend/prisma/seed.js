@@ -6,20 +6,20 @@ const prisma = new PrismaClient();
 async function main() {
   // 1. Seed categories
   const categories = [
-    'Men',
-    'Women',
-    'Kids',
-    'Shoes',
-    'Skincare'
+    { name: 'Men', slug: 'men' },
+    { name: 'Women', slug: 'women' },
+    { name: 'Kids', slug: 'kids' },
+    { name: 'Shoes', slug: 'shoes' },
+    { name: 'Skincare', slug: 'skincare' }
   ];
 
   console.log('Seeding categories...');
 
-  for (const name of categories) {
+  for (const category of categories) {
     await prisma.category.upsert({
-      where: { name },
-      update: {},
-      create: { name },
+      where: { slug: category.slug },
+      update: { name: category.name },
+      create: { name: category.name, slug: category.slug },
     });
   }
 
