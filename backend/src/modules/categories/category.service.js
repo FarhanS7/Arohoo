@@ -1,4 +1,5 @@
 import { AppError } from '../../common/errors/AppError.js';
+import { cacheUtil } from '../../common/utils/cache.js';
 import prisma from '../../infrastructure/database/prisma.js';
 
 export class CategoryService {
@@ -106,5 +107,43 @@ export class CategoryService {
     return await prisma.category.delete({
       where: { id },
     });
+  }
+
+  /**
+   * Retrieves public category list with product counts.
+   * Uses caching for performance.
+   */
+  async getPublicCategories() {
+    const cacheKey = 'public_categories';
+    const cachedData = cacheUtil.get(cacheKey);
+
+    if (cachedData) {
+      return cachedData;
+    }
+
+    const categories = await prisma.category.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        imageUrl: true,
+        displayOrder: true,
+        _count: {
+          select: { products: true },
+        },
+      },
+      orderBy: { displayOrder: 'asc' },
+    });
+
+    // Map to flatten product count
+    const result = categories.map((cat) => ({
+      ...cat,
+      productCount: cat._count.products,
+      _count: undefined,
+    }));
+
+    cacheUtil.set(cacheKey, result);
+    return result;
   }
 }
