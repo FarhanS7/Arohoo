@@ -55,6 +55,7 @@ model Merchant {
   userId      String         @unique
   user        User           @relation(fields: [userId], references: [id])
   products    Product[]
+  categories  Category[]
   orderItems  OrderItem[]
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
@@ -104,6 +105,8 @@ model Category {
   displayOrder Int       @default(0)
   isActive     Boolean   @default(true)
   products     Product[]
+  merchantId   String?
+  merchant     Merchant? @relation(fields: [merchantId], references: [id])
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 

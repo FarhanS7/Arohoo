@@ -73,21 +73,22 @@ export class AuthService {
         },
       });
 
-      await tx.merchant.create({
+      const newMerchant = await tx.merchant.create({
         data: {
           storeName,
           userId: newUser.id,
-          isApproved: false, // Explicitly false for new merchants
+          isApproved: false,
         },
       });
 
-      return newUser;
+      return { user: newUser, merchant: newMerchant };
     });
 
     // 4. Generate token
     const token = generateToken({
-      userId: result.id,
-      role: result.role,
+      userId: result.user.id,
+      role: result.user.role,
+      merchantId: result.merchant.id,
     });
 
     return token;
@@ -117,10 +118,20 @@ export class AuthService {
       throw new AppError('Invalid email or password', 401);
     }
 
-    // 3. Generate token
+    // 3. Get merchant info if merchant
+    let merchantId = null;
+    if (user.role === 'MERCHANT') {
+      const merchant = await prisma.merchant.findUnique({
+        where: { userId: user.id },
+      });
+      merchantId = merchant?.id;
+    }
+
+    // 4. Generate token
     const token = generateToken({
       userId: user.id,
       role: user.role,
+      merchantId,
     });
 
     return token;

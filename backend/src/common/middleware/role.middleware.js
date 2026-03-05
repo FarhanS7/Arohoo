@@ -1,4 +1,3 @@
-import { ForbiddenError, UnauthorizedError } from '../errors/AppError.js';
 
 /**
  * Middleware factory to authorize users based on roles.
@@ -8,11 +7,11 @@ import { ForbiddenError, UnauthorizedError } from '../errors/AppError.js';
 export const authorize = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.user) {
-      return next(new UnauthorizedError('Authentication required'));
+      return next(new AppError('Authentication required', 401));
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      return next(new ForbiddenError('Insufficient permissions'));
+      return next(new AppError('Insufficient permissions', 403));
     }
 
     next();
