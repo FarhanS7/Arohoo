@@ -64,3 +64,24 @@ export const registerMerchant = asyncHandler(async (req, res, next) => {
     token,
   });
 });
+
+/**
+ * Controller handling user login.
+ */
+export const login = asyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // 1. Validation
+  if (!email || !password) {
+    return next(new AppError('Please provide email and password', 400));
+  }
+
+  // 2. Call Service
+  const token = await authService.login({ email, password });
+
+  // 3. Send Response
+  res.status(200).json({
+    status: 'success',
+    token,
+  });
+});

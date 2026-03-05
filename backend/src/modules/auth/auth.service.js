@@ -1,6 +1,6 @@
 import { AppError } from '../../common/errors/AppError.js';
 import { generateToken } from '../../common/utils/jwt.js';
-import { hashPassword } from '../../common/utils/password.js';
+import { hashPassword, verifyPassword } from '../../common/utils/password.js';
 import prisma from '../../infrastructure/database/prisma.js';
 
 export class AuthService {
@@ -88,6 +88,39 @@ export class AuthService {
     const token = generateToken({
       userId: result.id,
       role: result.role,
+    });
+
+    return token;
+  }
+
+  /**
+   * Authenticates a user and issues a JWT token.
+   * @param {Object} credentials - Contains email and password.
+   * @returns {Promise<string>} - The generated JWT token.
+   */
+  async login(credentials) {
+    const { email, password } = credentials;
+
+    // 1. Find user by email
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new AppError('Invalid email or password', 401);
+    }
+
+    // 2. Verify password
+    const isPasswordValid = await verifyPassword(user.password, password);
+
+    if (!isPasswordValid) {
+      throw new AppError('Invalid email or password', 401);
+    }
+
+    // 3. Generate token
+    const token = generateToken({
+      userId: user.id,
+      role: user.role,
     });
 
     return token;
