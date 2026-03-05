@@ -1,31 +1,36 @@
+import { AppError } from '../../common/errors/AppError.js';
 import { asyncHandler } from '../../common/utils/async.handler.js';
-import { sendResponse } from '../../common/utils/response.js';
+import { AuthService } from './auth.service.js';
+
+const authService = new AuthService();
 
 /**
- * Controller for authentication endpoints.
+ * Controller handling authentication requests.
  */
-export class AuthController {
-  constructor(authService) {
-    this.authService = authService;
+export const register = asyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // 1. Basic Validation
+  if (!email || !password) {
+    return next(new AppError('Please provide email and password', 400));
   }
 
-  /**
-   * Handles user registration.
-   */
-  register = asyncHandler(async (req, res) => {
-    const { email, password, phone, role } = req.body;
-    const { user, token } = await this.authService.register({ email, password, phone, role });
+  if (password.length < 6) {
+    return next(new AppError('Password must be at least 6 characters long', 400));
+  }
 
-    sendResponse(res, 201, { user, token }, 'User registered successfully');
+  // Email format validation (simple regex)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return next(new AppError('Please provide a valid email address', 400));
+  }
+
+  // 2. Call Service
+  const token = await authService.register({ email, password });
+
+  // 3. Send Response
+  res.status(201).json({
+    status: 'success',
+    token,
   });
-
-  /**
-   * Handles user login.
-   */
-  login = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
-    const { user, token } = await this.authService.login(email, password);
-
-    sendResponse(res, 200, { user, token }, 'User logged in successfully');
-  });
-}
+});

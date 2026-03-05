@@ -5,6 +5,7 @@ import morgan from 'morgan';
 
 import { AppError } from './common/errors/AppError.js';
 import { globalErrorHandler } from './common/middleware/error.middleware.js';
+import apiRouter from './modules/index.js';
 
 const app = express();
 

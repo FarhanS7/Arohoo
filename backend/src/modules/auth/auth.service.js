@@ -1,25 +1,44 @@
-import { JwtService } from '../../infrastructure/services/jwt.service.js';
+import { AppError } from '../../common/errors/AppError.js';
+import { generateToken } from '../../common/utils/jwt.js';
+import { hashPassword } from '../../common/utils/password.js';
+import prisma from '../../infrastructure/database/prisma.js';
 
-/**
- * Orchestrator service for authentication logic.
- */
 export class AuthService {
   /**
-   * Generates a stateless JWT token for the user.
-   * @param {Object} user - User object containing id and role.
-   * @returns {string} - Signed JWT token.
+   * Registers a new customer.
+   * @param {Object} userData - Contains email and password.
+   * @returns {Promise<string>} - The generated JWT token.
    */
-  generateToken(user) {
-    const payload = {
-      sub: user.id,
-      role: user.role
-    };
-    return JwtService.sign(payload);
-  }
+  async register(userData) {
+    const { email, password } = userData;
 
-  // Placeholder for future multi-provider login logic
-  async authenticate(method, credentials) {
-    // method: 'password' | 'otp'
-    throw new Error('Method not implemented');
+    // 1. Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new AppError('Email already in use', 400);
+    }
+
+    // 2. Hash password
+    const hashedPassword = await hashPassword(password);
+
+    // 3. Create user
+    const newUser = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        role: 'CUSTOMER',
+      },
+    });
+
+    // 4. Generate token
+    const token = generateToken({
+      userId: newUser.id,
+      role: newUser.role,
+    });
+
+    return token;
   }
 }
