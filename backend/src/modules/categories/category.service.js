@@ -1,6 +1,6 @@
 import { AppError } from '../../common/errors/AppError.js';
 import { cacheUtil } from '../../common/utils/cache.js';
-import prisma from '../../infrastructure/database/prisma.js';
+import getPrisma from '../../infrastructure/database/prisma.js';
 
 export class CategoryService {
   /**
@@ -11,7 +11,7 @@ export class CategoryService {
   async createCategory(data, user) {
     const { name, slug, imageUrl, displayOrder, isActive } = data;
 
-    // 1. Check if slug exists
+    const prisma = getPrisma();
     const existingCategory = await prisma.category.findUnique({
       where: { slug },
     });
