@@ -114,31 +114,31 @@ model Category {
 }
 
 model Product {
-  id          String           @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
   description String?
-  basePrice   Decimal          @db.Decimal(10, 2)
-  status      String           @default("active") // active / disabled
 
   // Relations
   merchantId  String
-  merchant    Merchant         @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  merchant    Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
   categoryId  String
-  category    Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   
   variants    ProductVariant[]
   images      ProductImage[]
+  
+  // Future-proofing (carried over from previous context as "production-ready")
   orderItems  OrderItem[]
   reviews     Review[]
   wishlist    WishlistItem[]
   
   // Timestamps
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  @@index([merchantId])
+  @@index([name])
   @@index([categoryId])
-  @@index([status])
+  @@index([merchantId])
   @@map("products")
 }
 
