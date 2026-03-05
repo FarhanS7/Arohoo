@@ -21,21 +21,37 @@ enum OrderStatus {
 }
 
 model User {
-  id            String      @id @default(uuid())
-  email         String      @unique
-  password      String?
-  phone         String?     @unique
-  role          Role        @default(CUSTOMER)
-  isApproved    Boolean     @default(false)
-  otpHash       String?
-  otpExpiresAt  DateTime?
-  products      Product[]
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String?   // Hashed password
+  phone         String?   @unique // For future OTP support
+  role          Role      @default(CUSTOMER)
+  
+  // Relations
+  merchant      Merchant?
   orders        Order[]
-  merchantItems OrderItem[] @relation("MerchantItems")
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  reviews       Review[]
+  wishlist      WishlistItem[]
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@map("users")
+}
+
+model Merchant {
+  id          String      @id @default(uuid())
+  storeName   String
+  isApproved  Boolean     @default(false)
+  userId      String      @unique
+  user        User        @relation(fields: [userId], references: [id])
+  products    Product[]
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("merchants")
 }
 
 model Order {
@@ -60,7 +76,7 @@ model OrderItem {
   productId  String
   product    Product     @relation(fields: [productId], references: [id])
   merchantId String
-  merchant   User        @relation(name: "MerchantItems", fields: [merchantId], references: [id])
+  merchant   Merchant    @relation(fields: [merchantId], references: [id])
   quantity   Int
   price      Decimal     @db.Decimal(10, 2)
   status     OrderStatus @default(NEW_ORDER)
@@ -87,11 +103,14 @@ model Product {
   name        String
   description String
   merchantId  String
-  merchant    User             @relation(fields: [merchantId], references: [id])
+  merchant    Merchant         @relation(fields: [merchantId], references: [id])
   categoryId  String
   category    Category         @relation(fields: [categoryId], references: [id])
   variants    ProductVariant[]
   images      ProductImage[]
+  orderItems  OrderItem[]
+  reviews     Review[]
+  wishlist    WishlistItem[]
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 
@@ -126,4 +145,32 @@ model ProductImage {
 
   @@index([productId])
   @@map("product_images")
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  rating      Int
+  comment     String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, productId])
+  @@map("reviews")
+}
+
+model WishlistItem {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+  @@map("wishlist_items")
 }
