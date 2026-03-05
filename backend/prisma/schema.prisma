@@ -7,7 +7,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum UserRole {
+enum Role {
   CUSTOMER
   MERCHANT
   ADMIN
@@ -25,7 +25,7 @@ model User {
   email         String      @unique
   password      String?
   phone         String?     @unique
-  role          UserRole    @default(CUSTOMER)
+  role          Role        @default(CUSTOMER)
   isApproved    Boolean     @default(false)
   otpHash       String?
   otpExpiresAt  DateTime?
