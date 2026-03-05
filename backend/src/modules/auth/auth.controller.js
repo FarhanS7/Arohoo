@@ -34,3 +34,33 @@ export const register = asyncHandler(async (req, res, next) => {
     token,
   });
 });
+
+/**
+ * Controller handling merchant registration.
+ */
+export const registerMerchant = asyncHandler(async (req, res, next) => {
+  const { email, password, storeName } = req.body;
+
+  // 1. Validation
+  if (!email || !password || !storeName) {
+    return next(new AppError('Please provide email, password, and store name', 400));
+  }
+
+  if (password.length < 6) {
+    return next(new AppError('Password must be at least 6 characters long', 400));
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return next(new AppError('Please provide a valid email address', 400));
+  }
+
+  // 2. Call Service
+  const token = await authService.registerMerchant({ email, password, storeName });
+
+  // 3. Send Response
+  res.status(201).json({
+    status: 'success',
+    token,
+  });
+});

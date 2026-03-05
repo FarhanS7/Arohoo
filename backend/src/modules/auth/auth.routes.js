@@ -1,5 +1,5 @@
 import express from 'express';
-import { register } from './auth.controller.js';
+import { register, registerMerchant } from './auth.controller.js';
 
 const router = express.Router();
 
@@ -9,5 +9,6 @@ const router = express.Router();
  */
 
 router.post('/register', register);
+router.post('/register-merchant', registerMerchant);
 
 export default router;
