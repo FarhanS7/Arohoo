@@ -1,69 +1,85 @@
 import { AppError } from '../../common/errors/AppError.js';
+import getPrisma from '../../infrastructure/database/prisma.js';
+
+const prisma = getPrisma();
 
 export class ProductService {
-  constructor(prisma) {
-    this.prisma = prisma;
-  }
+  /**
+   * Creates a new product with optional variants in a single transaction.
+   * @param {Object} data - Product and variant data.
+   * @param {string} merchantId - The owner merchant ID.
+   */
+  async createProduct(data, merchantId) {
+    const { name, description, categoryId, basePrice, variants } = data;
 
-  async createProduct(data) {
-    const { name, merchantId, categoryId, description, variants = [], images = [] } = data;
+    // 1. Verify category exists
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId },
+    });
 
-    // 1. Validation: Max 5 images
-    if (images.length > 5) {
-      throw new AppError('Product cannot have more than 5 images', 400);
+    if (!category) {
+      throw new AppError('Category not found', 400);
     }
 
-    // 2. Creation with nested variants and images
-    return this.prisma.product.create({
-      data: {
-        name,
-        description,
-        merchantId,
-        categoryId,
-        variants: {
-          create: variants.map(v => ({
-            sku: v.sku,
-            size: v.size,
-            color: v.color,
-            price: v.price,
-            stock: v.stock
-          }))
-        },
-        images: {
-          create: images.map(url => ({ url }))
-        }
-      },
-      include: {
-        variants: true,
-        images: true
+    // 2. Prevent duplicate variants (simple check by serialized attributes)
+    if (variants && variants.length > 0) {
+      const variantSignatures = variants.map(v => 
+        JSON.stringify(Object.entries(v.attributes).sort())
+      );
+      const uniqueSignatures = new Set(variantSignatures);
+      if (uniqueSignatures.size !== variantSignatures.length) {
+        throw new AppError('Duplicate variants detected', 400);
       }
-    });
-  }
-
-  async getProductById(id, requesterMerchantId, isAdmin = false) {
-    const product = await this.prisma.product.findUnique({
-      where: { id },
-      include: { variants: true, images: true }
-    });
-
-    if (!product) {
-      throw new AppError('Product not found', 404);
     }
 
-    // 3. Multi-tenant isolation check
-    if (!isAdmin && product.merchantId !== requesterMerchantId) {
-      throw new AppError('Forbidden: You do not have access to this product', 403);
-    }
+    // 3. Execute Transaction
+    return await prisma.$transaction(async (tx) => {
+      // Create Base Product
+      const product = await tx.product.create({
+        data: {
+          name,
+          description,
+          basePrice,
+          categoryId,
+          merchantId,
+          status: 'active',
+        },
+      });
 
-    return product;
-  }
+      // Create Variants if provided
+      if (variants && variants.length > 0) {
+        for (const variantData of variants) {
+          const variant = await tx.productVariant.create({
+            data: {
+              productId: product.id,
+              price: variantData.price,
+            },
+          });
 
-  async deleteProduct(id, merchantId, isAdmin = false) {
-    const product = await this.getProductById(id, merchantId, isAdmin);
-    
-    // Cascade delete is handled at the database level via Prisma schema
-    return this.prisma.product.delete({
-      where: { id: product.id }
+          // Create Attributes for each variant
+          const attributeEntries = Object.entries(variantData.attributes).map(([name, value]) => ({
+            variantId: variant.id,
+            name,
+            value,
+          }));
+
+          await tx.variantAttribute.createMany({
+            data: attributeEntries,
+          });
+        }
+      }
+
+      // Return full product with variants and attributes
+      return await tx.product.findUnique({
+        where: { id: product.id },
+        include: {
+          variants: {
+            include: {
+              attributes: true,
+            },
+          },
+        },
+      });
     });
   }
 }
