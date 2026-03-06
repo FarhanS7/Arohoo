@@ -68,6 +68,8 @@ model Order {
   id              String      @id @default(uuid())
   userId          String
   user            User        @relation(fields: [userId], references: [id])
+  shippingName    String
+  shippingPhone   String
   shippingAddress Json
   totalAmount     Decimal     @db.Decimal(10, 2)
   status          OrderStatus @default(NEW_ORDER)
@@ -80,18 +82,21 @@ model Order {
 }
 
 model OrderItem {
-  id         String      @id @default(uuid())
-  orderId    String
-  order      Order       @relation(fields: [orderId], references: [id])
-  productId  String
-  product    Product     @relation(fields: [productId], references: [id])
-  merchantId String
-  merchant   Merchant    @relation(fields: [merchantId], references: [id])
-  quantity   Int
-  price      Decimal     @db.Decimal(10, 2)
-  status     OrderStatus @default(NEW_ORDER)
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id               String         @id @default(uuid())
+  orderId          String
+  order            Order          @relation(fields: [orderId], references: [id])
+  productId        String
+  product          Product        @relation(fields: [productId], references: [id])
+  productVariantId String
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+  merchantId       String
+  merchant         Merchant       @relation(fields: [merchantId], references: [id])
+  quantity         Int
+  price            Decimal        @db.Decimal(10, 2)
+  subtotal         Decimal        @db.Decimal(10, 2)
+  status           OrderStatus    @default(NEW_ORDER)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
   @@index([orderId])
   @@index([merchantId])
@@ -156,6 +161,7 @@ model ProductVariant {
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   cartItems CartItem[]
+  orderItems OrderItem[]
   
   // Timestamps
   createdAt DateTime @default(now())

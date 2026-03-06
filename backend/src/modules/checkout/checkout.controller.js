@@ -4,14 +4,14 @@ import { CheckoutService } from './checkout.service.js';
 const checkoutService = new CheckoutService();
 
 /**
- * Validates checkout request and returns summary.
+ * Validates checkout request and creates an order.
  */
 export const validateCheckout = asyncHandler(async (req, res, next) => {
-  const checkoutSummary = await checkoutService.validateCheckout(req.body);
+  const orderSummary = await checkoutService.createOrder(req.user.id, req.body);
 
-  res.status(200).json({
+  res.status(201).json({
     success: true,
-    data: checkoutSummary,
+    data: orderSummary,
     error: null
   });
 });
