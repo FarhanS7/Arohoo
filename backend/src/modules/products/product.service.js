@@ -111,4 +111,10 @@ export class ProductService {
   async getPublicProducts(filters, page = 1, limit = 20) {
     return await this.repository.searchProducts(filters, { page, limit });
   }
+
+  async getVariantById(id) {
+    const variant = await this.repository.findVariantById(id);
+    if (!variant) throw new AppError('Product variant not found', 404);
+    return variant;
+  }
 }

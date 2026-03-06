@@ -132,4 +132,22 @@ export class PrismaProductRepository {
     );
     return created;
   }
+
+  async findVariantById(id) {
+    return await prisma.productVariant.findUnique({
+      where: { id },
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            images: {
+              take: 1,
+              orderBy: { order: 'asc' }
+            }
+          }
+        }
+      }
+    });
+  }
 }

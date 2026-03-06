@@ -50,3 +50,13 @@ export const getProductDetail = asyncHandler(async (req, res) => {
     error: null
   });
 });
+
+export const getVariantDetail = asyncHandler(async (req, res) => {
+  const variant = await productService.getVariantById(req.params.id);
+
+  res.status(200).json({
+    success: true,
+    data: variant,
+    error: null
+  });
+});

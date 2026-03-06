@@ -1,5 +1,4 @@
-import express from 'express';
-import { getProductDetail, listProducts, searchProducts } from './public.product.controller.js';
+import { getProductDetail, getVariantDetail, listProducts, searchProducts } from './public.product.controller.js';
 
 const router = express.Router();
 
@@ -11,5 +10,6 @@ const router = express.Router();
 router.get('/', listProducts);
 router.get('/search', searchProducts);
 router.get('/:id', getProductDetail);
+router.get('/variants/:id', getVariantDetail);
 
 export default router;
