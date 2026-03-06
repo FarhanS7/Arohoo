@@ -4,6 +4,7 @@ import authRoutes from './auth/auth.routes.js';
 import cartRoutes from './cart/cart.routes.js';
 import categoryRoutes from './categories/category.routes.js';
 import publicCategoryRoutes from './categories/public.category.routes.js';
+import checkoutRoutes from './checkout/checkout.routes.js';
 import productRoutes from './products/product.routes.js';
 import publicProductRoutes from './products/public.product.routes.js';
 
@@ -16,5 +17,6 @@ rootRouter.use('/public/categories', publicCategoryRoutes);
 rootRouter.use('/merchant/products', productRoutes);
 rootRouter.use('/public/products', publicProductRoutes);
 rootRouter.use('/cart', cartRoutes);
+rootRouter.use('/checkout', checkoutRoutes);
 
 export default rootRouter;
