@@ -22,6 +22,20 @@ export const updateStatus = asyncHandler(async (req, res) => {
 });
 
 /**
+ * List orders for the current user.
+ */
+export const listOrders = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+  const result = await orderService.getOrdersByUser(req.user.id, page, limit);
+
+  res.status(200).json({
+    success: true,
+    data: result,
+    error: null
+  });
+});
+
+/**
  * Get order details.
  */
 export const getOrder = asyncHandler(async (req, res) => {

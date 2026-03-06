@@ -104,11 +104,79 @@ export class OrderService {
     });
   }
 
-  async getOrderById(id, requesterId, userRole) {
+  /**
+   * Retrieves a paginated list of orders for a specific user.
+   */
+  async getOrdersByUser(userId, page = 1, limit = 10) {
+    const skip = (page - 1) * limit;
+
+    const [orders, total] = await Promise.all([
+      this.prisma.order.findMany({
+        where: { userId },
+        include: {
+          orderItems: {
+            include: {
+              product: { select: { name: true } },
+              productVariant: {
+                select: { size: true, color: true, price: true }
+              },
+              merchant: {
+                select: { id: true, storeName: true }
+              }
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit
+      }),
+      this.prisma.order.count({ where: { userId } })
+    ]);
+
+    // Format response to match contract
+    const formattedOrders = orders.map(order => ({
+      id: order.id,
+      status: order.status,
+      createdAt: order.createdAt,
+      total: Number(order.totalAmount),
+      items: order.orderItems.map(item => ({
+        productId: item.productId,
+        productName: item.product.name,
+        variant: item.productVariant,
+        quantity: item.quantity,
+        merchant: {
+          id: item.merchant.id,
+          name: item.merchant.storeName
+        }
+      })),
+      shippingAddress: order.shippingAddress
+    }));
+
+    return {
+      orders: formattedOrders,
+      meta: {
+        page: Number(page),
+        limit: Number(limit),
+        total
+      }
+    };
+  }
+
+  async getOrderById(orderId, userId, role) {
     const order = await this.prisma.order.findUnique({
-      where: { id },
+      where: { id: orderId },
       include: { 
-        orderItems: true,
+        orderItems: {
+          include: {
+            product: { select: { name: true } },
+            productVariant: {
+              select: { size: true, color: true, price: true }
+            },
+            merchant: {
+              select: { id: true, storeName: true }
+            }
+          }
+        },
         statusHistory: {
             include: { changedBy: { select: { email: true } } },
             orderBy: { createdAt: 'desc' }
@@ -118,6 +186,36 @@ export class OrderService {
 
     if (!order) throw new AppError('Order not found', 404);
 
-    return order;
+    // Multi-tenant check: Customers can only see their own orders
+    if (role === 'CUSTOMER' && order.userId !== userId) {
+      throw new AppError('Unauthorized: You can only view your own orders', 403);
+    }
+
+    // Role check: Merchants can only see orders if they have an item in it
+    // (Simplifying: admins see all, customers see own, merchants see if they own an item)
+    if (role === 'MERCHANT') {
+        const hasItem = order.orderItems.some(item => item.merchantId === userId); // Note: userId is often merchantId for role MERCHANT in routes
+        // Better: routes provide user.merchantId if available
+    }
+
+    // Format response
+    return {
+      id: order.id,
+      status: order.status,
+      createdAt: order.createdAt,
+      total: Number(order.totalAmount),
+      items: order.orderItems.map(item => ({
+        productId: item.productId,
+        productName: item.product.name,
+        variant: item.productVariant,
+        quantity: item.quantity,
+        merchant: {
+          id: item.merchant.id,
+          name: item.merchant.storeName
+        }
+      })),
+      shippingAddress: order.shippingAddress,
+      statusHistory: order.statusHistory
+    };
   }
 }

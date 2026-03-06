@@ -13,6 +13,12 @@ router.patch(
   orderController.updateStatus
 );
 
+// List orders
+router.get(
+  '/',
+  orderController.listOrders
+);
+
 // Order details
 router.get(
   '/:id',
