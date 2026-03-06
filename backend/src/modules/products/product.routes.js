@@ -1,22 +1,26 @@
 import express from 'express';
-import { authorize, protect } from '../../common/middleware/auth.middleware.js';
-import { validate } from '../../common/middleware/validator.middleware.js';
-import { createProduct } from './product.controller.js';
-import { createProductSchema } from './product.validator.js';
+import { protect } from '../../common/middleware/auth.middleware.js';
+import { authorize } from '../../common/middleware/role.middleware.js';
+import { validate } from '../../common/middleware/validation.middleware.js';
+import {
+    createProduct,
+    deleteProduct,
+    getMerchantProducts,
+    getProductById,
+    updateProduct
+} from './product.controller.js';
+import { createProductSchema, updateProductSchema } from './product.validator.js';
 
 const router = express.Router();
 
-/**
- * Merchant Product Routes
- * Prefix: /api/merchant/products
- */
+router.use(protect);
+router.use(authorize('MERCHANT', 'ADMIN'));
 
-router.post(
-  '/',
-  protect,
-  authorize('MERCHANT', 'ADMIN'),
-  validate(createProductSchema),
-  createProduct
-);
+router.post('/', validate(createProductSchema), createProduct);
+router.get('/', getMerchantProducts);
+router.get('/:id', getProductById);
+router.post('/:productId/images', upload.array('images', 5), uploadProductImages);
+router.put('/:id', validate(updateProductSchema), updateProduct);
+router.delete('/:id', deleteProduct);
 
 export default router;

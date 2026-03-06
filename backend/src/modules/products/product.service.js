@@ -1,85 +1,114 @@
-import { AppError } from '../../common/errors/AppError.js';
 import getPrisma from '../../infrastructure/database/prisma.js';
+import { PrismaProductRepository } from './repositories/prisma.product.repository.js';
 
 const prisma = getPrisma();
 
+export class AppError extends Error {
+  constructor(message, statusCode = 400) {
+    super(message);
+    this.statusCode = statusCode;
+  }
+}
+
 export class ProductService {
-  /**
-   * Creates a new product with optional variants in a single transaction.
-   * @param {Object} data - Product and variant data.
-   * @param {string} merchantId - The owner merchant ID.
-   */
+  constructor(repository) {
+    this.repository = repository || new PrismaProductRepository();
+  }
+
   async createProduct(data, merchantId) {
-    const { name, description, categoryId, basePrice, variants } = data;
+    const { name, categoryId, basePrice, variants } = data;
 
-    // 1. Verify category exists
-    const category = await prisma.category.findUnique({
-      where: { id: categoryId },
-    });
+    if (!name || name.trim() === '') throw new AppError('Product name is required');
+    if (basePrice <= 0) throw new AppError('Base price must be positive');
+    if (!categoryId) throw new AppError('Category ID is required');
 
-    if (!category) {
-      throw new AppError('Category not found', 400);
-    }
+    const category = await prisma.category.findUnique({ where: { id: categoryId } });
+    if (!category) throw new AppError('Invalid category', 400);
 
-    // 2. Prevent duplicate variants (simple check by serialized attributes)
     if (variants && variants.length > 0) {
-      const variantSignatures = variants.map(v => 
-        JSON.stringify(Object.entries(v.attributes).sort())
-      );
-      const uniqueSignatures = new Set(variantSignatures);
-      if (uniqueSignatures.size !== variantSignatures.length) {
-        throw new AppError('Duplicate variants detected', 400);
-      }
+      const signatures = new Set();
+      data.variants = variants.map(v => {
+        if (v.price <= 0) throw new AppError('Variant price must be positive');
+        if (v.stock !== undefined && v.stock < 0) throw new AppError('Stock cannot be negative');
+        if (!v.attributes?.size || !v.attributes?.color) throw new AppError('Variant must include size and color attributes');
+
+        const sig = JSON.stringify(Object.entries(v.attributes).sort());
+        if (signatures.has(sig)) throw new AppError('Duplicate variant detected');
+        signatures.add(sig);
+
+        return {
+          ...v,
+          sku: v.sku || `SKU-${Date.now()}-${Math.floor(Math.random() * 10000)}`
+        };
+      });
     }
 
-    // 3. Execute Transaction
-    return await prisma.$transaction(async (tx) => {
-      // Create Base Product
-      const product = await tx.product.create({
-        data: {
-          name,
-          description,
-          basePrice,
-          categoryId,
-          merchantId,
-          status: 'active',
-        },
-      });
-
-      // Create Variants if provided
-      if (variants && variants.length > 0) {
-        for (const variantData of variants) {
-          const variant = await tx.productVariant.create({
-            data: {
-              productId: product.id,
-              price: variantData.price,
-            },
-          });
-
-          // Create Attributes for each variant
-          const attributeEntries = Object.entries(variantData.attributes).map(([name, value]) => ({
-            variantId: variant.id,
-            name,
-            value,
-          }));
-
-          await tx.variantAttribute.createMany({
-            data: attributeEntries,
-          });
-        }
+    try {
+      return await this.repository.createProduct(data, merchantId);
+    } catch (error) {
+      if (error.code === 'P2002' && error.meta?.target?.includes('sku')) {
+        throw new AppError('SKU already exists', 409);
       }
+      throw error;
+    }
+  }
 
-      // Return full product with variants and attributes
-      return await tx.product.findUnique({
-        where: { id: product.id },
-        include: {
-          variants: {
-            include: {
-              attributes: true,
-            },
-          },
-        },
-      });
-    });
+  async updateProduct(id, merchantId, data) {
+    const existing = await this.repository.findProductById(id);
+    if (!existing) throw new AppError('Product not found', 404);
+    if (existing.merchantId !== merchantId) throw new AppError('Unauthorized access to product', 403);
+
+    if (data.categoryId) {
+      const category = await prisma.category.findUnique({ where: { id: data.categoryId } });
+      if (!category) throw new AppError('Invalid category');
+    }
+
+    try {
+      return await this.repository.updateProduct(id, merchantId, data);
+    } catch (error) {
+      if (error.code === 'P2002' && error.meta?.target?.includes('sku')) {
+        throw new AppError('SKU conflict in update', 409);
+      }
+      throw error;
+    }
+  }
+
+  async deleteProduct(id, merchantId) {
+    const existing = await this.repository.findProductById(id);
+    if (!existing) throw new AppError('Product not found', 404);
+    if (existing.merchantId !== merchantId) throw new AppError('Unauthorized access', 403);
+
+    await this.repository.deleteProduct(id, merchantId);
+    return true;
+  }
+
+  async getProductById(id, merchantId) {
+    const product = await this.repository.findProductById(id);
+    if (!product) throw new AppError('Product not found', 404);
+    if (merchantId && product.merchantId !== merchantId) throw new AppError('Unauthorized', 403);
+    return product;
+  }
+
+  async getMerchantProducts(merchantId, page = 1, limit = 20) {
+    return await this.repository.findProductsByMerchant(merchantId, { page, limit });
+  }
+
+  async uploadProductImages(productId, merchantId, images) {
+    // 1. Verify ownership
+    const product = await this.getProductById(productId, merchantId);
+    if (!product) throw new AppError('Product not found', 404);
+
+    // 2. Check total images limit (5)
+    const existingCount = product.images.length;
+    if (existingCount + images.length > 5) {
+      throw new AppError('Maximum 5 images allowed per product', 400);
+    }
+
+    // 3. Save images
+    return await this.repository.addProductImages(productId, images);
+  }
+
+  async getPublicProducts(filters, page = 1, limit = 20) {
+    return await this.repository.searchProducts(filters, { page, limit });
   }
 }

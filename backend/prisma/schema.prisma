@@ -117,6 +117,7 @@ model Product {
   id          String   @id @default(uuid())
   name        String
   description String?
+  basePrice   Decimal  @default(0) @db.Decimal(10, 2)
 
   // Relations
   merchantId  String
@@ -159,6 +160,7 @@ model ProductVariant {
   updatedAt DateTime @updatedAt
 
   @@index([productId])
+  @@index([price])
   @@map("product_variants")
 }
 

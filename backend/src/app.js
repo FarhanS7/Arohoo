@@ -18,6 +18,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 app.use(express.json({ limit: '10kb' })); // Body parser
+app.use(express.static('public')); // Serve static files
 
 // 2. ROUTES
 app.get('/health', (req, res) => {
