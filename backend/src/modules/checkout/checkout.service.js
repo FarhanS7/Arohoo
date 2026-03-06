@@ -94,7 +94,7 @@ export class CheckoutService {
           shippingPhone: phone,
           shippingAddress: address,
           totalAmount: total,
-          status: 'NEW_ORDER'
+          status: 'PENDING'
         }
       });
 
@@ -110,7 +110,7 @@ export class CheckoutService {
             quantity: item.quantity,
             price: item.price,
             subtotal: item.subtotal,
-            status: 'NEW_ORDER'
+            status: 'PENDING'
           }
         });
 

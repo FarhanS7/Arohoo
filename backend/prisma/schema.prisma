@@ -15,10 +15,11 @@ enum Role {
 }
 
 enum OrderStatus {
-  NEW_ORDER
-  PROCESSING
+  PENDING
+  CONFIRMED
   SHIPPED
   DELIVERED
+  CANCELLED
 }
 
 model User {
@@ -34,6 +35,7 @@ model User {
   reviews       Review[]
   wishlist      WishlistItem[]
   cart          Cart?
+  orderHistory  OrderStatusHistory[]
   
   // Timestamps
   createdAt     DateTime  @default(now())
@@ -72,8 +74,9 @@ model Order {
   shippingPhone   String
   shippingAddress Json
   totalAmount     Decimal     @db.Decimal(10, 2)
-  status          OrderStatus @default(NEW_ORDER)
+  status          OrderStatus @default(PENDING)
   orderItems      OrderItem[]
+  statusHistory   OrderStatusHistory[]
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
@@ -94,7 +97,8 @@ model OrderItem {
   quantity         Int
   price            Decimal        @db.Decimal(10, 2)
   subtotal         Decimal        @db.Decimal(10, 2)
-  status           OrderStatus    @default(NEW_ORDER)
+  status           OrderStatus    @default(PENDING)
+  statusHistory    OrderStatusHistory[]
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 
@@ -242,4 +246,21 @@ model CartItem {
   @@index([cartId])
   @@index([productVariantId])
   @@map("cart_items")
+}
+
+model OrderStatusHistory {
+  id           String      @id @default(uuid())
+  orderId      String
+  order        Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItemId  String?
+  orderItem    OrderItem?  @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  oldStatus    OrderStatus?
+  newStatus    OrderStatus
+  changedById  String
+  changedBy    User        @relation(fields: [changedById], references: [id])
+  createdAt    DateTime    @default(now())
+
+  @@index([orderId])
+  @@index([orderItemId])
+  @@map("order_status_history")
 }
