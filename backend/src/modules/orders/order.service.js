@@ -116,9 +116,9 @@ export class OrderService {
         include: {
           orderItems: {
             include: {
-              product: { select: { name: true } },
+              product: { select: { id: true, name: true } },
               productVariant: {
-                select: { size: true, color: true, price: true }
+                select: { id: true, price: true }
               },
               merchant: {
                 select: { id: true, storeName: true }
@@ -133,23 +133,27 @@ export class OrderService {
       this.prisma.order.count({ where: { userId } })
     ]);
 
-    // Format response to match contract
+    // Format response to match the requested schema
     const formattedOrders = orders.map(order => ({
       id: order.id,
       status: order.status,
+      totalAmount: Number(order.totalAmount),
       createdAt: order.createdAt,
-      total: Number(order.totalAmount),
-      items: order.orderItems.map(item => ({
-        productId: item.productId,
-        productName: item.product.name,
-        variant: item.productVariant,
+      orderItems: order.orderItems.map(item => ({
         quantity: item.quantity,
-        merchant: {
-          id: item.merchant.id,
-          name: item.merchant.storeName
+        productVariant: {
+          id: item.productVariant.id,
+          price: Number(item.productVariant.price),
+          product: {
+            id: item.product.id,
+            name: item.product.name
+          },
+          merchant: {
+            id: item.merchant.id,
+            storeName: item.merchant.storeName
+          }
         }
-      })),
-      shippingAddress: order.shippingAddress
+      }))
     }));
 
     return {
