@@ -2,103 +2,92 @@ import { asyncHandler } from '../../common/utils/async.handler.js';
 import { cartService } from './cart.service.js';
 
 /**
- * Get current user's cart.
- * Automatically creates a cart if it doesn't exist.
+ * Controller for managing shopping cart operations.
+ * Exposes CartService functionality via REST endpoints.
  */
 export const getCart = asyncHandler(async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const cart = await cartService.getCart(userId);
   
   res.status(200).json({
     success: true,
-    data: cart
+    data: cart,
+    error: null
   });
 });
 
 /**
- * Add an item to the cart.
- * Returns the full updated cart for state synchronization.
+ * Adds an item to the user's cart.
+ * If the item already exists, increments the quantity.
  */
 export const addItem = asyncHandler(async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const { productVariantId, quantity } = req.body;
 
-  if (!productVariantId) {
-    return res.status(400).json({
-      success: false,
-      error: 'Product variant ID is required'
-    });
-  }
-
-  await cartService.addItem({ 
-    userId, 
-    productVariantId, 
-    quantity: parseInt(quantity) || 1 
+  const cartItem = await cartService.addItem({
+    userId,
+    productVariantId,
+    quantity: quantity || 1
   });
   
-  const updatedCart = await cartService.getCart(userId);
   res.status(201).json({
     success: true,
-    data: updatedCart
+    data: cartItem,
+    error: null
   });
 });
 
 /**
- * Update cart item quantity.
- * If quantity is 0, item is removed.
+ * Updates the quantity of a specific item in the cart.
  */
-export const updateItemQuantity = asyncHandler(async (req, res) => {
-  const userId = req.user.userId;
+export const updateQuantity = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
   const cartItemId = req.params.id;
   const { quantity } = req.body;
 
-  if (quantity === undefined || quantity === null) {
-    return res.status(400).json({
-      success: false,
-      error: 'Quantity is required'
-    });
-  }
-
-  await cartService.updateQuantity({ 
-    userId, 
-    cartItemId, 
-    quantity: parseInt(quantity) 
+  const updatedItem = await cartService.updateQuantity({
+    userId,
+    cartItemId,
+    quantity
   });
   
-  const updatedCart = await cartService.getCart(userId);
   res.status(200).json({
     success: true,
-    data: updatedCart
+    data: updatedItem,
+    error: null
   });
 });
 
 /**
- * Remove an item from the cart.
+ * Removes a specific item from the user's cart.
  */
 export const removeItem = asyncHandler(async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const cartItemId = req.params.id;
 
-  await cartService.removeItem({ userId, cartItemId });
+  await cartService.removeItem({
+    userId,
+    cartItemId
+  });
   
-  const updatedCart = await cartService.getCart(userId);
   res.status(200).json({
     success: true,
-    data: updatedCart
+    data: null,
+    error: null
   });
 });
 
 /**
- * Clear the entire cart.
+ * Clears all items from the user's cart.
  */
 export const clearCart = asyncHandler(async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user.id;
 
   await cartService.clearCart(userId);
   
-  const updatedCart = await cartService.getCart(userId);
   res.status(200).json({
     success: true,
-    data: updatedCart
+    data: null,
+    error: null
   });
 });
