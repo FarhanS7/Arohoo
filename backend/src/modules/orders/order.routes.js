@@ -1,28 +1,26 @@
 import express from 'express';
-import { protect, restrictTo } from '../../common/middleware/auth.middleware.js';
+import { protect } from '../../common/middleware/auth.middleware.js';
 import * as orderController from './order.controller.js';
 
 const router = express.Router();
 
+/**
+ * All order routes are protected.
+ */
 router.use(protect);
 
-// Status updates - restricted to ADMIN and MERCHANT
-router.patch(
-  '/:id/status',
-  restrictTo('ADMIN', 'MERCHANT'),
-  orderController.updateStatus
-);
+/**
+ * @route   GET /api/v1/orders/me
+ * @desc    Get personal order history for the authenticated user
+ * @access  Private
+ */
+router.get('/me', orderController.getMyOrders);
 
-// List orders for the current user
-router.get(
-  '/me',
-  orderController.getMyOrders
-);
-
-// Order details
-router.get(
-  '/:id',
-  orderController.getOrder
-);
+/**
+ * @route   GET /api/v1/orders/:id
+ * @desc    Get detailed information for a specific order
+ * @access  Private
+ */
+router.get('/:id', orderController.getOrder);
 
 export default router;
