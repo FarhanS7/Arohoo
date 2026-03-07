@@ -4,7 +4,11 @@ import * as cartController from './cart.controller.js';
 
 const router = express.Router();
 
-// All cart routes require authentication
+/**
+ * @route   GET /api/v1/cart
+ * @route   DELETE /api/v1/cart
+ * @access  Private (Customer)
+ */
 router.use(protect);
 
 router

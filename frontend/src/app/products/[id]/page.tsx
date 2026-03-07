@@ -1,13 +1,17 @@
 "use client";
 
+import { useCart } from "@/features/cart/hooks/useCart";
 import { Product, productService, ProductVariant } from "@/lib/api/products";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const router = useRouter();
+  const { addItem } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [addingToCart, setAddingToCart] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [mainImage, setMainImage] = useState<string | null>(null);
@@ -35,6 +39,19 @@ export default function ProductDetailPage() {
     }
     fetchDetail();
   }, [id]);
+
+  const handleAddToCart = async () => {
+    if (!selectedVariant) return;
+    setAddingToCart(true);
+    try {
+      await addItem(selectedVariant.id, 1);
+      router.push('/cart');
+    } catch (err: any) {
+      alert(err.message || 'Failed to add item to cart');
+    } finally {
+      setAddingToCart(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -126,10 +143,18 @@ export default function ProductDetailPage() {
               </div>
 
               <div className="pt-4 flex flex-col gap-4">
-                <button className="w-full py-5 bg-black text-white font-bold rounded-2xl text-xs uppercase tracking-[0.2em] shadow-2xl hover:bg-gray-800 transition-all flex items-center justify-center gap-3 active:scale-95">
-                  Add to Cart
-                  <span className="opacity-40 text-sm">/</span>
-                  <span className="opacity-90">Bag</span>
+                <button 
+                  disabled={addingToCart || !selectedVariant || selectedVariant.stock === 0}
+                  onClick={handleAddToCart}
+                  className="w-full py-5 bg-black text-white font-bold rounded-2xl text-xs uppercase tracking-[0.2em] shadow-2xl hover:bg-gray-800 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                >
+                  {addingToCart ? "Adding..." : selectedVariant?.stock === 0 ? "Out of Stock" : "Add to Cart"}
+                  {!addingToCart && selectedVariant?.stock !== 0 && (
+                    <>
+                      <span className="opacity-40 text-sm">/</span>
+                      <span className="opacity-90">Bag</span>
+                    </>
+                  )}
                 </button>
                 <div className="flex items-center justify-center gap-6 text-[10px] uppercase font-bold text-gray-400 tracking-widest pt-2">
                    <div className="flex items-center gap-2">

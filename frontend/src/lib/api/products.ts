@@ -1,14 +1,12 @@
 import { api } from "./client";
 
 export interface ProductVariant {
-  id?: string;
+  id: string;
   sku: string;
   price: number;
   stock: number;
-  attributes: {
-    size: string;
-    color: string;
-  };
+  size: string | null;
+  color: string | null;
 }
 
 export interface ProductImage {
