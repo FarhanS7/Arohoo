@@ -218,4 +218,119 @@ export class OrderService {
       statusHistory: order.statusHistory
     };
   }
+
+  /**
+   * Internal helper to create an order from items.
+   * Can be used standalone or within createOrderFromCart.
+   * Performs stock validation and decrementing within a transaction.
+   */
+  async createOrder({ userId, shippingName, shippingPhone, shippingAddress, items }, externalTx = null) {
+    const tx = externalTx || this.prisma;
+
+    return tx.$transaction(async (innerTx) => {
+      let totalAmount = 0;
+      const orderItemsData = [];
+
+      // 1. Process items and validate stock
+      for (const item of items) {
+        const variant = await innerTx.productVariant.findUnique({
+          where: { id: item.productVariantId || item.variantId }, // Support both naming styles
+          include: { product: true }
+        });
+
+        if (!variant) {
+          throw new AppError(`Product variant not found: ${item.productVariantId || item.variantId}`, 404);
+        }
+
+        if (variant.stock < item.quantity) {
+          throw new AppError(`Not enough stock for SKU ${variant.sku}. Available: ${variant.stock}`, 400);
+        }
+
+        // Decrement stock
+        await innerTx.productVariant.update({
+          where: { id: variant.id },
+          data: { stock: { decrement: item.quantity } }
+        });
+
+        const subtotal = Number(variant.price) * item.quantity;
+        totalAmount += subtotal;
+
+        orderItemsData.push({
+          productId: variant.productId,
+          productVariantId: variant.id,
+          merchantId: variant.product.merchantId,
+          quantity: item.quantity,
+          price: variant.price,
+          subtotal: subtotal,
+          status: 'PENDING'
+        });
+      }
+
+      // 2. Create Order
+      const order = await innerTx.order.create({
+        data: {
+          userId,
+          shippingName,
+          shippingPhone,
+          shippingAddress,
+          totalAmount,
+          status: 'PENDING',
+          orderItems: {
+            create: orderItemsData
+          }
+        },
+        include: {
+          orderItems: true
+        }
+      });
+
+      return order;
+    });
+  }
+
+  /**
+   * Creates an order from the user's current shopping cart.
+   * Validates cart content and stock before clearing cart and creating order.
+   */
+  async createOrderFromCart({ userId, shippingName, shippingPhone, shippingAddress }) {
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Fetch user cart with items and variants
+      const cart = await tx.cart.findUnique({
+        where: { userId },
+        include: {
+          items: {
+            include: {
+              productVariant: true
+            }
+          }
+        }
+      });
+
+      if (!cart || cart.items.length === 0) {
+        throw new AppError('Your cart is empty', 400);
+      }
+
+      // 2. Prepare items for createOrder
+      const items = cart.items.map(item => ({
+        productVariantId: item.productVariantId,
+        quantity: item.quantity
+      }));
+
+      // 3. Create Order (Stock validation & decrementing happens inside)
+      const order = await this.createOrder({
+        userId,
+        shippingName,
+        shippingPhone,
+        shippingAddress,
+        items
+      }, tx); // Pass current transaction
+
+      // 4. Clear Cart
+      await tx.cartItem.deleteMany({
+        where: { cartId: cart.id }
+      });
+
+      return order;
+    });
+  }
 }
