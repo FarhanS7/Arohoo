@@ -13,10 +13,10 @@ router.patch(
   orderController.updateStatus
 );
 
-// List orders
+// List orders for the current user
 router.get(
-  '/',
-  orderController.listOrders
+  '/me',
+  orderController.getMyOrders
 );
 
 // Order details

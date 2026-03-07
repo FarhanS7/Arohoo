@@ -24,8 +24,10 @@ export const updateStatus = asyncHandler(async (req, res) => {
 /**
  * List orders for the current user.
  */
-export const listOrders = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
+export const getMyOrders = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  
   const result = await orderService.getOrdersByUser(req.user.id, page, limit);
 
   res.status(200).json({
