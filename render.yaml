@@ -9,13 +9,9 @@ services:
     startCommand: sleep 5 && npx prisma migrate deploy && node src/server.js
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: arohoo-db
-          property: connectionString
+        sync: false # Provide your Neon connection string in the Render Dashboard
       - key: DIRECT_URL
-        fromDatabase:
-          name: arohoo-db
-          property: connectionString
+        sync: false # Provide your Neon direct connection string
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRES_IN
@@ -26,10 +22,3 @@ services:
         value: 8000
       - key: CORS_ORIGIN
         value: "*" # Update this with your frontend URL once deployed
-
-databases:
-  - name: arohoo-db
-    databaseName: arohoo
-    user: arohoo_user
-    plan: free
-    region: oregon
