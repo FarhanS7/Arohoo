@@ -3,10 +3,10 @@ services:
     name: arohoo-backend
     env: node
     plan: free
-    region: ohio # Adjust if needed
+    region: oregon
     rootDir: backend
     buildCommand: npm install && npx prisma generate
-    startCommand: npx prisma migrate deploy && node src/server.js
+    startCommand: sleep 5 && npx prisma migrate deploy && node src/server.js
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -32,3 +32,4 @@ databases:
     databaseName: arohoo
     user: arohoo_user
     plan: free
+    region: oregon
