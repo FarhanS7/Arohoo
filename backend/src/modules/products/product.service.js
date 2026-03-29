@@ -1,7 +1,5 @@
-import getPrisma from '../../infrastructure/database/prisma.js';
+import prisma from '../../infrastructure/database/prisma.js';
 import { PrismaProductRepository } from './repositories/prisma.product.repository.js';
-
-const prisma = getPrisma();
 
 export class AppError extends Error {
   constructor(message, statusCode = 400) {
@@ -16,6 +14,8 @@ export class ProductService {
   }
 
   async createProduct(data, merchantId) {
+    if (!merchantId) throw new AppError('Only registered merchants can create products', 403);
+
     const { name, categoryId, basePrice, variants } = data;
 
     if (!name || name.trim() === '') throw new AppError('Product name is required');

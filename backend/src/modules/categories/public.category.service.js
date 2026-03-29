@@ -1,5 +1,5 @@
 import { cacheUtil } from '../../common/utils/cache.js';
-import getPrisma from '../../infrastructure/database/prisma.js';
+import prisma from '../../infrastructure/database/prisma.js';
 
 const CACHE_KEY = 'public:categories:list';
 const CACHE_TTL = 600; // 10 minutes
@@ -10,7 +10,6 @@ export class PublicCategoryService {
    * Uses in-memory caching.
    */
   async getPublicCategories() {
-    const prisma = getPrisma();
     // 1. Try to get from cache
     const cachedData = cacheUtil.get(CACHE_KEY);
     if (cachedData) {

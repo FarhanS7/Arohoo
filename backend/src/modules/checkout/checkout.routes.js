@@ -1,5 +1,6 @@
 import express from 'express';
 import { protect } from '../../common/middleware/auth.middleware.js';
+import { checkoutLimiter } from '../../common/middleware/rate-limit.middleware.js';
 import { validate } from '../../common/middleware/validation.middleware.js';
 import * as checkoutController from './checkout.controller.js';
 import { checkoutSchema } from './checkout.validator.js';
@@ -10,6 +11,7 @@ const router = express.Router();
 router.post(
   '/',
   protect,
+  checkoutLimiter,
   validate(checkoutSchema),
   checkoutController.validateCheckout
 );

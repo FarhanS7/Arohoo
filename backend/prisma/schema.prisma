@@ -14,6 +14,11 @@ enum Role {
   ADMIN
 }
 
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
 enum OrderStatus {
   PENDING
   CONFIRMED
@@ -25,9 +30,11 @@ enum OrderStatus {
 model User {
   id            String    @id @default(uuid())
   email         String    @unique
+  name          String?
   password      String?   // Hashed password
   phone         String?   @unique // For future OTP support
   role          Role      @default(CUSTOMER)
+  status        UserStatus @default(ACTIVE)
   
   // Relations
   merchant      Merchant?
@@ -53,12 +60,17 @@ enum MerchantStatus {
 model Merchant {
   id          String         @id @default(uuid())
   storeName   String
+  description String?
+  bannerUrl   String?
+  logo        String?
+  address     String?
   isApproved  Boolean        @default(false)
   status      MerchantStatus @default(PENDING)
   userId      String         @unique
   user        User           @relation(fields: [userId], references: [id])
   products    Product[]
-  categories  Category[]
+  categories  Category[]     @relation("MerchantCategories")
+  malls       Mall[]         @relation("MallMerchants")
   orderItems  OrderItem[]
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
@@ -115,8 +127,7 @@ model Category {
   displayOrder Int       @default(0)
   isActive     Boolean   @default(true)
   products     Product[]
-  merchantId   String?
-  merchant     Merchant? @relation(fields: [merchantId], references: [id])
+  merchants    Merchant[] @relation("MerchantCategories")
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -263,4 +274,17 @@ model OrderStatusHistory {
   @@index([orderId])
   @@index([orderItemId])
   @@map("order_status_history")
+}
+
+model Mall {
+  id          String     @id @default(uuid())
+  name        String
+  location    String
+  coverImage  String?
+  description String?
+  merchants   Merchant[] @relation("MallMerchants")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("malls")
 }

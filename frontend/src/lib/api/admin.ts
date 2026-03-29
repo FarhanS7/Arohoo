@@ -1,0 +1,61 @@
+import { Category } from "./categories";
+import { api } from "./client";
+
+export interface PlatformStats {
+  totalUsers: number;
+  totalMerchants: number;
+  totalOrders: number;
+  totalRevenue: number;
+  pendingApprovals: number;
+}
+
+export interface MerchantApplication {
+  id: string;
+  businessName: string;
+  ownerName: string;
+  email: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  createdAt: string;
+}
+
+export const adminService = {
+  async getPlatformStats(): Promise<{ success: boolean; data: PlatformStats }> {
+    const res = await api.get("/admin/stats");
+    return res.data;
+  },
+
+  async getPendingMerchants(): Promise<{ success: boolean; data: MerchantApplication[] }> {
+    const res = await api.get("/admin/merchants/pending");
+    return res.data;
+  },
+
+  async getAllMerchants(): Promise<{ success: boolean; data: MerchantApplication[] }> {
+    const res = await api.get("/admin/merchants");
+    return res.data;
+  },
+
+  async approveMerchant(id: string): Promise<{ success: boolean }> {
+    const res = await api.patch(`/admin/merchants/${id}/approve`);
+    return res.data;
+  },
+
+  async rejectMerchant(id: string): Promise<{ success: boolean }> {
+    const res = await api.patch(`/admin/merchants/${id}/reject`);
+    return res.data;
+  },
+
+  async createCategory(data: Partial<Category>): Promise<{ success: boolean; data: Category }> {
+    const res = await api.post("/admin/categories", data);
+    return res.data;
+  },
+
+  async updateCategory(id: string, data: Partial<Category>): Promise<{ success: boolean; data: Category }> {
+    const res = await api.patch(`/admin/categories/${id}`, data);
+    return res.data;
+  },
+
+  async deleteCategory(id: string): Promise<{ success: boolean }> {
+    const res = await api.delete(`/admin/categories/${id}`);
+    return res.data;
+  },
+};

@@ -1,6 +1,7 @@
 "use client";
 
 import { Product } from "@/lib/api/products";
+import Image from "next/image";
 import Link from "next/link";
 
 interface ProductCardProps {
@@ -16,11 +17,12 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Link href={`/products/${product.id}`} className="group">
       <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-gray-100 shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
-        <img
+        <Image
           src={displayImage}
           alt={product.name}
-          className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
+          fill
+          className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {product.variants.length > 0 && (
           <div className="absolute bottom-4 left-4 right-4">

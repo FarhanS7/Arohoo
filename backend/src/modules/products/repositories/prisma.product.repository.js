@@ -1,7 +1,5 @@
 import { getPagination } from '../../../common/types/pagination.types.js';
-import getPrisma from '../../../infrastructure/database/prisma.js';
-
-const prisma = getPrisma();
+import prisma from '../../../infrastructure/database/prisma.js';
 
 export class PrismaProductRepository {
   /**

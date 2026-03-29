@@ -1,0 +1,155 @@
+import { AppError } from '../../common/errors/AppError.js';
+import prisma from '../../infrastructure/database/prisma.js';
+
+/**
+ * Service to handle merchant-specific business logic and analytics.
+ */
+export class MerchantService {
+  constructor(prismaInstance) {
+    this.prisma = prismaInstance || prisma;
+  }
+
+  /**
+   * Calculates comprehensive dashboard statistics for a specific merchant.
+   * Includes revenue, sales volume, fulfillment rate, and stock health.
+   * 
+   * @param {string} merchantId - The unique identifier of the merchant.
+   * @returns {Promise<Object>} Statistics containing totalRevenue, totalSales, fulfillmentRate, and lowStockProducts.
+   */
+  async getMerchantDashboardStats(merchantId) {
+    if (!merchantId) throw new AppError('Merchant ID is required', 400);
+
+    // 1. Efficiently aggregate revenue, sales volume, and total/delivered counts
+    const statsAggregate = await this.prisma.orderItem.aggregate({
+      where: {
+        merchantId,
+        status: { not: 'CANCELLED' }
+      },
+      _sum: {
+        subtotal: true,
+        quantity: true
+      },
+      _count: {
+        id: true
+      }
+    });
+
+    const deliveredCount = await this.prisma.orderItem.count({
+      where: {
+        merchantId,
+        status: 'DELIVERED'
+      }
+    });
+
+    // 2. Count product variants with low stock (<= 5 items)
+    const lowStockProducts = await this.prisma.productVariant.count({
+      where: {
+        product: { merchantId },
+        stock: { lte: 5 }
+      }
+    });
+
+    const totalRevenue = Number(statsAggregate._sum.subtotal || 0);
+    const totalSales = Number(statsAggregate._sum.quantity || 0);
+    const totalItems = statsAggregate._count.id || 0;
+    
+    // 3. Calculate fulfillment rate
+    const fulfillmentRate = totalItems > 0 
+        ? Math.round((deliveredCount / totalItems) * 100) 
+        : 0;
+
+    return {
+      totalRevenue,
+      totalSales,
+      fulfillmentRate,
+      lowStockProducts
+    };
+  }
+
+  /**
+   * Updates a merchant's profile information.
+   * 
+   * @param {string} merchantId - The unique ID of the merchant.
+   * @param {Object} updateData - The fields to update (storeName, description, bannerImage, logo).
+   * @returns {Promise<Object>} The updated merchant profile.
+   * @throws {AppError} If merchant not found.
+   */
+  async updateMerchantProfile(merchantId, updateData) {
+    if (!merchantId) throw new AppError('Merchant ID is required', 400);
+
+    const merchant = await this.prisma.merchant.findUnique({
+      where: { id: merchantId }
+    });
+
+    if (!merchant) throw new AppError('Merchant not found', 404);
+
+    return await this.prisma.merchant.update({
+      where: { id: merchantId },
+      data: updateData
+    });
+  }
+
+  /**
+   * Retrieves all merchants pending approval. (Admin only)
+   * @returns {Promise<Array>} List of pending merchants.
+   */
+  async getPendingMerchants() {
+    return await this.prisma.merchant.findMany({
+      where: { status: 'PENDING' },
+      include: {
+        user: {
+          select: {
+            email: true,
+            name: true,
+            phone: true
+          }
+        },
+        categories: true
+      }
+    });
+  }
+
+  /**
+   * Approves a merchant. (Admin only)
+   * @param {string} merchantId - The unique ID of the merchant.
+   * @returns {Promise<Object>} The updated merchant.
+   */
+  async approveMerchant(merchantId) {
+    const merchant = await this.prisma.merchant.findUnique({
+      where: { id: merchantId }
+    });
+
+    if (!merchant) throw new AppError('Merchant not found', 404);
+
+    return await this.prisma.merchant.update({
+      where: { id: merchantId },
+      data: {
+        isApproved: true,
+        status: 'APPROVED'
+      }
+    });
+  }
+
+  /**
+   * Rejects a merchant. (Admin only)
+   * @param {string} merchantId - The unique ID of the merchant.
+   * @returns {Promise<Object>} The updated merchant.
+   */
+  async rejectMerchant(merchantId) {
+    const merchant = await this.prisma.merchant.findUnique({
+      where: { id: merchantId }
+    });
+
+    if (!merchant) throw new AppError('Merchant not found', 404);
+
+    return await this.prisma.merchant.update({
+      where: { id: merchantId },
+      data: {
+        isApproved: false,
+        status: 'REJECTED'
+      }
+    });
+  }
+}
+
+export default new MerchantService();

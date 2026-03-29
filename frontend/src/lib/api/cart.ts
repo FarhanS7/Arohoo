@@ -1,4 +1,4 @@
-import { api as client } from "./client";
+import { api } from "./client";
 
 export interface CartItem {
   id: string;
@@ -25,49 +25,52 @@ export interface Cart {
   items: CartItem[];
 }
 
+/**
+ * Cart API Service
+ */
 export const cartApi = {
   /**
    * Fetches the current user's cart.
    */
-  getCart: async () => {
-    const response = await client.get<{ success: boolean; data: Cart }>("/cart");
-    return response.data;
+  async getCart(): Promise<{ success: boolean; data: Cart }> {
+    const res = await api.get<{ success: boolean; data: Cart }>("/cart");
+    return res.data;
   },
 
   /**
    * Adds an item to the cart.
    */
-  addItem: async (productVariantId: string, quantity: number = 1) => {
-    const response = await client.post<{ success: boolean; data: Cart }>("/cart/items", {
+  async addItem(productVariantId: string, quantity: number = 1): Promise<{ success: boolean; data: Cart }> {
+    const res = await api.post<{ success: boolean; data: Cart }>("/cart/items", {
       productVariantId,
       quantity,
     });
-    return response.data;
+    return res.data;
   },
 
   /**
    * Updates the quantity of a cart item.
    */
-  updateQuantity: async (cartItemId: string, quantity: number) => {
-    const response = await client.patch<{ success: boolean; data: Cart }>(`/cart/items/${cartItemId}`, {
+  async updateQuantity(cartItemId: string, quantity: number): Promise<{ success: boolean; data: Cart }> {
+    const res = await api.patch<{ success: boolean; data: Cart }>(`/cart/items/${cartItemId}`, {
       quantity,
     });
-    return response.data;
+    return res.data;
   },
 
   /**
    * Removes an item from the cart.
    */
-  removeItem: async (cartItemId: string) => {
-    const response = await client.delete<{ success: boolean; data: Cart }>(`/cart/items/${cartItemId}`);
-    return response.data;
+  async removeItem(cartItemId: string): Promise<{ success: boolean; data: Cart }> {
+    const res = await api.delete<{ success: boolean; data: Cart }>(`/cart/items/${cartItemId}`);
+    return res.data;
   },
 
   /**
    * Clears the entire cart.
    */
-  clearCart: async () => {
-    const response = await client.delete<{ success: boolean; data: Cart }>("/cart");
-    return response.data;
+  async clearCart(): Promise<{ success: boolean; data: Cart }> {
+    const res = await api.delete<{ success: boolean; data: Cart }>("/cart");
+    return res.data;
   },
 };

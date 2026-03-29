@@ -5,6 +5,7 @@ import morgan from 'morgan';
 
 import { AppError } from './common/errors/AppError.js';
 import { globalErrorHandler } from './common/middleware/error.middleware.js';
+import logger from './common/utils/logger.js';
 import apiRouter from './modules/index.js';
 
 const app = express();
@@ -13,9 +14,10 @@ const app = express();
 app.use(helmet()); // Security headers
 app.use(cors()); // CORS support
 
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev')); // Request logging
-}
+// HTTP request logging via Morgan streamed to Winston
+app.use(morgan('combined', { 
+  stream: { write: (message) => logger.info(message.trim()) } 
+}));
 
 app.use(express.json({ limit: '10kb' })); // Body parser
 app.use(express.static('public')); // Serve static files

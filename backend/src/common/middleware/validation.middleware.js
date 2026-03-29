@@ -13,7 +13,7 @@ export const validate = (schema) => (req, res, next) => {
     });
     next();
   } catch (error) {
-    const message = error.errors.map((i) => i.message).join(', ');
+    const message = error.errors ? error.errors.map((i) => i.message).join(', ') : error.message;
     next(new AppError(message, 400));
   }
 };

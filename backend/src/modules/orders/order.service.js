@@ -35,17 +35,22 @@ export class OrderService {
 
       // 2. Role-based Permission Checks
       if (user.role === 'MERCHANT') {
-        const isOwner = order.orderItems.some(item => item.merchantId === user.merchantId); // This is simplified, should check specific item if orderItemId provided
-        if (orderItemId && target.merchantId !== user.merchantId) {
-            throw new AppError('Unauthorized: You can only update your own items', 403);
+        // Merchant MUST provide orderItemId to update status of their own item
+        if (!orderItemId) {
+          throw new AppError('Merchants can only update specific item status, not entire order', 403);
         }
+
+        // Verify ownership
+        if (target.merchantId !== user.merchantId) {
+          throw new AppError('Unauthorized: You can only update your own items', 403);
+        }
+
+        // Merchants can only move to SHIPPED or DELIVERED
         if (!['SHIPPED', 'DELIVERED'].includes(newStatus)) {
           throw new AppError('Merchants can only update items to SHIPPED or DELIVERED', 403);
         }
       } else if (user.role === 'CUSTOMER') {
         throw new AppError('Customers cannot update order status', 403);
-      } else if (user.role === 'ADMIN') {
-        // Admins can do anything, but restricted by progression mostly
       }
 
       // 3. Progression Rules
@@ -73,14 +78,12 @@ export class OrderService {
           data: { status: newStatus }
         });
         
-        // If order confirmed/cancelled, maybe update all items too? 
-        // User requirements: "Merchants can only update their items to SHIPPED or DELIVERED"
-        // This implies item-level status is primary for merchants.
+        // If order confirmed/cancelled, update all items too
         if (['CONFIRMED', 'CANCELLED'].includes(newStatus)) {
-            await tx.orderItem.updateMany({
-                where: { orderId: id },
-                data: { status: newStatus }
-            });
+          await tx.orderItem.updateMany({
+            where: { orderId: id },
+            data: { status: newStatus }
+          });
         }
       }
 
@@ -335,6 +338,211 @@ export class OrderService {
       });
 
       return order;
+    });
+  }
+
+  /**
+   * Retrieves a paginated list of orders containing items from a specific merchant.
+   * Returns only the items belonging to that merchant within each order.
+   */
+  async getOrdersByMerchant({ merchantId, page = 1, limit = 10 }) {
+    const skip = (page - 1) * limit;
+
+    const [orders, total] = await Promise.all([
+      this.prisma.order.findMany({
+        where: {
+          orderItems: { some: { merchantId } }
+        },
+        include: {
+          user: {
+            select: { id: true, email: true }
+          },
+          orderItems: {
+            where: { merchantId },
+            include: {
+              productVariant: {
+                include: {
+                  product: { select: { id: true, name: true } }
+                }
+              }
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit
+      }),
+      this.prisma.order.count({
+        where: {
+          orderItems: { some: { merchantId } }
+        }
+      })
+    ]);
+
+    // Format results to match the requested schema
+    const formattedOrders = orders.map(order => ({
+      id: order.id,
+      status: order.status,
+      createdAt: order.createdAt,
+      user: {
+        id: order.user.id,
+        email: order.user.email
+      },
+      items: order.orderItems.map(item => ({
+        id: item.id,
+        quantity: item.quantity,
+        price: Number(item.price),
+        productVariant: {
+          id: item.productVariant.id,
+          sku: item.productVariant.sku,
+          product: {
+            id: item.productVariant.product.id,
+            name: item.productVariant.product.name
+          }
+        }
+      }))
+    }));
+
+    return {
+      orders: formattedOrders,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total // Including total even though not explicitly in schema but standard for pagination
+      }
+    };
+  }
+
+  /**
+   * Retrieves a paginated list of all orders in the system for platform admins.
+   */
+  async getAllOrders(page = 1, limit = 10) {
+    const skip = (page - 1) * limit;
+
+    const [orders, total] = await Promise.all([
+      this.prisma.order.findMany({
+        include: {
+          user: {
+            select: { id: true, email: true }
+          },
+          orderItems: {
+            include: {
+              product: { select: { id: true, name: true } },
+              productVariant: {
+                select: { id: true, size: true, color: true, price: true }
+              },
+              merchant: {
+                select: { id: true, storeName: true }
+              }
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit
+      }),
+      this.prisma.order.count()
+    ]);
+
+    const formattedOrders = orders.map(order => ({
+      id: order.id,
+      status: order.status,
+      totalAmount: Number(order.totalAmount),
+      createdAt: order.createdAt,
+      customer: {
+        id: order.user.id,
+        email: order.user.email
+      },
+      orderItems: order.orderItems.map(item => ({
+        id: item.id,
+        quantity: item.quantity,
+        price: Number(item.price),
+        status: item.status,
+        productVariant: {
+          id: item.productVariant.id,
+          price: Number(item.productVariant.price),
+          product: {
+            id: item.product.id,
+            name: item.product.name
+          },
+          merchant: {
+            id: item.merchant.id,
+            storeName: item.merchant.storeName
+          }
+        }
+      }))
+    }));
+
+    return {
+      orders: formattedOrders,
+      meta: {
+        page: Number(page),
+        limit: Number(limit),
+        total
+      }
+    };
+  }
+
+  /**
+   * Updates the status of a specific order item belonging to a merchant.
+   * Validates ownership and enforces status progression.
+   */
+  async updateMerchantOrderItemStatus({ merchantId, orderItemId, status }) {
+    const validStatuses = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
+    if (!validStatuses.includes(status)) {
+      throw new AppError(`Invalid status: ${status}`, 400);
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Fetch item with current status
+      const item = await tx.orderItem.findUnique({
+        where: { id: orderItemId },
+        include: { order: true }
+      });
+
+      if (!item) {
+        throw new AppError('Order item not found', 404);
+      }
+
+      // 2. Validate ownership
+      if (item.merchantId !== merchantId) {
+        throw new AppError('Unauthorized: You do not own this order item', 403);
+      }
+
+      const currentStatus = item.status;
+
+      // 3. Enforce status transitions
+      const progression = {
+        'PENDING': ['CONFIRMED', 'CANCELLED'],
+        'CONFIRMED': ['SHIPPED', 'CANCELLED'],
+        'SHIPPED': ['DELIVERED'],
+        'DELIVERED': [],
+        'CANCELLED': []
+      };
+
+      if (!progression[currentStatus].includes(status)) {
+        throw new AppError(`Invalid status transition from ${currentStatus} to ${status}`, 409);
+      }
+
+      // 4. Update status
+      const updatedItem = await tx.orderItem.update({
+        where: { id: orderItemId },
+        data: { status }
+      });
+
+      // 5. Add status history record
+      await tx.orderStatusHistory.create({
+        data: {
+          orderId: item.orderId,
+          orderItemId,
+          oldStatus: currentStatus,
+          newStatus: status,
+          // We don't have the user object here, but we can find the merchant user id or leave it
+          // Assuming the system allows finding user by merchantId if needed, but for now we skip changedById or use a placeholder
+        }
+      });
+
+      return updatedItem;
     });
   }
 }

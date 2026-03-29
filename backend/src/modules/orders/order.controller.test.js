@@ -5,6 +5,8 @@ const mockOrderService = {
   getOrdersByUser: jest.fn(),
   updateOrderStatus: jest.fn(),
   getOrderById: jest.fn(),
+  getOrdersByMerchant: jest.fn(),
+  getAllOrders: jest.fn(),
 };
 
 // 2. Mock modules BEFORE importing controller
@@ -93,6 +95,115 @@ describe('OrderController', () => {
 
       expect(mockOrderService.updateOrderStatus).toHaveBeenCalledWith('ord-123', 'SHIPPED', req.user, 'item-456');
       expect(res.status).toHaveBeenCalledWith(200);
+    });
+  });
+
+  describe('getMerchantOrders', () => {
+    test('should return 200 and merchant orders', async () => {
+      req.user = { id: 'u-1', role: 'MERCHANT', merchantId: 'm-123' };
+      req.query = { page: '1', limit: '10' };
+      const mockResult = {
+        orders: [{ id: 'order-1', status: 'PENDING' }],
+        pagination: { page: 1, limit: 10, total: 1 }
+      };
+      mockOrderService.getOrdersByMerchant.mockResolvedValue(mockResult);
+
+      await orderController.getMerchantOrders(req, res, next);
+
+      expect(mockOrderService.getOrdersByMerchant).toHaveBeenCalledWith({
+        merchantId: 'm-123',
+        page: 1,
+        limit: 10
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockResult,
+        error: null
+      });
+    });
+
+    test('should fail if user is not a merchant', async () => {
+      req.user.role = 'CUSTOMER';
+      
+      await orderController.getMerchantOrders(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expect.any(Error));
+      const error = next.mock.calls[0][0];
+      expect(error.statusCode).toBe(403);
+      expect(error.message).toContain('Only merchants can access');
+    });
+
+    test('should fail if merchantId is missing', async () => {
+      req.user = { id: 'u-1', role: 'MERCHANT' }; // missing merchantId
+      
+      await orderController.getMerchantOrders(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expect.any(Error));
+      const error = next.mock.calls[0][0];
+      expect(error.statusCode).toBe(404);
+    });
+  });
+
+  describe('getAllOrders', () => {
+    test('should return 200 and all orders for admin', async () => {
+      req.user = { id: 'admin-1', role: 'ADMIN' };
+      req.query = { page: '1', limit: '20' };
+      const mockResult = {
+        orders: [{ id: 'order-1', status: 'PENDING' }],
+        meta: { page: 1, limit: 20, total: 1 }
+      };
+      mockOrderService.getAllOrders.mockResolvedValue(mockResult);
+
+      await orderController.getAllOrders(req, res, next);
+
+      expect(mockOrderService.getAllOrders).toHaveBeenCalledWith(1, 20);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockResult,
+        error: null
+      });
+    });
+
+    test('should fail if user is not an admin', async () => {
+      req.user = { id: 'u-1', role: 'CUSTOMER' };
+      
+      await orderController.getAllOrders(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expect.any(Error));
+      const error = next.mock.calls[0][0];
+      expect(error.statusCode).toBe(403);
+    });
+  });
+
+  describe('adminUpdateOrderStatus', () => {
+    test('should return 200 and updated status for admin', async () => {
+      req.user = { id: 'admin-1', role: 'ADMIN' };
+      req.body = { orderId: 'order-1', status: 'CANCELLED' };
+      const mockResult = { orderId: 'order-1', newStatus: 'CANCELLED' };
+      mockOrderService.updateOrderStatus.mockResolvedValue(mockResult);
+
+      await orderController.adminUpdateOrderStatus(req, res, next);
+
+      expect(mockOrderService.updateOrderStatus).toHaveBeenCalledWith('order-1', 'CANCELLED', req.user);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: mockResult,
+        error: null
+      });
+    });
+
+    test('should fail if user is not an admin', async () => {
+      req.user = { id: 'u-1', role: 'CUSTOMER' };
+      req.body = { orderId: 'order-1', status: 'CANCELLED' };
+      
+      await orderController.adminUpdateOrderStatus(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(expect.any(Error));
+      const error = next.mock.calls[0][0];
+      expect(error.statusCode).toBe(403);
     });
   });
 });

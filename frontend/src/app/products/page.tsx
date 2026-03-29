@@ -2,6 +2,7 @@
 
 import FilterPanel from "@/features/products/components/FilterPanel";
 import ProductCard from "@/features/products/components/ProductCard";
+import ProductCardSkeleton from "@/features/products/components/ProductCardSkeleton";
 import { usePublicProducts } from "@/features/products/hooks/usePublicProducts";
 import { useState } from "react";
 
@@ -94,11 +95,7 @@ export default function ProductCatalogPage() {
              {loading && products.length === 0 ? (
                <div className="grid grid-cols-2 lg:grid-cols-3 gap-8">
                  {[...Array(6)].map((_, i) => (
-                   <div key={i} className="animate-pulse">
-                     <div className="aspect-[4/5] bg-gray-100 rounded-2xl mb-4" />
-                     <div className="h-4 bg-gray-100 rounded w-2/3 mb-2" />
-                     <div className="h-4 bg-gray-100 rounded w-1/3" />
-                   </div>
+                   <ProductCardSkeleton key={i} />
                  ))}
                </div>
              ) : products.length ===0 ? (

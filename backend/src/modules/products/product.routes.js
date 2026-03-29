@@ -1,13 +1,15 @@
 import express from 'express';
 import { protect } from '../../common/middleware/auth.middleware.js';
 import { authorize } from '../../common/middleware/role.middleware.js';
+import { upload } from '../../common/middleware/upload.middleware.js';
 import { validate } from '../../common/middleware/validation.middleware.js';
 import {
     createProduct,
     deleteProduct,
     getMerchantProducts,
     getProductById,
-    updateProduct
+    updateProduct,
+    uploadProductImages
 } from './product.controller.js';
 import { createProductSchema, updateProductSchema } from './product.validator.js';
 

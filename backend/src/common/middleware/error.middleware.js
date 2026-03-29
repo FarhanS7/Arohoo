@@ -1,3 +1,4 @@
+import logger from '../utils/logger.js';
 
 /**
  * Global error handling middleware for Express.
@@ -23,8 +24,8 @@ export const globalErrorHandler = (err, req, res, next) => {
     });
   }
 
-  // Log non-operational errors
-  console.error('ERROR 💥', err);
+  // Log error using Winston
+  logger.error(err);
 
   return res.status(500).json({
     status: 'error',

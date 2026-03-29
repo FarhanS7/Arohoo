@@ -4,7 +4,7 @@ import { ProductService } from './product.service.js';
 const productService = new ProductService();
 
 export const createProduct = asyncHandler(async (req, res) => {
-  const merchantId = req.user?.merchant?.id;
+  const merchantId = req.user.merchantId;
   const product = await productService.createProduct(req.body, merchantId);
 
   res.status(201).json({
@@ -15,7 +15,7 @@ export const createProduct = asyncHandler(async (req, res) => {
 });
 
 export const getMerchantProducts = asyncHandler(async (req, res) => {
-  const merchantId = req.user?.merchant?.id;
+  const merchantId = req.user.merchantId;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 20;
 
@@ -29,7 +29,7 @@ export const getMerchantProducts = asyncHandler(async (req, res) => {
 });
 
 export const getProductById = asyncHandler(async (req, res) => {
-  const merchantId = req.user?.merchant?.id;
+  const merchantId = req.user.merchantId;
   const product = await productService.getProductById(req.params.id, merchantId);
 
   res.status(200).json({
@@ -40,7 +40,7 @@ export const getProductById = asyncHandler(async (req, res) => {
 });
 
 export const updateProduct = asyncHandler(async (req, res) => {
-  const merchantId = req.user?.merchant?.id;
+  const merchantId = req.user.merchantId;
   const product = await productService.updateProduct(req.params.id, merchantId, req.body);
 
   res.status(200).json({
@@ -51,7 +51,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
 });
 
 export const uploadProductImages = asyncHandler(async (req, res) => {
-  const merchantId = req.user?.merchant?.id;
+  const merchantId = req.user.merchantId;
   const productId = req.params.productId;
   
   if (!req.files || req.files.length === 0) {
@@ -73,7 +73,7 @@ export const uploadProductImages = asyncHandler(async (req, res) => {
 });
 
 export const deleteProduct = asyncHandler(async (req, res) => {
-  const merchantId = req.user?.merchant?.id;
+  const merchantId = req.user.merchantId;
   await productService.deleteProduct(req.params.id, merchantId);
 
   res.status(200).json({

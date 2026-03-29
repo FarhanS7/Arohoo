@@ -1,7 +1,11 @@
 import { CreateProductInput, Product } from "@/lib/api/products";
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { useCategories } from "../hooks/useCategories";
-import ImageUpload from "./ImageUpload";
+
+const ImageUpload = dynamic(() => import("./ImageUpload"), {
+  loading: () => <div className="h-40 w-full bg-gray-50 animate-pulse rounded-xl" />,
+});
 
 interface ProductFormProps {
   initialData?: Product;
@@ -208,7 +212,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                     <label className="text-[10px] font-bold text-gray-500 uppercase">Size</label>
                     <input
                       type="text"
-                      value={variant.attributes.size}
+                      value={variant.attributes.size || ""}
                       onChange={(e) => handleVariantChange(index, "attributes.size", e.target.value)}
                       className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 outline-none focus:ring-1 focus:ring-indigo-500"
                       placeholder="M, L, XL..."
@@ -218,7 +222,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                     <label className="text-[10px] font-bold text-gray-500 uppercase">Color</label>
                     <input
                       type="text"
-                      value={variant.attributes.color}
+                      value={variant.attributes.color || ""}
                       onChange={(e) => handleVariantChange(index, "attributes.color", e.target.value)}
                       className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 outline-none focus:ring-1 focus:ring-indigo-500"
                       placeholder="Red, Blue..."

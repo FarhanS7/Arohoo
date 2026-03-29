@@ -1,156 +1,166 @@
 "use client";
 
 import { useCart } from "@/features/cart/hooks/useCart";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function CartPage() {
-  const { cart, loading, error, updateQuantity, removeItem, clearCart, totalPrice, itemCount } = useCart();
+  const { 
+    cart, 
+    loading, 
+    removeItem, 
+    updateQuantity, 
+    totalPrice, 
+    itemCount 
+  } = useCart();
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="flex min-h-screen items-center justify-center p-8 bg-zinc-50 dark:bg-black">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-950 dark:border-zinc-800 dark:border-t-zinc-50"></div>
+          <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Loading your cart...</p>
+        </div>
       </div>
     );
   }
 
-  if (error) {
+  if (!cart || cart.items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen px-4 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2 uppercase italic">Cart Error</h2>
-        <p className="text-gray-500 mb-8">{error}</p>
-        <button onClick={() => window.location.reload()} className="px-8 py-3 bg-black text-white font-bold rounded-xl text-xs uppercase tracking-widest">
-          Retry
-        </button>
+      <div className="flex min-h-screen flex-col items-center justify-center p-8 bg-zinc-50 dark:bg-black">
+        <div className="max-w-md text-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-900">
+            <svg className="h-10 w-10 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+          </div>
+          <h1 className="mb-2 text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Your cart is empty</h1>
+          <p className="mb-8 text-zinc-600 dark:text-zinc-400">Looks like you haven't added anything to your cart yet. Let's find something for you!</p>
+          <Link
+            href="/products"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-zinc-950 px-8 text-base font-medium text-zinc-50 transition-colors hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+          >
+            Start Shopping
+          </Link>
+        </div>
       </div>
     );
   }
-
-  const items = cart?.items || [];
 
   return (
-    <div className="bg-white min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
-        <div className="flex items-baseline justify-between border-b border-gray-100 pb-8 mb-12">
-          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight uppercase italic">
-            Your Bag <span className="text-indigo-600">/</span> <span className="text-gray-400">{itemCount}</span>
-          </h1>
-          {items.length > 0 && (
-            <button 
-              onClick={clearCart}
-              className="text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-red-500 transition-colors"
-            >
-              Clear All
-            </button>
-          )}
-        </div>
+    <div className="min-h-screen bg-zinc-50 pt-12 dark:bg-black md:pt-20">
+      <div className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
+        <h1 className="mb-10 text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-4xl">Shopping Cart</h1>
 
-        {items.length === 0 ? (
-          <div className="text-center py-32 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-            <h3 className="text-xl font-bold text-gray-900 mb-2 uppercase">Your Bag is Empty</h3>
-            <p className="text-sm text-gray-500 max-w-xs mx-auto mb-8">Items added to your bag will appear here. Start browsing our collection.</p>
-            <Link 
-              href="/products" 
-              className="px-10 py-4 bg-black text-white font-bold rounded-2xl text-xs uppercase tracking-widest hover:bg-gray-800 transition-all inline-block"
-            >
-              Shop Collection
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-            {/* Cart Items List */}
-            <div className="lg:col-span-8 space-y-8">
-              {items.map((item) => (
-                <div key={item.id} className="flex gap-6 pb-8 border-b border-gray-50 group">
-                  <div className="w-24 h-32 md:w-32 md:h-40 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0">
-                    <img 
-                      src={`http://localhost:8000/placeholder-product.png`} // Fallback, update with real images if available
-                      alt="Product"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        <div className="flex flex-col gap-x-12 lg:flex-row lg:items-start">
+          {/* Cart Items List */}
+          <div className="flex-1">
+            <ul className="divide-y divide-zinc-200 border-b border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+              {cart.items.map((item) => (
+                <li key={item.id} className="flex py-6 sm:py-10">
+                  <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900 sm:h-32 sm:w-32">
+                    <Image
+                      src="/api/placeholder/400/400" // Fallback placeholder
+                      alt={item.productVariant.product.name}
+                      fill
+                      className="object-cover object-center"
                     />
                   </div>
-                  
-                  <div className="flex-grow flex flex-col pt-2">
-                    <div className="flex justify-between items-start mb-2">
+
+                  <div className="ml-4 flex flex-1 flex-col justify-between sm:ml-6">
+                    <div className="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900 uppercase tracking-tight leading-none mb-1">
-                          {item.productVariant?.product?.name || `Product ${item.productVariantId.substring(0, 4)}`}
-                        </h3>
-                        <div className="flex gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest italic">
-                          <span>{item.productVariant?.size || 'OS'}</span>
-                          <span>{item.productVariant?.color || 'N/A'}</span>
+                        <div className="flex justify-between">
+                          <h3 className="text-sm font-semibold">
+                            <Link href={`/products/${item.productVariant.product.id}`} className="text-zinc-900 hover:text-zinc-600 dark:text-zinc-50 dark:hover:text-zinc-300">
+                              {item.productVariant.product.name}
+                            </Link>
+                          </h3>
+                        </div>
+                        <div className="mt-1 flex text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                          {item.productVariant.color && <p className="border-r border-zinc-200 pr-3 dark:border-zinc-800">{item.productVariant.color}</p>}
+                          {item.productVariant.size && <p className="pl-3">{item.productVariant.size}</p>}
+                        </div>
+                        <p className="mt-1 text-sm font-bold text-zinc-900 dark:text-zinc-50">
+                          ${Number(item.productVariant.price).toFixed(2)}
+                        </p>
+                      </div>
+
+                      <div className="mt-4 sm:mt-0 sm:pr-9">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center rounded-full border border-zinc-200 dark:border-zinc-800">
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              className="flex h-8 w-8 items-center justify-center text-zinc-600 transition-colors hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50"
+                            >
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                              </svg>
+                            </button>
+                            <span className="w-6 text-center text-sm font-bold text-zinc-900 dark:text-zinc-50">
+                                {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              className="flex h-8 w-8 items-center justify-center text-zinc-600 transition-colors hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50"
+                            >
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              </svg>
+                            </button>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item.id)}
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-red-600 dark:text-zinc-500 dark:hover:bg-zinc-900"
+                          >
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
                         </div>
                       </div>
-                      <p className="text-lg font-black text-gray-900">${item.productVariant?.price || 0}</p>
-                    </div>
-
-                    <div className="mt-auto flex items-center justify-between">
-                      {/* Quantity Selector */}
-                      <div className="flex items-center border border-gray-100 rounded-xl bg-white shadow-sm overflow-hidden">
-                        <button 
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="px-4 py-2 hover:bg-gray-50 text-gray-500 transition-colors"
-                        >
-                          -
-                        </button>
-                        <span className="w-10 text-center text-xs font-bold text-gray-900">
-                          {item.quantity}
-                        </span>
-                        <button 
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="px-4 py-2 hover:bg-gray-50 text-gray-500 transition-colors"
-                        >
-                          +
-                        </button>
-                      </div>
-
-                      <button 
-                        onClick={() => removeItem(item.id)}
-                        className="text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-black transition-colors"
-                      >
-                        Remove
-                      </button>
                     </div>
                   </div>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
+          </div>
 
-            {/* Summary Sidebar */}
-            <div className="lg:col-span-4">
-              <div className="bg-gray-50 rounded-3xl p-8 sticky top-24">
-                <h2 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-8 border-b pb-4">Order Summary</h2>
-                
-                <div className="space-y-4 mb-8">
-                  <div className="flex justify-between text-sm font-medium text-gray-500">
-                    <span>Subtotal</span>
-                    <span className="text-gray-900">${totalPrice}</span>
-                  </div>
-                  <div className="flex justify-between text-sm font-medium text-gray-500">
-                    <span>Shipping</span>
-                    <span className="text-green-600 font-bold uppercase text-[10px] tracking-widest">Free</span>
-                  </div>
-                </div>
+          {/* Order Summary */}
+          <section className="mt-16 bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 lg:mt-0 lg:w-96">
+            <h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Order summary</h2>
 
-                <div className="border-t border-gray-200 pt-6 mb-10 flex justify-between items-baseline">
-                   <h3 className="text-xl font-bold text-gray-900 uppercase italic">Total</h3>
-                   <p className="text-2xl font-black text-gray-900 tracking-tight">${totalPrice}</p>
-                </div>
-
-                <Link 
-                  href="/checkout"
-                  className="w-full py-5 bg-black text-white font-bold rounded-2xl text-xs uppercase tracking-[0.2em] shadow-2xl hover:bg-gray-800 transition-all flex items-center justify-center gap-3 active:scale-95 mb-4"
-                >
-                  Proceed to Checkout
-                </Link>
-                
-                <p className="text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-loose">
-                  Complimentary international shipping <br /> & carbon neutral delivery.
-                </p>
+            <div className="mt-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">Subtotal ({itemCount} items)</p>
+                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">${totalPrice.toFixed(2)}</p>
+              </div>
+              <div className="flex items-center justify-between border-t border-zinc-100 pt-4 dark:border-zinc-900">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">Shipping estimate</p>
+                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">$0.00</p>
+              </div>
+              <div className="flex items-center justify-between border-t border-zinc-100 pt-4 dark:border-zinc-900">
+                <p className="text-base font-bold text-zinc-900 dark:text-zinc-50">Order total</p>
+                <p className="text-lg font-extrabold text-zinc-900 dark:text-zinc-50">${totalPrice.toFixed(2)}</p>
               </div>
             </div>
-          </div>
-        )}
+
+            <div className="mt-8">
+              <Link
+                href="/checkout"
+                className="flex w-full items-center justify-center rounded-full bg-zinc-950 px-6 py-4 text-base font-bold text-zinc-50 transition-all hover:bg-zinc-800 hover:scale-[1.02] active:scale-[0.98] dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+              >
+                Checkout
+              </Link>
+            </div>
+            
+            <p className="mt-4 text-center text-xs text-zinc-500">
+                Secure transaction with multi-tenant isolation.
+            </p>
+          </section>
+        </div>
       </div>
     </div>
   );

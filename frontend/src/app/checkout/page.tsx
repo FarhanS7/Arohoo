@@ -5,6 +5,9 @@ import ShippingForm, { ShippingFormData } from '@/features/checkout/components/S
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/features/auth/auth.context';
+import { useToastContext } from '@/components/providers/ToastProvider';
+import Navbar from '@/components/layout/Navbar';
 
 interface CartItem {
   productVariantId: string;
@@ -23,11 +26,21 @@ interface LiveItem extends CartItem {
 
 const CheckoutPage = () => {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+  const { addToast } = useToastContext();
   const [localCart, setLocalCart] = useState<CartItem[]>([]);
   const [liveItems, setLiveItems] = useState<LiveItem[]>([]);
   const [isLoadingLive, setIsLoadingLive] = useState(true);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  // 0. Auth Guard
+  useEffect(() => {
+    if (!authLoading && !user) {
+      addToast('info', 'Please login to proceed to checkout');
+      router.push(`/login?redirect=/checkout`);
+    }
+  }, [user, authLoading, router, addToast]);
 
   // 1. Load cart from localStorage
   useEffect(() => {
@@ -134,7 +147,8 @@ const CheckoutPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-neutral-50 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <Navbar />
       <div className="max-w-6xl mx-auto">
         <header className="mb-12">
           <h1 className="text-4xl font-bold text-neutral-900 tracking-tight">Checkout</h1>

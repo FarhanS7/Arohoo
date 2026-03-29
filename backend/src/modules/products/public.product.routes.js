@@ -1,3 +1,4 @@
+import express from 'express';
 import { getProductDetail, getVariantDetail, listProducts, searchProducts } from './public.product.controller.js';
 
 const router = express.Router();

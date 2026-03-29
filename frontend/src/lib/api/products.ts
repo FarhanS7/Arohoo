@@ -5,8 +5,10 @@ export interface ProductVariant {
   sku: string;
   price: number;
   stock: number;
-  size: string | null;
-  color: string | null;
+  attributes: {
+    size: string | null;
+    color: string | null;
+  };
 }
 
 export interface ProductImage {

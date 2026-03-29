@@ -49,7 +49,7 @@ export class AuthService {
    * @returns {Promise<string>} - The generated JWT token.
    */
   async registerMerchant(merchantData) {
-    const { email, password, storeName } = merchantData;
+    const { email, password, name, storeName, address, phone, categoryIds } = merchantData;
 
     // 1. Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -68,6 +68,8 @@ export class AuthService {
       const newUser = await tx.user.create({
         data: {
           email,
+          name,
+          phone,
           password: hashedPassword,
           role: 'MERCHANT',
         },
@@ -76,8 +78,13 @@ export class AuthService {
       const newMerchant = await tx.merchant.create({
         data: {
           storeName,
+          address,
           userId: newUser.id,
           isApproved: false,
+          status: 'PENDING',
+          categories: {
+            connect: categoryIds?.map(id => ({ id })) || []
+          }
         },
       });
 
@@ -118,12 +125,17 @@ export class AuthService {
       throw new AppError('Invalid email or password', 401);
     }
 
-    // 3. Get merchant info if merchant
+    // 3. Get merchant info if merchant and check approval
     let merchantId = null;
     if (user.role === 'MERCHANT') {
       const merchant = await prisma.merchant.findUnique({
         where: { userId: user.id },
       });
+      
+      if (!merchant?.isApproved) {
+        throw new AppError('Your account is pending approval. Please wait for admin verification.', 403);
+      }
+      
       merchantId = merchant?.id;
     }
 

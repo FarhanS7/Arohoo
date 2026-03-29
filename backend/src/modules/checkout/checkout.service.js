@@ -1,5 +1,5 @@
 import { AppError } from '../../common/errors/AppError.js';
-import getPrisma from '../../infrastructure/database/prisma.js';
+import prisma from '../../infrastructure/database/prisma.js';
 
 export class CheckoutService {
   /**
@@ -65,7 +65,6 @@ export class CheckoutService {
    * Public validation endpoint for dry-run (Step 4.1).
    */
   async validateCheckout(data) {
-    const prisma = getPrisma();
     const { summaryItems, total } = await this._validateAndPrepareItems(prisma, data.cartItems);
     
     return {
@@ -79,7 +78,6 @@ export class CheckoutService {
    * Atomic Order Creation (Step 4.2).
    */
   async createOrder(userId, checkoutData) {
-    const prisma = getPrisma();
     const { name, phone, address, cartItems } = checkoutData;
 
     return await prisma.$transaction(async (tx) => {

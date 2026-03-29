@@ -39,11 +39,11 @@ export const register = asyncHandler(async (req, res, next) => {
  * Controller handling merchant registration.
  */
 export const registerMerchant = asyncHandler(async (req, res, next) => {
-  const { email, password, storeName } = req.body;
+  const { email, password, name, storeName, address, phone, categoryIds } = req.body;
 
   // 1. Validation
-  if (!email || !password || !storeName) {
-    return next(new AppError('Please provide email, password, and store name', 400));
+  if (!email || !password || !name || !storeName || !address || !phone) {
+    return next(new AppError('Please provide all required fields (email, password, name, store name, address, phone)', 400));
   }
 
   if (password.length < 6) {
@@ -56,12 +56,21 @@ export const registerMerchant = asyncHandler(async (req, res, next) => {
   }
 
   // 2. Call Service
-  const token = await authService.registerMerchant({ email, password, storeName });
+  const token = await authService.registerMerchant({ 
+    email, 
+    password, 
+    name,
+    storeName, 
+    address, 
+    phone, 
+    categoryIds 
+  });
 
   // 3. Send Response
   res.status(201).json({
     status: 'success',
-    token,
+    message: 'Merchant registration submitted for approval',
+    token, // We still return the token, but they won't be able to log in next time if not approved
   });
 });
 
