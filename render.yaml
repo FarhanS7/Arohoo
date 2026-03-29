@@ -6,7 +6,7 @@ services:
     region: oregon
     rootDir: backend
     buildCommand: npm install && npx prisma generate
-    startCommand: npx prisma migrate deploy && node src/server.js
+    startCommand: npx prisma db push && node src/server.js
     envVars:
       - key: DATABASE_URL
         sync: false # Provide your Neon connection string in the Render Dashboard
