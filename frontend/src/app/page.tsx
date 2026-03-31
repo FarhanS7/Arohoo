@@ -3,6 +3,7 @@ import TrendingBrands from "@/components/sections/TrendingBrands";
 import TrendingMalls from "@/components/sections/TrendingMalls";
 import TrendingProducts from "@/components/sections/TrendingProducts";
 import Navbar from "@/components/layout/Navbar";
+import MerchantCTA from "@/components/sections/MerchantCTA";
 
 export default function Home() {
   return (
@@ -20,6 +21,9 @@ export default function Home() {
 
       {/* Trending Products */}
       <TrendingProducts />
+
+      {/* Merchant CTA Section */}
+      <MerchantCTA />
 
       {/* Basic Footer Placeholder */}
       <footer className="bg-gray-900 py-20 text-white">

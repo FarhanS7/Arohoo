@@ -16,7 +16,7 @@ export default function Hero() {
           className="object-cover object-left-top sm:object-center transition-transform duration-[2000ms] ease-out group-hover:scale-[1.02]"
           priority
         />
-        
+
         {/* Floating Search Bar - Positioned closely to the bottom of the visible banner */}
         <div className="absolute bottom-4 sm:bottom-8 md:bottom-12 inset-x-0 z-10 px-4 sm:px-6 animate-slide-up">
           <div className="max-w-2xl mx-auto flex items-center bg-white/95 backdrop-blur-xl rounded-xl md:rounded-[2rem] shadow-[0_15px_40px_-10px_rgba(110,40,180,0.3)] md:shadow-[0_20px_50px_-12px_rgba(110,40,180,0.35)] p-2 md:p-3 border border-purple-200/60 group/search transition-all duration-300 hover:shadow-[0_20px_50px_-12px_rgba(110,40,180,0.45)] hover:border-purple-300/80">

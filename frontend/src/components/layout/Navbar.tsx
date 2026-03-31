@@ -37,15 +37,6 @@ export default function Navbar() {
           </div>
           
           <div className="flex items-center gap-4">
-            {!user && (
-              <Link 
-                href="/merchant/signup" 
-                className="hidden md:block text-sm font-bold text-primary hover:text-primary/80 transition-colors"
-              >
-                Become a Merchant
-              </Link>
-            )}
-            
             <Link href="/cart" className="p-2 text-gray-600 hover:text-primary transition-colors relative">
                <ShoppingCart className="w-5 h-5" />
                <span className="absolute top-1 right-1 bg-primary text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
