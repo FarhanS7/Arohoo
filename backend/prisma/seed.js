@@ -48,43 +48,6 @@ async function main() {
     console.log('Admin account already exists.');
   }
 
-  // 3. Seed default merchant
-  const merchantEmail = 'merchant@arohhoo.com';
-  const merchantPassword = 'securepassword';
-  const storeName = 'Arohoo Official Store';
-
-  console.log('Seeding default merchant...');
-
-  const existingMerchantUser = await prisma.user.findUnique({
-    where: { email: merchantEmail },
-    include: { merchant: true }
-  });
-
-  if (!existingMerchantUser) {
-    const hashedPassword = await argon2.hash(merchantPassword);
-    await prisma.$transaction(async (tx) => {
-      const newUser = await tx.user.create({
-        data: {
-          email: merchantEmail,
-          password: hashedPassword,
-          role: Role.MERCHANT
-        }
-      });
-
-      await tx.merchant.create({
-        data: {
-          storeName,
-          userId: newUser.id,
-          isApproved: true,
-          status: 'APPROVED'
-        }
-      });
-    });
-    console.log(`Merchant account created: ${merchantEmail}`);
-  } else {
-    console.log('Merchant account already exists.');
-  }
-
   console.log('Seeding finished.');
 }
 

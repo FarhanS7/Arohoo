@@ -20,6 +20,8 @@ router.get('/merchants', adminController.getAllMerchants);
 router.get('/merchants/pending', adminController.getPendingMerchants);
 router.patch('/merchants/:id/approve', adminController.approveMerchant);
 router.patch('/merchants/:id/reject', adminController.rejectMerchant);
+router.patch('/merchants/:id/trending', adminController.toggleMerchantTrending);
+router.patch('/products/:id/trending', adminController.toggleProductTrending);
 
 // User Management
 router.get('/users', adminController.listUsers);

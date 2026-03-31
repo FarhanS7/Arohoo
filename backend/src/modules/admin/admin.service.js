@@ -33,8 +33,50 @@ export class AdminService {
       email: m.user.email,
       isApproved: m.isApproved,
       createdAt: m.createdAt,
+      isTrending: m.isTrending
     }));
   }
+
+  /**
+   * Toggles the 'isTrending' status of a merchant.
+   * @param {string} merchantId - ID of the merchant to update.
+   * @returns {Promise<Object>} - The updated merchant.
+   */
+  async toggleMerchantTrending(merchantId) {
+    const merchant = await this.prisma.merchant.findUnique({
+      where: { id: merchantId },
+    });
+
+    if (!merchant) {
+      throw new AppError('Merchant not found', 404);
+    }
+
+    return await this.prisma.merchant.update({
+      where: { id: merchantId },
+      data: { isTrending: !merchant.isTrending },
+    });
+  }
+
+  /**
+   * Toggles the 'isTrending' status of a product.
+   * @param {string} productId - ID of the product to update.
+   * @returns {Promise<Object>} - The updated product.
+   */
+  async toggleProductTrending(productId) {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new AppError('Product not found', 404);
+    }
+
+    return await this.prisma.product.update({
+      where: { id: productId },
+      data: { isTrending: !product.isTrending },
+    });
+  }
+
 
   /**
    * Retrieves merchants waiting for approval.
@@ -49,8 +91,16 @@ export class AdminService {
         user: {
           select: {
             email: true,
+            name: true,
+            phone: true,
           },
         },
+        categories: {
+          select: {
+            id: true,
+            name: true,
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc',
@@ -62,6 +112,9 @@ export class AdminService {
       businessName: m.storeName,
       ownerName: m.user.name,
       email: m.user.email,
+      phone: m.user.phone,
+      address: m.address,
+      categories: m.categories,
       status: m.status,
       createdAt: m.createdAt,
     }));

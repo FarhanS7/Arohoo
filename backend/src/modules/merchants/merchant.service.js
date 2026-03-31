@@ -150,6 +150,50 @@ export class MerchantService {
       }
     });
   }
+
+  /**
+   * Retrieves public merchants with optional filters.
+   * @param {Object} filters - Filter options (isTrending, etc.)
+   * @param {number} page - Current page num.
+   * @param {number} limit - Items per page.
+   * @returns {Promise<Object>} Formatted merchant list with pagination.
+   */
+  async getPublicMerchants(filters = {}, page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+    
+    const where = {
+      isApproved: true,
+      ...(filters.isTrending !== undefined && { isTrending: filters.isTrending === 'true' || filters.isTrending === true })
+    };
+
+    const [total, data] = await Promise.all([
+      this.prisma.merchant.count({ where }),
+      this.prisma.merchant.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          storeName: true,
+          description: true,
+          logo: true,
+          bannerUrl: true,
+          isTrending: true
+        }
+      })
+    ]);
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total
+      }
+    };
+  }
 }
+
 
 export default new MerchantService();

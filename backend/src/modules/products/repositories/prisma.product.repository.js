@@ -69,6 +69,7 @@ export class PrismaProductRepository {
 
     const where = {
       ...(categoryId && { categoryId }),
+      ...(filters.isTrending !== undefined && { isTrending: filters.isTrending === 'true' || filters.isTrending === true }),
       ...(query && {
         OR: [
           { name: { contains: query, mode: 'insensitive' } },

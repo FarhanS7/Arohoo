@@ -14,7 +14,12 @@ export interface MerchantApplication {
   businessName: string;
   ownerName: string;
   email: string;
+  phone?: string;
+  address?: string;
+  categories?: Category[];
   status: "PENDING" | "APPROVED" | "REJECTED";
+  isTrending: boolean;
+  isApproved: boolean;
   createdAt: string;
 }
 
@@ -56,6 +61,16 @@ export const adminService = {
 
   async deleteCategory(id: string): Promise<{ success: boolean }> {
     const res = await api.delete(`/admin/categories/${id}`);
+    return res.data;
+  },
+
+  async toggleMerchantTrending(id: string): Promise<{ success: boolean; data: any }> {
+    const res = await api.patch(`/admin/merchants/${id}/trending`);
+    return res.data;
+  },
+
+  async toggleProductTrending(id: string): Promise<{ success: boolean; data: any }> {
+    const res = await api.patch(`/admin/products/${id}/trending`);
     return res.data;
   },
 };

@@ -72,6 +72,7 @@ model Merchant {
   categories  Category[]     @relation("MerchantCategories")
   malls       Mall[]         @relation("MallMerchants")
   orderItems  OrderItem[]
+  isTrending  Boolean        @default(false)
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
@@ -155,6 +156,7 @@ model Product {
   wishlist    WishlistItem[]
   
   // Timestamps
+  isTrending  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

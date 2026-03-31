@@ -18,9 +18,15 @@ const MallManager = dynamic(() => import("@/features/admin/components/MallManage
   loading: () => <div className="h-96 w-full bg-gray-50 animate-pulse rounded-2xl" />,
 });
 
+const MerchantManager = dynamic(() => import("@/features/admin/components/MerchantManager"), {
+  loading: () => <div className="h-96 w-full bg-gray-50 animate-pulse rounded-2xl" />,
+});
+
+
 export default function AdminDashboardPage() {
-  const { stats, merchants, allMerchants, categories, malls, loading, approveMerchant, rejectMerchant, handleCategory, refresh } = useAdmin();
-  const [activeTab, setActiveTab] = useState<"approvals" | "categories" | "malls">("approvals");
+  const { stats, merchants, allMerchants, categories, malls, loading, approveMerchant, rejectMerchant, toggleMerchantTrending, toggleProductTrending, handleCategory, refresh } = useAdmin();
+  const [activeTab, setActiveTab] = useState<"approvals" | "categories" | "malls" | "merchants">("approvals");
+
 
   if (loading && !stats) {
     return (
@@ -91,7 +97,15 @@ export default function AdminDashboardPage() {
             Mall Management
             {activeTab === "malls" && <div className="absolute bottom-0 left-0 w-full h-1 bg-black rounded-full" />}
           </button>
+          <button
+            onClick={() => setActiveTab("merchants")}
+            className={`pb-6 text-xs font-black uppercase tracking-widest relative transition-colors ${activeTab === "merchants" ? "text-black" : "text-neutral-400 hover:text-neutral-600"}`}
+          >
+            All Merchants
+            {activeTab === "merchants" && <div className="absolute bottom-0 left-0 w-full h-1 bg-black rounded-full" />}
+          </button>
         </div>
+
 
         {/* Dynamic Content */}
         <div className="animate-in fade-in duration-500">
@@ -108,6 +122,12 @@ export default function AdminDashboardPage() {
               onUpdate={handleCategory.update}
               onDelete={handleCategory.delete}
             />
+          ) : activeTab === "merchants" ? (
+            <MerchantManager 
+              merchants={allMerchants}
+              onToggleTrending={toggleMerchantTrending}
+              onRefresh={refresh}
+            />
           ) : (
             <MallManager 
               malls={malls}
@@ -116,6 +136,7 @@ export default function AdminDashboardPage() {
             />
           )}
         </div>
+
       </div>
     </ProtectedRoute>
   );

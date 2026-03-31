@@ -98,6 +98,32 @@ export const updateUserStatus = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * Controller to toggle merchant trending status.
+ */
+export const toggleMerchantTrending = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const merchant = await adminService.toggleMerchantTrending(id);
+
+  res.status(200).json({
+    success: true,
+    data: merchant
+  });
+});
+
+/**
+ * Controller to toggle product trending status.
+ */
+export const toggleProductTrending = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const product = await adminService.toggleProductTrending(id);
+
+  res.status(200).json({
+    success: true,
+    data: product
+  });
+});
+
+/**
  * Controller to fetch platform-wide statistics.
  */
 export const getPlatformStats = asyncHandler(async (req, res, next) => {

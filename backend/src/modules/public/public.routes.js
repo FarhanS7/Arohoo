@@ -1,5 +1,4 @@
-import express from 'express';
-import { getPublicCategories } from './public.controller.js';
+import { getPublicCategories, getPublicMerchants } from './public.controller.js';
 
 const router = express.Router();
 
@@ -10,5 +9,6 @@ const router = express.Router();
  */
 
 router.get('/categories', getPublicCategories);
+router.get('/merchants', getPublicMerchants);
 
 export default router;

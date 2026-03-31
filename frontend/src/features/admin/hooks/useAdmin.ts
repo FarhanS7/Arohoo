@@ -73,6 +73,25 @@ export function useAdmin() {
     }
   };
 
+  const toggleMerchantTrending = async (id: string) => {
+    try {
+      const res = await adminService.toggleMerchantTrending(id);
+      if (res.success) {
+        setAllMerchants(prev => prev.map(m => m.id === id ? { ...m, isTrending: !m.isTrending } : m));
+      }
+    } catch (err: any) {
+      throw err.response?.data?.message || err.message || "Trending toggle failed";
+    }
+  };
+
+  const toggleProductTrending = async (id: string) => {
+    try {
+      await adminService.toggleProductTrending(id);
+    } catch (err: any) {
+      throw err.response?.data?.message || err.message || "Trending toggle failed";
+    }
+  };
+
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
@@ -87,6 +106,8 @@ export function useAdmin() {
     error,
     approveMerchant,
     rejectMerchant,
+    toggleMerchantTrending,
+    toggleProductTrending,
     handleCategory,
     refresh: fetchAll
   };

@@ -16,7 +16,8 @@ export const listProducts = asyncHandler(async (req, res) => {
     size,
     color,
     page, 
-    limit 
+    limit,
+    isTrending
   } = req.query;
 
   const filters = {
@@ -24,6 +25,7 @@ export const listProducts = asyncHandler(async (req, res) => {
     query: q,
     minPrice,
     maxPrice,
+    isTrending,
     variants: (size || color) ? { size, color } : undefined
   };
 

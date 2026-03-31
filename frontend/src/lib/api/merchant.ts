@@ -22,3 +22,8 @@ export const updateOrderStatus = async (orderId: string, status: string): Promis
   const { data } = await api.patch(`/merchant/orders/${orderId}/status`, { status });
   return data.data;
 };
+
+export const getPublicMerchants = async (params: any): Promise<any> => {
+  const { data } = await api.get("/public/merchants", { params });
+  return data;
+};
