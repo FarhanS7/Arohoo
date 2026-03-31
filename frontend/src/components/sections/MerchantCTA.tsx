@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ArrowRight, Store } from "lucide-react";
+import Link from "next/link";
 
 export default function MerchantCTA() {
   return (
@@ -36,7 +36,7 @@ export default function MerchantCTA() {
             href="/merchant/login"
             className="w-full sm:w-auto px-8 py-4 bg-white text-primary rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all border border-primary/20 flex items-center justify-center"
           >
-            Login to Dashboard
+          Merchant Login 
           </Link>
         </div>
       </div>

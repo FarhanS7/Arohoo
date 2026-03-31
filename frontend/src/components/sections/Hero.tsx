@@ -7,13 +7,13 @@ export default function Hero() {
     <section className="relative w-full bg-white flex flex-col items-center justify-center">
       <h1 className="sr-only">Shop the Mall from your home - Discover leading brands in one place</h1>
       
-      {/* Strict aspect-ratio container ensuring NO empty gap below the image */}
-      <div className="relative w-full max-w-[1920px] mx-auto aspect-[16/11] sm:aspect-[21/9] lg:aspect-[2.5/1] xl:h-[calc(100vh-120px)] xl:max-h-[700px] flex items-center justify-center group overflow-hidden bg-white">
+      {/* Responsive aspect-ratio container to ensure banner is shown fully without extreme cropping */}
+      <div className="relative w-full max-w-[1920px] mx-auto aspect-[2.5/1] xl:h-[calc(100vh-120px)] xl:max-h-[700px] flex items-center justify-center group overflow-hidden bg-[#fdfcfa]">
          <Image
           src="/images/new-hero-banner.png"
           alt="Arohoo Hero - Shop the Mall from your home"
           fill
-          className="object-cover object-left-top sm:object-center transition-transform duration-[2000ms] ease-out group-hover:scale-[1.02]"
+          className="object-cover object-left md:object-center transition-transform duration-[2000ms] ease-out group-hover:scale-[1.02]"
           priority
         />
 
