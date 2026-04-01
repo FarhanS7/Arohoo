@@ -265,4 +265,136 @@ export class AdminService {
       updatedAt: new Date()
     };
   }
+
+  /**
+   * Retrieves all products for platform-wide management.
+   * @returns {Promise<Array>} - List of all products.
+   */
+  async getAllProducts() {
+    return await this.prisma.product.findMany({
+      include: {
+        merchant: {
+          select: {
+            id: true,
+            storeName: true
+          }
+        },
+        category: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        images: {
+          take: 1,
+          select: { url: true }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+  }
+
+  /**
+   * Retrieves full details for a specific merchant including performance stats,
+   * product catalog, and order history.
+   * @param {string} merchantId - ID of the merchant to inspect.
+   */
+  async getMerchantFullDetails(merchantId) {
+    const merchant = await this.prisma.merchant.findUnique({
+      where: { id: merchantId },
+      include: {
+        user: {
+          select: {
+            email: true,
+            name: true,
+            phone: true
+          }
+        },
+        products: {
+          include: {
+            images: { take: 1 },
+            variants: true,
+            category: { select: { name: true } }
+          }
+        },
+        _count: {
+          select: { products: true }
+        }
+      }
+    });
+
+    if (!merchant) throw new AppError('Merchant not found', 404);
+
+    // Fetch related orders (all orders containing items from this merchant)
+    const orderItems = await this.prisma.orderItem.findMany({
+      where: { merchantId },
+      include: {
+        order: {
+          include: {
+            user: { select: { name: true, email: true } }
+          }
+        },
+        product: { select: { name: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // Reuse MerchantService-like stat aggregation
+    const statsAggregate = await this.prisma.orderItem.aggregate({
+      where: {
+        merchantId,
+        status: { not: 'CANCELLED' }
+      },
+      _sum: {
+        subtotal: true,
+        quantity: true
+      },
+      _count: {
+        id: true
+      }
+    });
+
+    const deliveredCount = await this.prisma.orderItem.count({
+      where: { merchantId, status: 'DELIVERED' }
+    });
+
+    const stats = {
+      totalRevenue: Number(statsAggregate._sum.subtotal || 0),
+      totalSales: Number(statsAggregate._sum.quantity || 0),
+      totalItems: statsAggregate._count.id || 0,
+      fulfillmentRate: statsAggregate._count.id > 0 
+        ? Math.round((deliveredCount / statsAggregate._count.id) * 100) 
+        : 0
+    };
+
+    return {
+      profile: merchant,
+      products: merchant.products,
+      orders: orderItems,
+      stats
+    };
+  }
+
+  /**
+   * Updates any product's details (Admin-level bypass).
+   */
+  async updateProductByAdmin(productId, data) {
+    return await this.prisma.product.update({
+      where: { id: productId },
+      data,
+      include: { variants: true }
+    });
+  }
+
+  /**
+   * Updates an order item's status (Admin-level bypass).
+   */
+  async updateOrderItemStatusByAdmin(orderItemId, status) {
+    return await this.prisma.orderItem.update({
+      where: { id: orderItemId },
+      data: { status }
+    });
+  }
 }

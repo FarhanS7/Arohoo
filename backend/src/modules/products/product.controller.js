@@ -1,5 +1,7 @@
 import { asyncHandler } from '../../common/utils/async.handler.js';
 import { ProductService } from './product.service.js';
+import { uploadToCloudinary } from '../../common/utils/cloudinary.service.js';
+import { AppError } from '../../common/errors/AppError.js';
 
 const productService = new ProductService();
 
@@ -54,15 +56,19 @@ export const uploadProductImages = asyncHandler(async (req, res) => {
   const merchantId = req.user.merchantId;
   const productId = req.params.productId;
   
-  if (!req.files || req.files.length === 0) {
+  if (!req.files || (Array.isArray(req.files) && req.files.length === 0)) {
     throw new AppError('Please upload at least one image', 400);
   }
 
-  const images = req.files.map((file, index) => ({
-    url: `/uploads/products/images/${file.filename}`,
-    order: index
-  }));
+  // Upload all files to Cloudinary concurrently
+  const uploadPromises = req.files.map((file, index) => 
+    uploadToCloudinary(file.buffer, 'arohoo/products').then(url => ({
+      url,
+      order: index
+    }))
+  );
 
+  const images = await Promise.all(uploadPromises);
   const updatedImages = await productService.uploadProductImages(productId, merchantId, images);
 
   res.status(200).json({

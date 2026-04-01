@@ -64,7 +64,7 @@ export default function ImageUpload({ productId, onUpload, existingImages = [], 
         {existingImages.map((img, idx) => (
           <div key={idx} className="aspect-square rounded-xl overflow-hidden border-2 border-indigo-100 relative group">
             <img 
-               src={img.url.startsWith('http') ? img.url : `http://localhost:8000${img.url}`} 
+               src={img.url} 
                alt="Product" 
                className="w-full h-full object-cover"
             />

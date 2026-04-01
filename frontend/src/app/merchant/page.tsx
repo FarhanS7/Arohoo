@@ -5,8 +5,11 @@ import StatsGrid from '@/features/merchant/components/StatsGrid';
 import { getMerchantStats } from '@/lib/api/merchant';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import { useAuth } from '@/features/auth/auth.context';
+import { ExternalLink } from 'lucide-react';
 
 const MerchantDashboardPage = () => {
+  const { user } = useAuth();
   const { data: stats, isLoading, isError, error } = useQuery({
     queryKey: ['merchant-stats'],
     queryFn: getMerchantStats,
@@ -25,14 +28,32 @@ const MerchantDashboardPage = () => {
                 <span className="text-neutral-200">/</span>
                 <span className="text-black">Dashboard</span>
               </nav>
-              <h1 className="text-5xl font-black text-neutral-900 tracking-tighter sm:text-6xl">
-                Store Overview
-              </h1>
+              <div className="flex items-center gap-4">
+                <h1 className="text-5xl font-black text-neutral-900 tracking-tighter sm:text-6xl">
+                  Store Overview
+                </h1>
+                {user?.merchantId && (
+                  <Link 
+                    href={`/merchants/${user.merchantId}`}
+                    target="_blank"
+                    className="p-2 rounded-full border border-neutral-100 text-neutral-400 hover:text-black hover:bg-neutral-50 transition-all group"
+                    title="View Public Profile"
+                  >
+                    <ExternalLink className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  </Link>
+                )}
+              </div>
               <p className="mt-4 text-lg text-neutral-500 font-medium max-w-2xl">
                 Monitor your business performance with real-time analytics and inventory health tracking.
               </p>
             </div>
             <div className="flex gap-4">
+              <Link 
+                href="/merchant/settings"
+                className="inline-flex items-center px-8 py-4 border-2 border-neutral-200 text-black text-sm font-bold rounded-2xl hover:bg-neutral-50 transition-all"
+              >
+                Store Branding
+              </Link>
               <Link 
                 href="/merchant/products"
                 className="inline-flex items-center px-8 py-4 bg-black text-white text-sm font-bold rounded-2xl hover:bg-neutral-800 transition-all shadow-xl shadow-neutral-200"

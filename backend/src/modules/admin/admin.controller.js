@@ -134,3 +134,55 @@ export const getPlatformStats = asyncHandler(async (req, res, next) => {
     data: stats
   });
 });
+
+/**
+ * Controller to fetch all products for platform management.
+ */
+export const getAllProducts = asyncHandler(async (req, res, next) => {
+  const products = await adminService.getAllProducts();
+
+  res.status(200).json({
+    success: true,
+    data: products
+  });
+});
+
+/**
+ * Controller to fetch specific merchant details for admin inspection.
+ */
+export const getMerchantDetails = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const details = await adminService.getMerchantFullDetails(id);
+
+  res.status(200).json({
+    success: true,
+    data: details
+  });
+});
+
+/**
+ * Controller for admin to modify a merchant's product.
+ */
+export const updateMerchantProduct = asyncHandler(async (req, res, next) => {
+  const { productId } = req.params;
+  const product = await adminService.updateProductByAdmin(productId, req.body);
+
+  res.status(200).json({
+    success: true,
+    data: product
+  });
+});
+
+/**
+ * Controller for admin to update a merchant's order item status.
+ */
+export const updateMerchantOrderItemStatus = asyncHandler(async (req, res, next) => {
+  const { orderItemId } = req.params;
+  const { status } = req.body;
+  const orderItem = await adminService.updateOrderItemStatusByAdmin(orderItemId, status);
+
+  res.status(200).json({
+    success: true,
+    data: orderItem
+  });
+});

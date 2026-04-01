@@ -21,8 +21,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const product = res.data;
     const description = product.description?.slice(0, 160) || "Premium sustainable essential from Arohoo.";
     const imageUrl = product.images.length > 0 
-      ? (product.images[0].url.startsWith('http') ? product.images[0].url : `http://localhost:8000${product.images[0].url}`)
-      : "http://localhost:3000/placeholder-product.png";
+      ? product.images[0].url
+      : "https://arohoo.com/placeholder-product.png";
 
     return {
       title: `${product.name} | Arohoo`,

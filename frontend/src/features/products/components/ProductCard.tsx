@@ -10,9 +10,9 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const mainImage = product.images.length > 0 ? product.images[0].url : null;
-  const displayImage = mainImage 
-    ? (mainImage.startsWith('http') ? mainImage : `http://localhost:8000${mainImage}`)
-    : '/placeholder-product.png';
+  const displayImage = mainImage || '/placeholder-product.png';
+
+  const merchantLogo = product.merchant?.logo || null;
 
   return (
     <Link href={`/products/${product.id}`} className="group">
@@ -24,13 +24,29 @@ export default function ProductCard({ product }: ProductCardProps) {
           className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-        {product.variants.length > 0 && (
           <div className="absolute bottom-4 left-4 right-4">
             <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg inline-block shadow-sm">
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block leading-none mb-1">From</span>
-              <span className="text-sm font-extrabold text-gray-900 leading-none">${product.basePrice}</span>
+              <span className="text-sm font-extrabold text-gray-900 leading-none">৳{Number(product.basePrice).toLocaleString()}</span>
             </div>
           </div>
+        {product.merchant && (
+          <Link 
+            href={`/merchants/${product.merchant.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="absolute top-4 left-4 flex items-center gap-2 bg-white/90 backdrop-blur-md p-1.5 pr-4 rounded-full shadow-lg border border-white hover:bg-white transition-all group/merchant"
+          >
+            <div className="relative w-7 h-7 rounded-full bg-black text-white flex items-center justify-center overflow-hidden border border-neutral-100">
+              {merchantLogo ? (
+                <Image src={merchantLogo} alt={product.merchant.storeName} fill className="object-cover" />
+              ) : (
+                <span className="text-[10px] font-black">{product.merchant.storeName.substring(0, 1)}</span>
+              )}
+            </div>
+            <span className="text-[10px] font-black text-neutral-900 uppercase tracking-widest hidden sm:block group-hover/merchant:text-primary transition-colors">
+              {product.merchant.storeName}
+            </span>
+          </Link>
         )}
       </div>
       <div className="mt-4 px-1">

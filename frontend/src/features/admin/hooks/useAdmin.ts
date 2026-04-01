@@ -9,19 +9,23 @@ export function useAdmin() {
   const [allMerchants, setAllMerchants] = useState<MerchantApplication[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [malls, setMalls] = useState<Mall[]>([]);
+  const [allProducts, setAllProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedMerchant, setSelectedMerchant] = useState<any | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [statsRes, merchantRes, allMerchantsRes, categoryRes, mallRes] = await Promise.all([
+      const [statsRes, merchantRes, allMerchantsRes, categoryRes, mallRes, productRes] = await Promise.all([
         adminService.getPlatformStats(),
         adminService.getPendingMerchants(),
         adminService.getAllMerchants(),
         categoryService.getPublicCategories(),
-        mallService.getAllMalls()
+        mallService.getAllMalls(),
+        adminService.getAllProducts()
       ]);
 
       if (statsRes.success) setStats(statsRes.data);
@@ -29,6 +33,7 @@ export function useAdmin() {
       if (allMerchantsRes.success) setAllMerchants(allMerchantsRes.data);
       if (categoryRes.success) setCategories(categoryRes.data);
       if (mallRes.status === "success") setMalls(mallRes.data);
+      if (productRes.success) setAllProducts(productRes.data);
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Failed to fetch admin data");
     } finally {
@@ -86,11 +91,56 @@ export function useAdmin() {
 
   const toggleProductTrending = async (id: string) => {
     try {
-      await adminService.toggleProductTrending(id);
+      const res = await adminService.toggleProductTrending(id);
+      if (res.success) {
+        setAllProducts(prev => prev.map(p => p.id === id ? { ...p, isTrending: !p.isTrending } : p));
+      }
     } catch (err: any) {
       throw err.response?.data?.message || err.message || "Trending toggle failed";
     }
   };
+
+  const fetchMerchantDetails = async (id: string) => {
+    setLoadingDetails(true);
+    try {
+      const res = await adminService.getMerchantDetails(id);
+      if (res.success) setSelectedMerchant(res.data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || "Failed to fetch merchant details");
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const updateMerchantProduct = async (productId: string, data: any) => {
+    try {
+      const res = await adminService.updateMerchantProduct(productId, data);
+      if (res.success && selectedMerchant) {
+        setSelectedMerchant({
+          ...selectedMerchant,
+          products: selectedMerchant.products.map((p: any) => p.id === productId ? res.data : p)
+        });
+      }
+    } catch (err: any) {
+      throw err.response?.data?.message || err.message || "Product update failed";
+    }
+  };
+
+  const updateMerchantOrderItemStatus = async (orderItemId: string, status: string) => {
+    try {
+      const res = await adminService.updateMerchantOrderItemStatus(orderItemId, status);
+      if (res.success && selectedMerchant) {
+        setSelectedMerchant({
+          ...selectedMerchant,
+          orders: selectedMerchant.orders.map((o: any) => o.id === orderItemId ? { ...o, status: res.data.status } : o)
+        });
+      }
+    } catch (err: any) {
+      throw err.response?.data?.message || err.message || "Order status update failed";
+    }
+  };
+
+  const clearSelectedMerchant = () => setSelectedMerchant(null);
 
   useEffect(() => {
     fetchAll();
@@ -102,12 +152,19 @@ export function useAdmin() {
     allMerchants,
     categories,
     malls,
+    allProducts,
     loading,
     error,
     approveMerchant,
     rejectMerchant,
     toggleMerchantTrending,
     toggleProductTrending,
+    fetchMerchantDetails,
+    updateMerchantProduct,
+    updateMerchantOrderItemStatus,
+    clearSelectedMerchant,
+    selectedMerchant,
+    loadingDetails,
     handleCategory,
     refresh: fetchAll
   };

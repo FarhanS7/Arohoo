@@ -45,7 +45,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           <div className="space-y-6">
             <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-gray-50 shadow-sm border border-gray-100">
                <Image 
-                 src={mainImage?.startsWith('http') ? mainImage : `http://localhost:8000${mainImage}`}
+                 src={mainImage!}
                  alt={product.name}
                  fill
                  priority
@@ -62,7 +62,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                     className={`relative flex-shrink-0 w-20 h-24 rounded-xl overflow-hidden border-2 transition-all ${mainImage === img.url ? 'border-indigo-600 ring-2 ring-indigo-50 shadow-lg scale-95' : 'border-transparent opacity-60 hover:opacity-100'}`}
                   >
                     <Image 
-                      src={img.url.startsWith('http') ? img.url : `http://localhost:8000${img.url}`} 
+                      src={img.url} 
                       alt={`${product.name} view ${idx + 1}`}
                       fill
                       className="object-cover"

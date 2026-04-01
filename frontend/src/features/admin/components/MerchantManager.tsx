@@ -7,10 +7,11 @@ import { useState } from "react";
 interface MerchantManagerProps {
   merchants: MerchantApplication[];
   onToggleTrending: (id: string) => Promise<void>;
+  onInspect: (id: string) => void;
   onRefresh: () => void;
 }
 
-export default function MerchantManager({ merchants, onToggleTrending, onRefresh }: MerchantManagerProps) {
+export default function MerchantManager({ merchants, onToggleTrending, onInspect, onRefresh }: MerchantManagerProps) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const handleToggle = async (id: string) => {
@@ -71,29 +72,37 @@ export default function MerchantManager({ merchants, onToggleTrending, onRefresh
                 )}
               </td>
               <td className="px-10 py-8 whitespace-nowrap text-right">
-                <button
-                  onClick={() => handleToggle(merchant.id)}
-                  disabled={loadingId === merchant.id}
-                  className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg ${
-                    merchant.isTrending 
-                    ? "bg-amber-50 text-amber-600 hover:bg-amber-100 shadow-amber-100 border border-amber-200" 
-                    : "bg-white text-neutral-900 hover:bg-black hover:text-white border border-neutral-100 shadow-neutral-100"
-                  } flex items-center gap-2 ml-auto`}
-                >
-                  {loadingId === merchant.id ? (
-                      <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  ) : merchant.isTrending ? (
-                    <>
-                      <XCircle className="w-3 h-3 text-amber-600" />
-                      Remove from Trending
-                    </>
-                  ) : (
-                    <>
-                      <Star className="w-3 h-3" />
-                      Make Trending
-                    </>
-                  )}
-                </button>
+                  <div className="flex items-center gap-3 ml-auto">
+                    <button
+                      onClick={() => onInspect(merchant.id)}
+                      className="px-6 py-3 rounded-2xl text-[10px] bg-neutral-900 text-white font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg"
+                    >
+                      Inspect Store
+                    </button>
+                    <button
+                      onClick={() => handleToggle(merchant.id)}
+                      disabled={loadingId === merchant.id}
+                      className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg ${
+                        merchant.isTrending 
+                        ? "bg-amber-50 text-amber-600 hover:bg-amber-100 shadow-amber-100 border border-amber-200" 
+                        : "bg-white text-neutral-900 hover:bg-black hover:text-white border border-neutral-100 shadow-neutral-100"
+                      } flex items-center gap-2`}
+                    >
+                      {loadingId === merchant.id ? (
+                          <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      ) : merchant.isTrending ? (
+                        <>
+                          <XCircle className="w-3 h-3 text-amber-600" />
+                          Remove
+                        </>
+                      ) : (
+                        <>
+                          <Star className="w-3 h-3" />
+                          Trending
+                        </>
+                      )}
+                    </button>
+                  </div>
               </td>
             </tr>
           ))}

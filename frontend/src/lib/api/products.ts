@@ -24,6 +24,12 @@ export interface Product {
   basePrice: number;
   categoryId: string;
   merchantId: string;
+  merchant?: {
+    id: string;
+    storeName: string;
+    logo?: string;
+  };
+  isTrending?: boolean;
   variants: ProductVariant[];
   images: ProductImage[];
   createdAt: string;

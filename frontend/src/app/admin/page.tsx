@@ -22,10 +22,24 @@ const MerchantManager = dynamic(() => import("@/features/admin/components/Mercha
   loading: () => <div className="h-96 w-full bg-gray-50 animate-pulse rounded-2xl" />,
 });
 
+const ProductManager = dynamic(() => import("@/features/admin/components/ProductManager"), {
+  loading: () => <div className="h-96 w-full bg-gray-50 animate-pulse rounded-2xl" />,
+});
+
+const MerchantDetailView = dynamic(() => import("@/features/admin/components/MerchantDetailView"), {
+  loading: () => <div className="h-[600px] w-full bg-gray-50 animate-pulse rounded-[3rem]" />,
+});
+
 
 export default function AdminDashboardPage() {
-  const { stats, merchants, allMerchants, categories, malls, loading, approveMerchant, rejectMerchant, toggleMerchantTrending, toggleProductTrending, handleCategory, refresh } = useAdmin();
-  const [activeTab, setActiveTab] = useState<"approvals" | "categories" | "malls" | "merchants">("approvals");
+  const { 
+    stats, merchants, allMerchants, categories, malls, allProducts, 
+    loading, approveMerchant, rejectMerchant, toggleMerchantTrending, 
+    toggleProductTrending, handleCategory, refresh,
+    fetchMerchantDetails, updateMerchantProduct, updateMerchantOrderItemStatus,
+    selectedMerchant, loadingDetails, clearSelectedMerchant
+  } = useAdmin();
+  const [activeTab, setActiveTab] = useState<"approvals" | "categories" | "malls" | "merchants" | "products">("approvals");
 
 
   if (loading && !stats) {
@@ -104,12 +118,27 @@ export default function AdminDashboardPage() {
             All Merchants
             {activeTab === "merchants" && <div className="absolute bottom-0 left-0 w-full h-1 bg-black rounded-full" />}
           </button>
+          <button
+            onClick={() => setActiveTab("products")}
+            className={`pb-6 text-xs font-black uppercase tracking-widest relative transition-colors ${activeTab === "products" ? "text-black" : "text-neutral-400 hover:text-neutral-600"}`}
+          >
+            Product Curation
+            {activeTab === "products" && <div className="absolute bottom-0 left-0 w-full h-1 bg-black rounded-full" />}
+          </button>
         </div>
 
 
         {/* Dynamic Content */}
         <div className="animate-in fade-in duration-500">
-          {activeTab === "approvals" ? (
+          {selectedMerchant ? (
+            <MerchantDetailView 
+              merchant={selectedMerchant}
+              onBack={clearSelectedMerchant}
+              onUpdateProduct={updateMerchantProduct}
+              onUpdateOrderStatus={updateMerchantOrderItemStatus}
+              loadingDetails={loadingDetails}
+            />
+          ) : activeTab === "approvals" ? (
             <MerchantApprovals 
               merchants={merchants}
               onApprove={approveMerchant}
@@ -126,6 +155,13 @@ export default function AdminDashboardPage() {
             <MerchantManager 
               merchants={allMerchants}
               onToggleTrending={toggleMerchantTrending}
+              onInspect={fetchMerchantDetails}
+              onRefresh={refresh}
+            />
+          ) : activeTab === "products" ? (
+            <ProductManager 
+              products={allProducts}
+              onToggleTrending={toggleProductTrending}
               onRefresh={refresh}
             />
           ) : (

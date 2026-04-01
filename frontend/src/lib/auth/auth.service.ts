@@ -8,6 +8,7 @@ export interface LoginInput {
 export interface AuthUser {
   id: string;
   role: "CUSTOMER" | "MERCHANT" | "ADMIN";
+  merchantId?: string;
 }
 
 export interface AuthResponse {

@@ -193,6 +193,43 @@ export class MerchantService {
       }
     };
   }
+
+  /**
+   * Retrieves a specific public merchant by ID with product summary.
+   * @param {string} id - Merchant ID.
+   * @returns {Promise<Object>} Merchant details and products.
+   */
+  async getPublicMerchantById(id) {
+    if (!id) throw new AppError('Merchant ID is required', 400);
+
+    const merchant = await this.prisma.merchant.findUnique({
+      where: { id, isApproved: true },
+      select: {
+        id: true,
+        storeName: true,
+        description: true,
+        logo: true,
+        bannerUrl: true,
+        isTrending: true,
+        address: true,
+        _count: {
+          select: { products: true }
+        },
+        products: {
+          take: 12, // Show a sample of products
+          orderBy: { createdAt: 'desc' },
+          include: {
+            images: { take: 1 },
+            variants: { take: 1 }
+          }
+        }
+      }
+    });
+
+    if (!merchant) throw new AppError('Merchant not found', 404);
+
+    return merchant;
+  }
 }
 
 

@@ -18,10 +18,13 @@ router.use(authorize('ADMIN'));
 router.get('/stats', adminController.getPlatformStats);
 router.get('/merchants', adminController.getAllMerchants);
 router.get('/merchants/pending', adminController.getPendingMerchants);
+router.get('/merchants/:id', adminController.getMerchantDetails); // NEW: Merchant Inspection
 router.patch('/merchants/:id/approve', adminController.approveMerchant);
 router.patch('/merchants/:id/reject', adminController.rejectMerchant);
 router.patch('/merchants/:id/trending', adminController.toggleMerchantTrending);
+router.get('/products', adminController.getAllProducts);
 router.patch('/products/:id/trending', adminController.toggleProductTrending);
+router.patch('/products/:productId', adminController.updateMerchantProduct); // NEW: Admin product edit
 
 // User Management
 router.get('/users', adminController.listUsers);
@@ -41,5 +44,6 @@ router.get('/orders', orderController.getAllOrders);
  * @access  Private (Admin)
  */
 router.patch('/orders/status', orderController.adminUpdateOrderStatus);
+router.patch('/orders/items/:orderItemId/status', adminController.updateMerchantOrderItemStatus); // NEW: Admin order status update
 
 export default router;

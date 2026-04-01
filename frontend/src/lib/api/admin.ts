@@ -68,9 +68,29 @@ export const adminService = {
     const res = await api.patch(`/admin/merchants/${id}/trending`);
     return res.data;
   },
+  
+  async getAllProducts(): Promise<{ success: boolean; data: any[] }> {
+    const res = await api.get("/admin/products");
+    return res.data;
+  },
 
   async toggleProductTrending(id: string): Promise<{ success: boolean; data: any }> {
     const res = await api.patch(`/admin/products/${id}/trending`);
+    return res.data;
+  },
+
+  async getMerchantDetails(id: string): Promise<{ success: boolean; data: any }> {
+    const res = await api.get(`/admin/merchants/${id}`);
+    return res.data;
+  },
+
+  async updateMerchantProduct(productId: string, data: any): Promise<{ success: boolean; data: any }> {
+    const res = await api.patch(`/admin/products/${productId}`, data);
+    return res.data;
+  },
+
+  async updateMerchantOrderItemStatus(orderItemId: string, status: string): Promise<{ success: boolean; data: any }> {
+    const res = await api.patch(`/admin/orders/items/${orderItemId}/status`, { status });
     return res.data;
   },
 };
