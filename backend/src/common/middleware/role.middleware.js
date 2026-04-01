@@ -1,3 +1,4 @@
+import { AppError } from '../errors/AppError.js';
 
 /**
  * Middleware factory to authorize users based on roles.

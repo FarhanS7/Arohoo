@@ -7,6 +7,13 @@ export const globalErrorHandler = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
+  // Handle Zod Validation Errors
+  if (err.name === 'ZodError') {
+    err.statusCode = 400;
+    err.status = 'fail';
+    err.message = 'Validation Error: ' + err.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+  }
+
   if (process.env.NODE_ENV === 'development') {
     return res.status(err.statusCode).json({
       status: err.status,

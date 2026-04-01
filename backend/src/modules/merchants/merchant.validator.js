@@ -6,7 +6,8 @@ import { z } from 'zod';
  */
 export const updateMerchantProfileSchema = z.object({
   storeName: z.string().min(1, 'Store name cannot be empty').optional(),
-  description: z.string().max(500, 'Description is too long').optional(),
-  bannerUrl: z.string().url('Invalid banner URL').optional().or(z.literal('')),
-  logo: z.string().url('Invalid logo URL').optional().or(z.literal(''))
+  description: z.string().max(500, 'Description is too long').optional().nullable(),
+  address: z.string().max(255, 'Address is too long').optional().nullable(),
+  bannerUrl: z.string().url('Invalid banner URL').optional().nullable().or(z.literal('')),
+  logo: z.string().url('Invalid logo URL').optional().nullable().or(z.literal(''))
 });

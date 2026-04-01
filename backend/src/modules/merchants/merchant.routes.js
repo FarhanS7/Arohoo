@@ -7,13 +7,6 @@ import * as merchantController from './merchant.controller.js';
 
 const router = express.Router();
 
-/**
- * @route   GET /api/v1/merchants/public/:id
- * @desc    Get public merchant profile
- * @access  Public
- */
-router.get('/public/:id', merchantController.getPublicProfile);
-
 // All routes below require the user to be a logged-in MERCHANT
 router.use(protect);
 router.use(authorize('MERCHANT'));

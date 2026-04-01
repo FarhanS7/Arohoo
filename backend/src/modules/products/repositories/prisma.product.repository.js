@@ -64,12 +64,12 @@ export class PrismaProductRepository {
     return { data, meta: { ...meta, total } };
   }
 
-  async searchProducts({ query, categoryId, minPrice, maxPrice, variants }, { page, limit }) {
+  async searchProducts({ query, categoryId, minPrice, maxPrice, variants, isTrending }, { page, limit }) {
     const { skip, take, meta } = getPagination(page, limit);
 
     const where = {
       ...(categoryId && { categoryId }),
-      ...(filters.isTrending !== undefined && { isTrending: filters.isTrending === 'true' || filters.isTrending === true }),
+      ...(isTrending !== undefined && { isTrending: isTrending === 'true' || isTrending === true }),
       ...(query && {
         OR: [
           { name: { contains: query, mode: 'insensitive' } },

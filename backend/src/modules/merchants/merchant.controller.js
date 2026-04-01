@@ -8,25 +8,27 @@ import { AppError } from '../../common/errors/AppError.js';
  * Controller to handle merchant-specific HTTP requests.
  */
 export const updateProfile = asyncHandler(async (req, res, next) => {
-  // 1. Get merchantId from the authenticated user (attached by protect middleware)
   const { merchantId } = req.user;
 
-  // 2. Validate input
-  const validatedData = updateMerchantProfileSchema.parse(req.body);
+  try {
+    const validatedData = updateMerchantProfileSchema.parse(req.body);
+    const updatedMerchant = await merchantService.updateMerchantProfile(merchantId, validatedData);
 
-  // 3. Update profile via service
-  const updatedMerchant = await merchantService.updateMerchantProfile(merchantId, validatedData);
-
-  res.status(200).json({
-    success: true,
-    data: {
-      storeName: updatedMerchant.storeName,
-      description: updatedMerchant.description,
-      bannerUrl: updatedMerchant.bannerUrl,
-      logo: updatedMerchant.logo,
-      address: updatedMerchant.address
-    }
-  });
+    res.status(200).json({
+      success: true,
+      data: {
+        storeName: updatedMerchant.storeName,
+        description: updatedMerchant.description,
+        bannerUrl: updatedMerchant.bannerUrl,
+        logo: updatedMerchant.logo,
+        address: updatedMerchant.address
+      }
+    });
+  } catch (error) {
+    console.error('--- DEBUG: updateProfile Error ---');
+    console.error(error);
+    next(error);
+  }
 });
 
 /**
@@ -145,5 +147,18 @@ export const getPublicProfile = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     data: merchant
+  });
+});
+
+/**
+ * Controller to list all public merchants with optional filters.
+ */
+export const listPublic = asyncHandler(async (req, res, next) => {
+  const { isTrending, page, limit } = req.query;
+  const result = await merchantService.getPublicMerchants({ isTrending }, Number(page || 1), Number(limit || 20));
+
+  res.status(200).json({
+    success: true,
+    ...result
   });
 });
