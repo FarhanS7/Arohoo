@@ -41,13 +41,19 @@ export default function MerchantProductsPage() {
     setDeletingProduct(product);
   };
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: any, files: File[]) => {
     try {
       if (editingProduct) {
         await updateProduct(editingProduct.id, data);
+        if (files && files.length > 0) {
+          await uploadImages(editingProduct.id, files);
+        }
         setSuccessMessage("Product updated successfully!");
       } else {
-        await createProduct(data);
+        const newProduct = await createProduct(data);
+        if (newProduct?.id && files && files.length > 0) {
+          await uploadImages(newProduct.id, files);
+        }
         setSuccessMessage("Product created successfully!");
       }
       setIsModalOpen(false);

@@ -104,9 +104,11 @@ export const productService = {
    * Upload images for a product
    */
   async uploadImages(productId: string, files: File[]): Promise<{ success: boolean; data: ProductImage[] }> {
+    console.log(`[API] Uploading ${files.length} images for product ${productId}`);
     const formData = new FormData();
     files.forEach((file) => formData.append("images", file));
 
+    // Use a fresh headers object to ensure browser sets the boundary
     const res = await api.post<{ success: boolean; data: ProductImage[] }>(
       `/merchant/products/${productId}/images`,
       formData,
@@ -114,6 +116,8 @@ export const productService = {
         headers: {
           "Content-Type": "multipart/form-data",
         },
+        // Important: this allows Axios to correctly handle FormData boundaries
+        transformRequest: [(data) => data], 
       }
     );
     return res.data;

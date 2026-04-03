@@ -61,35 +61,35 @@ export default function TrendingMalls() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {malls.map((mall) => (
             <div
               key={mall.id}
-              className="group relative h-[450px] overflow-hidden rounded-[2.5rem] bg-white shadow-2xl shadow-gray-200/50 hover:shadow-primary/10 transition-all duration-700"
+              className="relative h-[220px] sm:h-[280px] overflow-hidden rounded-xl sm:rounded-3xl bg-white shadow-md border border-neutral-100"
             >
               {mall.coverImage ? (
                 <Image
                   src={mall.coverImage}
                   alt={mall.name}
                   fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-1000"
+                  className="object-cover transition-transform duration-1000"
                 />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                  <span className="text-gray-300 font-black text-4xl italic opacity-20">Mall</span>
+                  <span className="text-gray-300 font-black text-xl italic opacity-20 uppercase tracking-tighter">Mall</span>
                 </div>
               )}
               
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-10 text-white">
-                <p className="text-[10px] font-black text-primary border border-primary/30 w-fit px-3 py-1 rounded-full mb-3 tracking-[0.2em] uppercase bg-primary/10 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex flex-col justify-end p-4 sm:p-6 text-white">
+                <p className="text-[7px] sm:text-[9px] font-black text-primary border border-primary/30 w-fit px-2 py-0.5 rounded-full mb-1 sm:mb-2 tracking-[0.1em] uppercase bg-primary/10 backdrop-blur-sm">
                   {mall.location}
                 </p>
-                <h3 className="text-3xl font-black mb-1 leading-tight">{mall.name}</h3>
-                <p className="text-white/60 text-xs font-medium mb-6 line-clamp-2">{mall.description}</p>
+                <h3 className="text-sm sm:text-xl font-black mb-1 leading-none uppercase italic tracking-tighter truncate">{mall.name}</h3>
+                <p className="text-white/60 text-[9px] sm:text-[10px] font-medium mb-3 sm:mb-4 line-clamp-1">{mall.description}</p>
                 
                 <Link 
                   href={`/malls/${mall.id}`}
-                  className="w-full bg-white text-primary px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-center transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 shadow-xl shadow-white/10"
+                  className="w-full bg-white text-primary px-3 py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-center shadow-md"
                 >
                   Visit Mall
                 </Link>

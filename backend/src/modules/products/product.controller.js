@@ -56,7 +56,15 @@ export const uploadProductImages = asyncHandler(async (req, res) => {
   const merchantId = req.user.merchantId;
   const productId = req.params.productId;
   
+  console.log('--- DEBUG: IMAGE UPLOAD ---');
+  console.log('ProductId:', productId);
+  console.log('Files received:', req.files ? req.files.length : 'none');
+  if (req.files && req.files.length > 0) {
+    req.files.forEach((f, i) => console.log(`File ${i}: ${f.originalname}, Size: ${f.size}`));
+  }
+  
   if (!req.files || (Array.isArray(req.files) && req.files.length === 0)) {
+    console.error('ERROR: No files in request body!');
     throw new AppError('Please upload at least one image', 400);
   }
 

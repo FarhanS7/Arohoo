@@ -40,7 +40,7 @@ export default function MerchantProfilePage() {
         )}
         
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-          <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-[2rem] bg-white border-4 border-white shadow-2xl overflow-hidden mb-6 animate-in zoom-in duration-700">
+          <div className="relative w-16 h-16 sm:w-32 sm:h-32 rounded-[2rem] bg-white border-4 border-white shadow-2xl overflow-hidden mb-6 animate-in zoom-in duration-700">
             {merchant.logo ? (
               <Image 
                 src={getImageUrl(merchant.logo)!} 

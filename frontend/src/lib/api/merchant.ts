@@ -52,7 +52,7 @@ export const uploadMerchantBanner = async (file: File): Promise<any> => {
 };
 
 export const getPublicMerchantProfile = async (id: string): Promise<any> => {
-  const { data } = await api.get(`/merchants/public/${id}`);
+  const { data } = await api.get(`/public/merchants/${id}`);
   return data.data;
 };
 

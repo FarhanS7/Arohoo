@@ -14,8 +14,8 @@ export default function TrendingBrands() {
     async function fetchTrendingBrands() {
       try {
         const res = await getPublicMerchants({ isTrending: true, limit: 6 });
-        if (res.success) {
-          setBrands(res.data.data);
+        if (res.success && Array.isArray(res.data)) {
+          setBrands(res.data);
         }
       } catch (error) {
         console.error("Failed to fetch trending brands:", error);
@@ -46,29 +46,29 @@ export default function TrendingBrands() {
     );
   }
 
-  if (brands.length === 0) return null;
+  if (!brands || brands.length === 0) return null;
 
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-end justify-between mb-12">
           <div>
-            <h2 className="text-3xl font-black text-neutral-900 mb-2 tracking-tight uppercase italic">Featured Houses</h2>
+            <h2 className="text-3xl font-black text-neutral-900 mb-2 tracking-tight uppercase italic">Trending Brands</h2>
             <p className="text-neutral-500 font-medium tracking-tight">The most influential brand boutiques curated for you.</p>
           </div>
           <Link href="/brands" className="text-primary font-black text-xs uppercase tracking-[0.2em] hover:opacity-70 transition-all border-b-2 border-primary/20 pb-1">
-            View All Houses
+            Explore All Brands
           </Link>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
           {brands.map((brand, index) => (
             <Link
-              href={`/brand/${brand.id}`}
+              href={`/merchants/${brand.id}`}
               key={brand.id}
-              className="group relative h-40 flex flex-col items-center justify-center p-6 bg-neutral-50 hover:bg-white border-2 border-transparent hover:border-primary/20 rounded-[2.5rem] transition-all duration-500 transform hover:-translate-y-2 shadow-sm hover:shadow-2xl hover:shadow-primary/5"
+              className="relative h-40 flex flex-col items-center justify-center p-6 bg-white border border-neutral-100 rounded-[2.5rem] shadow-sm"
             >
-              <div className="relative w-full h-16 mb-4 filter grayscale group-hover:grayscale-0 transition-all duration-700 opacity-60 group-hover:opacity-100">
+              <div className="relative w-full h-16 mb-4 transition-all duration-700">
                 {brand.logo ? (
                   <Image
                     src={brand.logo}
@@ -82,7 +82,7 @@ export default function TrendingBrands() {
                   </div>
                 )}
               </div>
-              <span className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] group-hover:text-primary transition-colors text-center truncate w-full px-2">
+              <span className="text-[10px] font-black text-neutral-900 uppercase tracking-[0.2em] text-center truncate w-full px-2">
                 {brand.storeName}
               </span>
             </Link>

@@ -82,7 +82,7 @@ export default function CartPage() {
                           {item.productVariant.size && <p className="pl-3">{item.productVariant.size}</p>}
                         </div>
                         <p className="mt-1 text-sm font-bold text-zinc-900 dark:text-zinc-50">
-                          ${Number(item.productVariant.price).toFixed(2)}
+                          ৳{Number(item.productVariant.price).toLocaleString()}
                         </p>
                       </div>
 
@@ -135,15 +135,15 @@ export default function CartPage() {
             <div className="mt-6 space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-zinc-600 dark:text-zinc-400">Subtotal ({itemCount} items)</p>
-                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">${totalPrice.toFixed(2)}</p>
+                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">৳{totalPrice.toLocaleString()}</p>
               </div>
               <div className="flex items-center justify-between border-t border-zinc-100 pt-4 dark:border-zinc-900">
                 <p className="text-sm text-zinc-600 dark:text-zinc-400">Shipping estimate</p>
-                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">$0.00</p>
+                <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50">৳0</p>
               </div>
               <div className="flex items-center justify-between border-t border-zinc-100 pt-4 dark:border-zinc-900">
                 <p className="text-base font-bold text-zinc-900 dark:text-zinc-50">Order total</p>
-                <p className="text-lg font-extrabold text-zinc-900 dark:text-zinc-50">${totalPrice.toFixed(2)}</p>
+                <p className="text-lg font-extrabold text-zinc-900 dark:text-zinc-50">৳{totalPrice.toLocaleString()}</p>
               </div>
             </div>
 

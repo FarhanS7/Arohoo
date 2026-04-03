@@ -8,6 +8,7 @@ export class PrismaProductRepository {
   get includeDetails() {
     return {
       variants: true,
+      merchant: true,
       images: {
         orderBy: { order: 'asc' }
       }

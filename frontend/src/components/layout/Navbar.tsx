@@ -17,7 +17,7 @@ export default function Navbar() {
     <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <Link href="/" className="text-2xl font-black tracking-tighter text-primary italic">Arohoo</Link>
+          <Link href="/" className="text-xl sm:text-2xl font-black tracking-tighter text-primary italic">Arohoo</Link>
           <div className="hidden md:flex gap-6 text-sm font-medium text-gray-600">
             <Link href="/products" className="hover:text-primary transition-colors">Shop</Link>
             <Link href="/brands" className="hover:text-primary transition-colors">Brands</Link>

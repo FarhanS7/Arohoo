@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/features/auth/auth.context';
 import { useToastContext } from '@/components/providers/ToastProvider';
+import { useCart } from '@/features/cart/hooks/useCart';
 import Navbar from '@/components/layout/Navbar';
 
 interface CartItem {
@@ -28,7 +29,7 @@ const CheckoutPage = () => {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { addToast } = useToastContext();
-  const [localCart, setLocalCart] = useState<CartItem[]>([]);
+  const { cart, loading: cartLoading } = useCart();
   const [liveItems, setLiveItems] = useState<LiveItem[]>([]);
   const [isLoadingLive, setIsLoadingLive] = useState(true);
   const [total, setTotal] = useState(0);
@@ -42,55 +43,39 @@ const CheckoutPage = () => {
     }
   }, [user, authLoading, router, addToast]);
 
-  // 1. Load cart from localStorage
+  // 1. Fetch live data for each cart item
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      try {
-        const parsed: CartItem[] = JSON.parse(savedCart);
-        if (parsed.length === 0) {
-          router.push('/cart');
-          return;
-        }
-        setLocalCart(parsed);
-      } catch (e) {
-        console.error('Failed to parse cart', e);
-        router.push('/cart');
-      }
-    } else {
-      router.push('/cart');
+    if (cartLoading || !cart || cart.items.length === 0) {
+      return;
     }
-  }, [router]);
-
-  // 2. Fetch live data for each variant (Never trust client price)
-  useEffect(() => {
-    if (localCart.length === 0) return;
 
     const fetchLiveData = async () => {
       setIsLoadingLive(true);
       setError(null);
       try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
         const fetched = await Promise.all(
-          localCart.map(async (item) => {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/public/products/variants/${item.productVariantId}`);
+          cart.items.map(async (item: any) => {
+            const res = await fetch(`${API_URL}/public/products/variants/${item.productVariantId}`);
             if (!res.ok) throw new Error('Failed to fetch price updates');
             const { data } = await res.json();
             
             return {
-              ...item,
+              productVariantId: item.productVariantId,
+              quantity: item.quantity,
               id: data.id,
               price: Number(data.price),
               stock: data.stock,
               name: data.product.name,
               image: data.product.images?.[0]?.url,
               variantName: `${data.size || ''} ${data.color || ''}`.trim(),
-              merchantName: data.product.merchantId, // simplified
+              merchantName: data.product.merchant.storeName,
             };
           })
         );
 
         setLiveItems(fetched);
-        setTotal(fetched.reduce((acc, current) => acc + current.price * current.quantity, 0));
+        setTotal(fetched.reduce((acc: number, current: LiveItem) => acc + current.price * current.quantity, 0));
       } catch (err) {
         console.error(err);
         setError('Unable to sync live prices. Please try again.');
@@ -100,35 +85,36 @@ const CheckoutPage = () => {
     };
 
     fetchLiveData();
-  }, [localCart]);
+  }, [cart, cartLoading]);
 
-  // 3. Checkout Mutation
+  // 2. Checkout Mutation
   const checkoutMutation = useMutation({
     mutationFn: async (shippingData: ShippingFormData) => {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'}/checkout`, {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+      const res = await fetch(`${API_URL}/checkout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          cartItems: localCart.map(i => ({ productVariantId: i.productVariantId, quantity: i.quantity })),
+          cartItems: cart?.items.map((i: any) => ({ productVariantId: i.productVariantId, quantity: i.quantity })),
           ...shippingData,
-          address: `${shippingData.addressLine1}, ${shippingData.city}`, // matching backend's simple address logic for now
+          address: `${shippingData.addressLine1}, ${shippingData.city}`, 
         }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Checkout failed');
+        throw new Error(data.message || 'Checkout failed');
       }
 
       return res.json();
     },
     onSuccess: (data) => {
-      localStorage.removeItem('cart'); // Clear cart on success
-      router.push(`/orders/${data.data.orderId}/success`);
+      localStorage.removeItem('arohoo_guest_cart');
+      router.push(`/orders/${data.data.id}/success`);
     },
     onError: (err: any) => {
       setError(err.message);
@@ -137,7 +123,6 @@ const CheckoutPage = () => {
 
   const handleCheckout = (formData: ShippingFormData) => {
     setError(null);
-    // Double check stock before submission (visual only, backend enforces)
     const outOfStock = liveItems.find(item => item.quantity > item.stock);
     if (outOfStock) {
       setError(`Stock changed! Only ${outOfStock.stock} units of ${outOfStock.name} available.`);

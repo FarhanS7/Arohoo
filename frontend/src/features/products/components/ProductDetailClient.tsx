@@ -72,24 +72,43 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               </div>
             )}
           </div>
-
+ 
           {/* Product Info */}
           <div className="flex flex-col">
             <div className="border-b border-gray-100 pb-8">
-              <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3 block italic">New Arrival</span>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest block italic">New Arrival</span>
+                {product.merchant && (
+                  <Link 
+                    href={`/merchants/${product.merchant.id}`}
+                    className="flex items-center gap-2 group/brand"
+                  >
+                    <div className="relative w-6 h-6 rounded-full overflow-hidden bg-black border border-gray-100 group-hover/brand:border-primary transition-colors">
+                      {product.merchant.logo ? (
+                        <Image src={product.merchant.logo} alt={product.merchant.storeName} fill className="object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[8px] font-black text-white">{product.merchant.storeName.substring(0, 1)}</div>
+                      )}
+                    </div>
+                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest group-hover/brand:text-primary transition-colors border-b border-transparent group-hover/brand:border-primary/30 pb-0.5">
+                      {product.merchant.storeName}
+                    </span>
+                  </Link>
+                )}
+              </div>
               <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight uppercase leading-none mb-4">
                 {product.name}
               </h1>
               <p className="text-2xl font-black text-gray-900 leading-none">
-                ${selectedVariant?.price || product.basePrice}
+                ৳{(selectedVariant?.price || product.basePrice).toLocaleString()}
               </p>
             </div>
-
+ 
             <div className="py-8 space-y-8">
               <div className="prose prose-sm text-gray-500 font-medium leading-relaxed">
                 {product.description || "A masterfully crafted essential designed for comfort and longevity. Made from premium, planet-friendly materials."}
               </div>
-
+ 
               {/* Variant Selectors */}
               <div className="space-y-6">
                 <div>
@@ -107,7 +126,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                    </div>
                 </div>
               </div>
-
+ 
               <div className="pt-4 flex flex-col gap-4">
                 <button 
                   disabled={addingToCart || !selectedVariant || selectedVariant.stock === 0}
@@ -122,6 +141,16 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                     </>
                   )}
                 </button>
+                
+                {product.merchant && (
+                  <Link 
+                    href={`/merchants/${product.merchant.id}`}
+                    className="w-full py-4 border-2 border-neutral-100 text-center text-[10px] font-black uppercase tracking-widest text-neutral-400 rounded-2xl hover:bg-neutral-50 hover:border-neutral-200 hover:text-neutral-900 transition-all shadow-sm"
+                  >
+                    Visit {product.merchant.storeName} Store
+                  </Link>
+                )}
+
                 <div className="flex items-center justify-center gap-6 text-[10px] uppercase font-bold text-gray-400 tracking-widest pt-2">
                    <div className="flex items-center gap-2">
                      <span className="w-1 h-1 rounded-full bg-green-500"></span>
@@ -134,7 +163,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 </div>
               </div>
             </div>
-
+ 
             {/* Product Meta (Simplified) */}
             <div className="mt-auto border-t border-gray-100 pt-8 grid grid-cols-2 gap-8">
                <div>

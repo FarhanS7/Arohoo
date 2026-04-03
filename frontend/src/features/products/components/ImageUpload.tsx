@@ -5,11 +5,12 @@ import { useRef, useState } from "react";
 interface ImageUploadProps {
   productId?: string;
   onUpload: (files: File[]) => Promise<void>;
+  onChange?: (files: File[]) => void;
   existingImages?: { id?: string; url: string; order: number }[];
   loading: boolean;
 }
 
-export default function ImageUpload({ productId, onUpload, existingImages = [], loading }: ImageUploadProps) {
+export default function ImageUpload({ productId, onUpload, onChange, existingImages = [], loading }: ImageUploadProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -24,8 +25,10 @@ export default function ImageUpload({ productId, onUpload, existingImages = [], 
     }
 
     const newPreviews = files.map((file) => URL.createObjectURL(file));
-    setSelectedFiles([...selectedFiles, ...files]);
+    const updatedFiles = [...selectedFiles, ...files];
+    setSelectedFiles(updatedFiles);
     setPreviews([...previews, ...newPreviews]);
+    if (onChange) onChange(updatedFiles);
   };
 
   const removeSelectedFile = (index: number) => {
@@ -37,6 +40,7 @@ export default function ImageUpload({ productId, onUpload, existingImages = [], 
     URL.revokeObjectURL(newPreviews[index]);
     newPreviews.splice(index, 1);
     setPreviews(newPreviews);
+    if (onChange) onChange(newFiles);
   };
 
   const handleUpload = async () => {

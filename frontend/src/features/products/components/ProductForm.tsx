@@ -9,7 +9,7 @@ const ImageUpload = dynamic(() => import("./ImageUpload"), {
 
 interface ProductFormProps {
   initialData?: Product;
-  onSubmit: (data: CreateProductInput) => Promise<void>;
+  onSubmit: (data: CreateProductInput, files: File[]) => Promise<void>;
   onUpload?: (files: File[]) => Promise<any>;
   onCancel: () => void;
   loading: boolean;
@@ -22,11 +22,11 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
       ? {
           name: initialData.name,
           description: initialData.description,
-          basePrice: initialData.basePrice,
+          basePrice: Number(initialData.basePrice),
           categoryId: initialData.categoryId,
           variants: initialData.variants.map((v) => ({
             sku: v.sku,
-            price: v.price,
+            price: Number(v.price),
             stock: v.stock,
             attributes: v.attributes,
           })),
@@ -40,6 +40,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
         }
   );
 
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleAddVariant = () => {
@@ -90,9 +91,10 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
     if (!formData.name) return setFormError("Product name is required");
     if (!formData.categoryId) return setFormError("Category is required");
     if (formData.basePrice <= 0) return setFormError("Base price must be greater than 0");
+    if (!formData.variants || formData.variants.length === 0) return setFormError("Add at least one variant (Size/Color)");
 
     try {
-      await onSubmit(formData);
+      await onSubmit(formData, selectedFiles);
     } catch (err: any) {
       setFormError(err);
     }
@@ -240,6 +242,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
           productId={initialData?.id}
           existingImages={initialData?.images}
           onUpload={onUpload || (async () => {})}
+          onChange={setSelectedFiles}
           loading={loading}
         />
       </div>

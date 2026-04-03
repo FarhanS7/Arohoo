@@ -14,7 +14,7 @@ export default function TrendingProducts() {
     async function fetchTrending() {
       try {
         const res = await productService.getPublicProducts({ isTrending: true, limit: 4 });
-        if (res.success) {
+        if (res.success && Array.isArray(res.data)) {
           setProducts(res.data);
         }
       } catch (error) {
@@ -46,7 +46,7 @@ export default function TrendingProducts() {
     );
   }
 
-  if (products.length === 0) return null;
+  if (!products || products.length === 0) return null;
 
   return (
     <section className="py-20 bg-white">
@@ -64,7 +64,7 @@ export default function TrendingProducts() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
           {products.map((product) => (
             <Link 
-              href={`/product/${product.id}`}
+              href={`/products/${product.id}`}
               key={product.id} 
               className="group overflow-hidden rounded-xl sm:rounded-[2rem] bg-white border border-neutral-100 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500"
             >
