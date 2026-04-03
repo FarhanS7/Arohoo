@@ -3,6 +3,7 @@
 import { useCart } from "@/features/cart/hooks/useCart";
 import { Product, ProductVariant } from "@/lib/api/products";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
