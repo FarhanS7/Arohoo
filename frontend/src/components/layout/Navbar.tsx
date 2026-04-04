@@ -1,23 +1,32 @@
 "use client";
 
 import { useAuth } from "@/features/auth/auth.context";
+import { LogOut, Search, ShoppingCart, User } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, User, Search, LogOut } from "lucide-react";
 
 export default function Navbar() {
   const { user, logoutUser } = useAuth();
   const pathname = usePathname();
 
   // Don't show navbar on login/register pages if they are separate full-screen experiences
-  // But for now, let's keep it consistent.
   const isAuthPage = pathname === "/login" || pathname === "/register" || pathname === "/merchant/signup";
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <Link href="/" className="text-xl sm:text-2xl font-black tracking-tighter text-primary italic">Arohoo</Link>
+          <Link href="/" className="flex items-center">
+            <Image 
+              src="/arohoo_logo_v7.svg" 
+              alt="Arohoo" 
+              width={200} 
+              height={150} 
+              className="h-24 w-auto object-contain " 
+              priority
+            />
+          </Link>
           <div className="hidden md:flex gap-6 text-sm font-medium text-gray-600">
             <Link href="/products" className="hover:text-primary transition-colors">Shop</Link>
             <Link href="/brands" className="hover:text-primary transition-colors">Brands</Link>

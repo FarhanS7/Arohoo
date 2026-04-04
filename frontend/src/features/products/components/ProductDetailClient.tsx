@@ -38,7 +38,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const images = product.images.length > 0 ? product.images : [{ url: '/placeholder-product.png', order: 0 }];
 
   return (
-    <div className="bg-white">
+    <div className="bg-white font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24">
           
@@ -60,7 +60,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   <button 
                     key={idx}
                     onClick={() => setMainImage(img.url)}
-                    className={`relative flex-shrink-0 w-20 h-24 rounded-xl overflow-hidden border-2 transition-all ${mainImage === img.url ? 'border-indigo-600 ring-2 ring-indigo-50 shadow-lg scale-95' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                    className={`relative flex-shrink-0 w-20 h-24 rounded-xl overflow-hidden border-2 transition-all ${mainImage === img.url ? 'border-purple-600 ring-2 ring-purple-50 shadow-lg scale-95' : 'border-transparent opacity-60 hover:opacity-100'}`}
                   >
                     <Image 
                       src={img.url} 
@@ -78,20 +78,20 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           <div className="flex flex-col">
             <div className="border-b border-gray-100 pb-8">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest block italic">New Arrival</span>
+                <span className="text-xs font-bold text-purple-600 uppercase tracking-widest block italic">New Arrival</span>
                 {product.merchant && (
                   <Link 
                     href={`/merchants/${product.merchant.id}`}
                     className="flex items-center gap-2 group/brand"
                   >
-                    <div className="relative w-6 h-6 rounded-full overflow-hidden bg-black border border-gray-100 group-hover/brand:border-primary transition-colors">
+                    <div className="relative w-6 h-6 rounded-full overflow-hidden bg-black border border-gray-100 group-hover/brand:border-purple-600 transition-colors">
                       {product.merchant.logo ? (
                         <Image src={product.merchant.logo} alt={product.merchant.storeName} fill className="object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-[8px] font-black text-white">{product.merchant.storeName.substring(0, 1)}</div>
                       )}
                     </div>
-                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest group-hover/brand:text-primary transition-colors border-b border-transparent group-hover/brand:border-primary/30 pb-0.5">
+                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest group-hover/brand:text-purple-600 transition-colors border-b border-transparent group-hover/brand:border-purple-600/30 pb-0.5">
                       {product.merchant.storeName}
                     </span>
                   </Link>
@@ -119,9 +119,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                        <button
                          key={v.id}
                          onClick={() => setSelectedVariant(v)}
-                         className={`px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider border-2 transition-all ${selectedVariant?.id === v.id ? 'bg-black border-black text-white shadow-xl -translate-y-1' : 'bg-white border-gray-100 text-gray-600 hover:border-gray-300'}`}
+                         className={`px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider border-2 transition-all ${selectedVariant?.id === v.id ? 'bg-purple-600 border-purple-600 text-white shadow-xl -translate-y-1' : 'bg-white border-gray-100 text-gray-600 hover:border-gray-300'}`}
                        >
-                         {v.attributes.size} {v.attributes.color && `- ${v.attributes.color}`}
+                         {v.size} {v.color && `- ${v.color}`}
                        </button>
                      ))}
                    </div>
@@ -132,7 +132,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 <button 
                   disabled={addingToCart || !selectedVariant || selectedVariant.stock === 0}
                   onClick={handleAddToCart}
-                  className="w-full py-5 bg-black text-white font-bold rounded-2xl text-xs uppercase tracking-[0.2em] shadow-2xl hover:bg-gray-800 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                  className="w-full py-5 bg-purple-600 text-white font-bold rounded-2xl text-xs uppercase tracking-[0.2em] shadow-2xl hover:bg-purple-700 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
                 >
                   {addingToCart ? "Adding..." : selectedVariant?.stock === 0 ? "Out of Stock" : "Add to Cart"}
                   {!addingToCart && selectedVariant?.stock !== 0 && (
@@ -158,7 +158,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                      In Stock
                    </div>
                    <div className="flex items-center gap-2">
-                     <span className="w-1.5 h-1.5 border border-indigo-400 rounded-full"></span>
+                     <span className="w-1.5 h-1.5 border border-purple-400 rounded-full"></span>
                      Ships Worldwide
                    </div>
                 </div>
@@ -173,7 +173,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                </div>
                <div>
                   <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 italic">Category</h4>
-                  <p className="text-xs font-bold text-gray-700 underline underline-offset-4 decoration-indigo-200">Sustainability</p>
+                  <p className="text-xs font-bold text-gray-700 underline underline-offset-4 decoration-purple-200">Sustainability</p>
                </div>
             </div>
           </div>

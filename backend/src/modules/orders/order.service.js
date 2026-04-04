@@ -221,7 +221,11 @@ export class OrderService {
           name: item.merchant.storeName
         }
       })),
+      shippingName: order.shippingName,
+      shippingPhone: order.shippingPhone,
       shippingAddress: order.shippingAddress,
+      shippingDistrict: order.shippingDistrict,
+      shippingCost: Number(order.shippingCost),
       statusHistory: order.statusHistory
     };
   }
@@ -384,14 +388,24 @@ export class OrderService {
       id: order.id,
       status: order.status,
       createdAt: order.createdAt,
-      user: {
+      customer: order.user ? {
         id: order.user.id,
         email: order.user.email
+      } : {
+        name: order.shippingName,
+        phone: order.shippingPhone
       },
+      shippingName: order.shippingName,
+      shippingPhone: order.shippingPhone,
+      shippingAddress: order.shippingAddress,
+      shippingDistrict: order.shippingDistrict,
+      shippingCost: Number(order.shippingCost),
+      totalAmount: Number(order.totalAmount),
       items: order.orderItems.map(item => ({
         id: item.id,
         quantity: item.quantity,
         price: Number(item.price),
+        subtotal: Number(item.subtotal),
         productVariant: {
           id: item.productVariant.id,
           sku: item.productVariant.sku,

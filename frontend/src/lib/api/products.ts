@@ -5,10 +5,8 @@ export interface ProductVariant {
   sku: string;
   price: number;
   stock: number;
-  attributes: {
-    size: string | null;
-    color: string | null;
-  };
+  size: string | null;
+  color: string | null;
 }
 
 export interface ProductImage {
@@ -148,6 +146,14 @@ export const productService = {
    */
   async getPublicProductById(id: string): Promise<{ success: boolean; data: Product }> {
     const res = await api.get<{ success: boolean; data: Product }>(`/public/products/${id}`);
+    return res.data;
+  },
+
+  /**
+   * Get public variant details by ID
+   */
+  async getPublicVariantById(id: string): Promise<{ success: boolean; data: any }> {
+    const res = await api.get<{ success: boolean; data: any }>(`/public/products/variants/${id}`);
     return res.data;
   },
 };

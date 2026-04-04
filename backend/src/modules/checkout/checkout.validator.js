@@ -5,6 +5,8 @@ export const checkoutSchema = z.object({
     name: z.string({ required_error: 'Name is required' }).min(2, 'Name must be at least 2 characters'),
     phone: z.string({ required_error: 'Phone is required' }).min(10, 'Invalid phone number'),
     address: z.string({ required_error: 'Address is required' }).min(5, 'Address is too short'),
+    shippingDistrict: z.string({ required_error: 'District is required' }),
+    shippingCost: z.number({ required_error: 'Shipping cost is required' }),
     cartItems: z.array(
       z.object({
         productVariantId: z.string({ required_error: 'Product variant ID is required' }).uuid('Invalid variant ID'),

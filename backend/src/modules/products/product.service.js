@@ -30,9 +30,9 @@ export class ProductService {
       data.variants = variants.map(v => {
         if (v.price <= 0) throw new AppError('Variant price must be positive');
         if (v.stock !== undefined && v.stock < 0) throw new AppError('Stock cannot be negative');
-        if (!v.attributes?.size || !v.attributes?.color) throw new AppError('Variant must include size and color attributes');
+        if (!v.size || !v.color) throw new AppError('Variant must include size and color');
 
-        const sig = JSON.stringify(Object.entries(v.attributes).sort());
+        const sig = JSON.stringify({ size: v.size, color: v.color });
         if (signatures.has(sig)) throw new AppError('Duplicate variant detected');
         signatures.add(sig);
 

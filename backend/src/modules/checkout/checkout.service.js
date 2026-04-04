@@ -16,7 +16,7 @@ export class CheckoutService {
    */
   async _validateAndPrepareItems(tx, cartItems) {
     const summaryItems = [];
-    let total = 0;
+    let subtotal = 0;
 
     for (const item of cartItems) {
       const variant = await tx.productVariant.findUnique({
@@ -44,8 +44,8 @@ export class CheckoutService {
       }
 
       const price = Number(variant.price);
-      const subtotal = price * item.quantity;
-      total += subtotal;
+      const itemSubtotal = price * item.quantity;
+      subtotal += itemSubtotal;
 
       summaryItems.push({
         productVariantId: variant.id,
@@ -54,22 +54,22 @@ export class CheckoutService {
         name: variant.product.name,
         price,
         quantity: item.quantity,
-        subtotal
+        subtotal: itemSubtotal
       });
     }
 
-    return { summaryItems, total };
+    return { summaryItems, subtotal };
   }
 
   /**
    * Public validation endpoint for dry-run (Step 4.1).
    */
   async validateCheckout(data) {
-    const { summaryItems, total } = await this._validateAndPrepareItems(prisma, data.cartItems);
+    const { summaryItems, subtotal } = await this._validateAndPrepareItems(prisma, data.cartItems);
     
     return {
       items: summaryItems,
-      total,
+      subtotal,
       currency: 'BDT'
     };
   }
@@ -78,19 +78,23 @@ export class CheckoutService {
    * Atomic Order Creation (Step 4.2).
    */
   async createOrder(userId, checkoutData) {
-    const { name, phone, address, cartItems } = checkoutData;
+    const { name, phone, address, cartItems, shippingDistrict, shippingCost } = checkoutData;
 
     return await prisma.$transaction(async (tx) => {
       // 1. Validate items and stock within the transaction
-      const { summaryItems, total } = await this._validateAndPrepareItems(tx, cartItems);
+      const { summaryItems, subtotal } = await this._validateAndPrepareItems(tx, cartItems);
+      
+      const total = subtotal + Number(shippingCost || 0);
 
       // 2. Create the Order
       const order = await tx.order.create({
         data: {
-          userId,
+          userId: userId || null,
           shippingName: name,
           shippingPhone: phone,
           shippingAddress: address,
+          shippingDistrict: shippingDistrict || 'Chattogram',
+          shippingCost: Number(shippingCost || 0),
           totalAmount: total,
           status: 'PENDING'
         }

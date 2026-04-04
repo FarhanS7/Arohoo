@@ -47,22 +47,22 @@ export default function FilterPanel({ currentParams, onFilterChange }: FilterPan
         <h4 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-6 border-b pb-2">Price Range</h4>
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => handlePriceChange(0, 50)}
-            className={`px-3 py-2 rounded-lg text-xs font-bold border ${currentParams.maxPrice === 50 ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-100 text-gray-600 hover:bg-gray-50'}`}
+            onClick={() => handlePriceChange(0, 1000)}
+            className={`px-3 py-2 rounded-lg text-xs font-bold border ${currentParams.maxPrice === 1000 ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-100 text-gray-600 hover:bg-gray-50'}`}
           >
-            Under $50
+            Under ৳1,000
           </button>
           <button
-            onClick={() => handlePriceChange(50, 150)}
-            className={`px-3 py-2 rounded-lg text-xs font-bold border ${currentParams.minPrice === 50 ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-100 text-gray-600 hover:bg-gray-50'}`}
+            onClick={() => handlePriceChange(1000, 3000)}
+            className={`px-3 py-2 rounded-lg text-xs font-bold border ${currentParams.minPrice === 1000 ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-100 text-gray-600 hover:bg-gray-50'}`}
           >
-            $50 - $150
+            ৳1,000 - ৳3,000
           </button>
           <button
-            onClick={() => handlePriceChange(150, undefined)}
-            className={`px-3 py-2 rounded-lg text-xs font-bold border ${currentParams.minPrice === 150 ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-100 text-gray-600 hover:bg-gray-50'}`}
+            onClick={() => handlePriceChange(3000, undefined)}
+            className={`px-3 py-2 rounded-lg text-xs font-bold border ${currentParams.minPrice === 3000 ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-100 text-gray-600 hover:bg-gray-50'}`}
           >
-            $150 +
+            ৳3,000 +
           </button>
           <button
             onClick={() => handlePriceChange(undefined, undefined)}
@@ -75,12 +75,12 @@ export default function FilterPanel({ currentParams, onFilterChange }: FilterPan
 
       {/* Attributes (Simplified) */}
       <div>
-        <h4 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-6 border-b pb-2">Attributes</h4>
+        <h4 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-6 border-b pb-2">Quick Filters</h4>
         <div className="space-y-4">
            <div>
-             <span className="text-[10px] font-bold text-gray-400 uppercase mb-2 block">Quick Size</span>
+             <span className="text-[10px] font-bold text-gray-400 uppercase mb-2 block">Sizes</span>
              <div className="flex flex-wrap gap-2">
-               {['S', 'M', 'L', 'XL'].map(size => (
+               {['39', '40', '41', '42', '43', 'S', 'M', 'L', 'XL'].map(size => (
                  <button 
                    key={size}
                    onClick={() => onFilterChange({ size: currentParams.size === size ? undefined : size })}

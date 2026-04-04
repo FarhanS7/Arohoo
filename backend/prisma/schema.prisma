@@ -81,11 +81,13 @@ model Merchant {
 
 model Order {
   id              String      @id @default(uuid())
-  userId          String
-  user            User        @relation(fields: [userId], references: [id])
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id])
   shippingName    String
   shippingPhone   String
-  shippingAddress Json
+  shippingAddress String
+  shippingDistrict String     @default("Chattogram")
+  shippingCost    Decimal     @default(70) @db.Decimal(10, 2)
   totalAmount     Decimal     @db.Decimal(10, 2)
   status          OrderStatus @default(PENDING)
   orderItems      OrderItem[]

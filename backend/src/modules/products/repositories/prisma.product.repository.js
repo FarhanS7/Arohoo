@@ -21,20 +21,11 @@ export class PrismaProductRepository {
   async createProduct(data, merchantId) {
     const { variants, images, ...rest } = data;
 
-    const mappedVariants = variants?.map(v => {
-      const { attributes, ...vRest } = v;
-      return {
-        ...vRest,
-        size: attributes?.size,
-        color: attributes?.color
-      };
-    });
-
     return await prisma.product.create({
       data: {
         ...rest,
         merchantId,
-        variants: mappedVariants ? { create: mappedVariants } : undefined,
+        variants: variants ? { create: variants } : undefined,
         images: images ? { create: images } : undefined,
       },
       include: this.includeDetails

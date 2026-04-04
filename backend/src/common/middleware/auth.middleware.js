@@ -28,3 +28,23 @@ export const protect = (req, res, next) => {
     return next(new AppError('Invalid token. Please log in again!', 401));
   }
 };
+
+/**
+ * Middleware to optionally attach a user to the request if a token is present.
+ */
+export const optionalProtect = (req, res, next) => {
+  let token;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (token) {
+    try {
+      const decoded = verifyToken(token);
+      req.user = decoded;
+    } catch (error) {
+      // Ignore invalid token for optional protection
+    }
+  }
+  next();
+};

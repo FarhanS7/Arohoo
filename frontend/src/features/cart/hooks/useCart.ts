@@ -53,8 +53,6 @@ export function useCart() {
         const res = await cartApi.addItem(productVariantId, quantity);
         if (res.success) setCart(res.data);
       } else {
-        // Logic for guest cart in localStorage would be more complex (need to fetch variant info)
-        // For MVP, we'll mostly emphasize logged-in cart, but we can store ID/Qty
         const currentCart = cart || { id: "guest", userId: "guest", items: [] };
         const items = [...currentCart.items];
         const existing = items.find(i => i.productVariantId === productVariantId);
@@ -62,15 +60,23 @@ export function useCart() {
         if (existing) {
           existing.quantity += quantity;
         } else {
-          // Note: Full variant details normally fetched from backend if we wanted a rich guest cart
-          // For now, we'll redirect guest to login or just show minimal
-          // We'll implement basic aggregation here
+          // Fetch full variant details so the guest cart and checkout UI have data
+          const { productService } = await import("@/lib/api/products");
+          const { data } = await productService.getPublicVariantById(productVariantId);
+          
           items.push({
             id: `temp-${Date.now()}`,
             cartId: "guest",
             productVariantId,
             quantity,
-            productVariant: { id: productVariantId } as any // Simplified
+            productVariant: {
+              id: data.id,
+              price: data.price,
+              product: {
+                name: data.product.name,
+                images: data.product.images
+              }
+            } as any
           });
         }
         

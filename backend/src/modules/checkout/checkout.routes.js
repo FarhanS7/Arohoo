@@ -1,5 +1,5 @@
 import express from 'express';
-import { protect } from '../../common/middleware/auth.middleware.js';
+import { optionalProtect } from '../../common/middleware/auth.middleware.js';
 import { checkoutLimiter } from '../../common/middleware/rate-limit.middleware.js';
 import { validate } from '../../common/middleware/validation.middleware.js';
 import * as checkoutController from './checkout.controller.js';
@@ -10,7 +10,7 @@ const router = express.Router();
 // Checkout usually requires authentication to bind to a user
 router.post(
   '/',
-  protect,
+  optionalProtect,
   checkoutLimiter,
   validate(checkoutSchema),
   checkoutController.validateCheckout

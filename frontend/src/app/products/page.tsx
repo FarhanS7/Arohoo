@@ -32,10 +32,10 @@ export default function ProductCatalogPage() {
         </div>
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8 text-center">
             <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-6xl uppercase italic">
-              Sustainable Essentials
+              Arohoo Boutique
             </h1>
             <p className="mt-6 text-lg leading-8 text-gray-300 max-w-2xl mx-auto">
-              Premium sandals and apparel crafted from recycled materials. Comfort that doesn't cost the Earth.
+              Discover exclusive collections from Bangladesh's most influential brand boutiques. Curated for your unique style.
             </p>
             
             {/* Search Bar */}
