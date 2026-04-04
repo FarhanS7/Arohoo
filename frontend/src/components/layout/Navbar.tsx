@@ -51,6 +51,16 @@ export default function Navbar() {
                <span className="absolute top-1 right-1 bg-primary text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
             </Link>
 
+            {user && (pathname.startsWith("/merchant") || pathname.startsWith("/admin")) && (
+              <Link 
+                href="/" 
+                className="hidden md:flex items-center gap-2 bg-zinc-900 border border-zinc-800 text-white px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-200"
+              >
+                <Search className="w-3 h-3" />
+                Switch to Store
+              </Link>
+            )}
+
             {user ? (
               <div className="flex items-center gap-4">
                 <Link 

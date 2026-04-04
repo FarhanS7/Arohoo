@@ -10,7 +10,10 @@ interface CategoryManagerProps {
   onDelete: (id: string) => Promise<void>;
 }
 
+import { useToastContext } from "@/components/providers/ToastProvider";
+
 export default function CategoryManager({ categories, onCreate, onUpdate, onDelete }: CategoryManagerProps) {
+  const { addToast } = useToastContext();
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Category>>({ name: "", slug: "" });
@@ -20,14 +23,27 @@ export default function CategoryManager({ categories, onCreate, onUpdate, onDele
     try {
       if (editingId) {
         await onUpdate(editingId, formData);
+        addToast("success", "Category updated");
         setEditingId(null);
       } else {
         await onCreate(formData);
+        addToast("success", "Category created");
         setIsAdding(false);
       }
       setFormData({ name: "", slug: "" });
     } catch (err: any) {
-      alert(err);
+      addToast("error", err.message || "Failed to save category");
+    }
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (confirm(`Delete category "${name}"?`)) {
+      try {
+        await onDelete(id);
+        addToast("success", "Category deleted");
+      } catch (err: any) {
+        addToast("error", err.message || "Failed to delete category");
+      }
     }
   };
 
@@ -109,7 +125,7 @@ export default function CategoryManager({ categories, onCreate, onUpdate, onDele
                   Edit
                 </button>
                 <button
-                  onClick={() => confirm("Delete this category?") && onDelete(cat.id)}
+                  onClick={() => handleDelete(cat.id, cat.name)}
                   className="text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-red-600 transition-colors"
                 >
                   Delete

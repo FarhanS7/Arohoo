@@ -8,8 +8,11 @@ import ProductTable from "@/features/products/components/ProductTable";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import { Product } from "@/lib/api/products";
 import { useState } from "react";
+import { useToastContext } from "@/components/providers/ToastProvider";
+import BackButton from "@/components/layout/UX/BackButton";
 
 export default function MerchantProductsPage() {
+  const { addToast } = useToastContext();
   const { 
     products, 
     loading, 
@@ -25,7 +28,6 @@ export default function MerchantProductsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
@@ -48,17 +50,17 @@ export default function MerchantProductsPage() {
         if (files && files.length > 0) {
           await uploadImages(editingProduct.id, files);
         }
-        setSuccessMessage("Product updated successfully!");
+        addToast("success", "Product updated successfully!");
       } else {
         const newProduct = await createProduct(data);
         if (newProduct?.id && files && files.length > 0) {
           await uploadImages(newProduct.id, files);
         }
-        setSuccessMessage("Product created successfully!");
+        addToast("success", "Product created successfully!");
       }
       setIsModalOpen(false);
-      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
+      addToast("error", err.message || "Failed to save product");
       throw err;
     }
   };
@@ -67,11 +69,10 @@ export default function MerchantProductsPage() {
     if (!deletingProduct) return;
     try {
       await deleteProduct(deletingProduct.id);
-      setSuccessMessage("Product deleted successfully!");
+      addToast("success", "Product deleted successfully!");
       setDeletingProduct(null);
-      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
-      alert(err);
+      addToast("error", err.message || "Failed to delete product");
     }
   };
 
@@ -80,7 +81,9 @@ export default function MerchantProductsPage() {
 
   return (
     <ProtectedRoute allowedRoles={["MERCHANT", "ADMIN"]}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <BackButton className="mb-8" label="Dashboard" />
+        
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 border-b border-neutral-100 pb-12">
           <div>
@@ -121,13 +124,6 @@ export default function MerchantProductsPage() {
             <p className="text-3xl font-black text-white leading-none">94.2%</p>
           </div>
         </div>
-
-        {successMessage && (
-          <div className="mb-8 bg-green-50 border border-green-100 text-green-700 px-6 py-4 rounded-2xl text-sm font-black flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
-            <span className="flex h-6 w-6 bg-green-100 rounded-full items-center justify-center text-xs">✓</span>
-            {successMessage}
-          </div>
-        )}
 
         <div className="space-y-6">
           <ProductTable

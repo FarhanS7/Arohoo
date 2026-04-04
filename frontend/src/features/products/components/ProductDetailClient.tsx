@@ -11,9 +11,15 @@ interface ProductDetailClientProps {
   product: Product;
 }
 
+import PageLayout from "@/components/layout/UX/PageLayout";
+import BackButton from "@/components/layout/UX/BackButton";
+
+import { useToastContext } from "@/components/providers/ToastProvider";
+
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
   const router = useRouter();
   const { addItem } = useCart();
+  const { addToast } = useToastContext();
   const [addingToCart, setAddingToCart] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     product.variants.length > 0 ? product.variants[0] : null
@@ -27,9 +33,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     setAddingToCart(true);
     try {
       await addItem(selectedVariant.id, 1);
+      addToast("success", "Added to bag");
       router.push('/cart');
     } catch (err: any) {
-      alert(err.message || 'Failed to add item to cart');
+      addToast("error", err.message || 'Failed to add item to cart');
     } finally {
       setAddingToCart(false);
     }
@@ -38,9 +45,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const images = product.images.length > 0 ? product.images : [{ url: '/placeholder-product.png', order: 0 }];
 
   return (
-    <div className="bg-white font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24">
+    <PageLayout>
+      <div className="bg-white font-sans overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
+          <BackButton className="mb-8" />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24">
           
           {/* Image Gallery */}
           <div className="space-y-6">
@@ -191,6 +201,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             </div>
          </div>
       </div>
-    </div>
+      </div>
+    </PageLayout>
   );
 }

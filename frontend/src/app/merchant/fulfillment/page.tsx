@@ -3,28 +3,30 @@
 import ProtectedRoute from "@/components/auth/protected-route";
 import OrderFulfillmentTable from "@/features/merchant/components/OrderFulfillmentTable";
 import { useMerchantOrders } from "@/features/merchant/hooks/useMerchantOrders";
-import { useState } from "react";
+import { useToastContext } from "@/components/providers/ToastProvider";
+import BackButton from "@/components/layout/UX/BackButton";
 
 export default function MerchantFulfillmentPage() {
+  const { addToast } = useToastContext();
   const { orders, loading, error, changeStatus } = useMerchantOrders();
-  const [successInfo, setSuccessInfo] = useState<string | null>(null);
 
   const handleStatusChange = async (orderId: string, status: string) => {
     try {
       await changeStatus(orderId, status);
-      setSuccessInfo(`Order status updated to ${status}`);
-      setTimeout(() => setSuccessInfo(null), 3000);
+      addToast("success", `Order status updated to ${status}`);
     } catch (err: any) {
-      alert(err);
+      addToast("error", err.message || "Failed to update order status");
     }
   };
 
-  const pendingCount = orders.filter(o => o.status === "PROCESSING").length;
-  const shippedCount = orders.filter(o => o.status === "SHIPPED").length;
+  const pendingCount = orders.filter((o: any) => o.status === "PROCESSING").length;
+  const shippedCount = orders.filter((o: any) => o.status === "SHIPPED").length;
 
   return (
     <ProtectedRoute allowedRoles={["MERCHANT", "ADMIN"]}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <BackButton className="mb-8" label="Dashboard" />
+        
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 border-b border-neutral-100 pb-12">
           <div>
@@ -57,13 +59,6 @@ export default function MerchantFulfillmentPage() {
             <p className="text-4xl font-black text-white leading-none">{shippedCount}</p>
           </div>
         </div>
-
-        {successInfo && (
-          <div className="mb-8 bg-green-50 border border-green-100 text-green-700 px-8 py-5 rounded-[2rem] text-sm font-black flex items-center gap-4 animate-in fade-in slide-in-from-top-6 duration-500 shadow-lg shadow-green-50">
-            <div className="flex h-8 w-8 bg-green-100 rounded-full items-center justify-center text-xs">✓</div>
-            {successInfo}
-          </div>
-        )}
 
         {/* Main Table */}
         <div className="space-y-6">

@@ -10,7 +10,10 @@ interface ImageUploadProps {
   loading: boolean;
 }
 
+import { useToastContext } from "@/components/providers/ToastProvider";
+
 export default function ImageUpload({ productId, onUpload, onChange, existingImages = [], loading }: ImageUploadProps) {
+  const { addToast } = useToastContext();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -20,7 +23,7 @@ export default function ImageUpload({ productId, onUpload, onChange, existingIma
     const totalCount = existingImages.length + selectedFiles.length + files.length;
 
     if (totalCount > 5) {
-      alert("Maximum 5 images allowed per product");
+      addToast("error", "Maximum 5 images allowed per product");
       return;
     }
 
