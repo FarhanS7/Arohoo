@@ -21,6 +21,8 @@ interface LiveItem {
   merchantName?: string;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+
 const CheckoutPage = () => {
   const router = useRouter();
   const { addToast } = useToastContext();
@@ -32,8 +34,8 @@ const CheckoutPage = () => {
   const [shippingCost, setShippingCost] = useState(70);
   const [shippingDistrict, setShippingDistrict] = useState<'Chattogram' | 'Other'>('Chattogram');
   const [error, setError] = useState<string | null>(null);
-
-  // 1. Fetch live data for each cart item
+ 
+  // 1. Fetch live data for the entire cart in ONE request
   useEffect(() => {
     if (cartLoading || !cart || cart.items.length === 0) {
       if (!cartLoading && (!cart || cart.items.length === 0)) {
@@ -46,32 +48,26 @@ const CheckoutPage = () => {
       setIsLoadingLive(true);
       setError(null);
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-        const fetched = await Promise.all(
-          cart.items.map(async (item: any) => {
-            const res = await fetch(`${API_URL}/public/products/variants/${item.productVariantId}`);
-            if (!res.ok) throw new Error('Failed to fetch price updates');
-            const { data } = await res.json();
-            
-            return {
-              productVariantId: item.productVariantId,
-              quantity: item.quantity,
-              id: data.id,
-              price: Number(data.price),
-              stock: data.stock,
-              name: data.product.name,
-              image: data.product.images?.[0]?.url,
-              variantName: `${data.size || ''} ${data.color || ''} ${data.sku || ''}`.trim(),
-              merchantName: data.product.merchant.storeName,
-            };
+        const res = await fetch(`${API_URL}/checkout/validate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cartItems: cart.items.map((i: any) => ({
+              productVariantId: i.productVariantId,
+              quantity: i.quantity
+            }))
           })
-        );
+        });
 
-        setLiveItems(fetched);
-        setSubtotal(fetched.reduce((acc: number, current: LiveItem) => acc + current.price * current.quantity, 0));
+        if (!res.ok) throw new Error('Failed to sync live prices');
+        
+        const { data } = await res.json();
+        
+        setLiveItems(data.items);
+        setSubtotal(data.subtotal);
       } catch (err) {
         console.error(err);
-        setError('Unable to sync live prices. Please try again.');
+        setError('Checkout was unable to sync live prices. Please try again.');
       } finally {
         setIsLoadingLive(false);
       }
@@ -89,7 +85,6 @@ const CheckoutPage = () => {
   const checkoutMutation = useMutation({
     mutationFn: async (shippingData: ShippingFormData) => {
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
       
       const payload = {
         cartItems: cart?.items.map((i: any) => ({ 
@@ -129,7 +124,7 @@ const CheckoutPage = () => {
     }
   });
 
-  const handleCheckout = (formData: ShippingFormData) => {
+  const handleCheckout = useCallback((formData: ShippingFormData) => {
     setError(null);
     if (!liveItems.length) return;
 
@@ -139,7 +134,7 @@ const CheckoutPage = () => {
       return;
     }
     checkoutMutation.mutate(formData);
-  };
+  }, [liveItems, checkoutMutation]);
 
   if (!cartLoading && (!cart || cart.items.length === 0)) {
     return (

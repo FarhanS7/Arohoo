@@ -1,7 +1,5 @@
-import { beforeAll, describe, expect, test } from '@jest/globals';
-import getPrisma from '../../infrastructure/database/prisma.js';
-
-const prisma = getPrisma();
+import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
+import prisma from '../../infrastructure/database/prisma.js';
 
 describe('ProductVariant Schema Verification', () => {
   let testProduct;

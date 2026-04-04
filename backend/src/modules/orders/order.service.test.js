@@ -5,7 +5,21 @@ const mockPrisma = {
   $transaction: jest.fn((cb) => cb(mockPrisma)),
   order: {
     findMany: jest.fn(),
+    findUnique: jest.fn(),
     count: jest.fn(),
+    update: jest.fn(),
+  },
+  orderItem: {
+    findUnique: jest.fn(),
+    update: jest.fn(),
+    updateMany: jest.fn(),
+  },
+  orderStatusHistory: {
+    create: jest.fn(),
+  },
+  productVariant: {
+    findMany: jest.fn(),
+    update: jest.fn(),
   },
 };
 
@@ -113,7 +127,7 @@ describe('OrderService.getOrdersByUser', () => {
 
       expect(result.orders).toHaveLength(1);
       const order = result.orders[0];
-      expect(order.user.email).toBe('cust@ex.com');
+      expect(order.customer.email).toBe('cust@ex.com');
       expect(order.items).toHaveLength(1);
       const item = order.items[0];
       expect(item.id).toBe('oi-1');

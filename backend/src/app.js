@@ -10,12 +10,16 @@ import apiRouter from './modules/index.js';
 
 const app = express();
 
+// Set trust proxy to 1 to correctly handle client IP through load balancers
+app.set('trust proxy', 1);
+
 // 1. GLOBAL MIDDLEWARES
 app.use(helmet()); // Security headers
 app.use(cors()); // CORS support
 
-// HTTP request logging via Morgan streamed to Winston
-app.use(morgan('combined', { 
+// HTTP request logging via Morgan - optimized format for performance
+const morganFormat = process.env.NODE_ENV === 'production' ? 'common' : 'dev';
+app.use(morgan(morganFormat, { 
   stream: { write: (message) => logger.info(message.trim()) } 
 }));
 

@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { AuthService } from '../../src/modules/auth/auth.service.js';
 import { PasswordProvider } from '../../src/modules/auth/providers/password.provider.js';
 

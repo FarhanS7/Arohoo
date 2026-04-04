@@ -18,6 +18,7 @@ const mockPrisma = {
   },
   productVariant: {
     findUnique: jest.fn(),
+    findMany: jest.fn(),
     update: jest.fn(),
   },
 };
@@ -57,7 +58,7 @@ describe('OrderService Checkout', () => {
         product: { merchantId: 'm-1' }
       };
 
-      mockPrisma.productVariant.findUnique.mockResolvedValue(mockVariant);
+      mockPrisma.productVariant.findMany.mockResolvedValue([mockVariant]);
       mockPrisma.order.create.mockResolvedValue({ id: 'order-1', totalAmount: 200 });
 
       const result = await orderService.createOrder(orderData);
@@ -76,14 +77,14 @@ describe('OrderService Checkout', () => {
     });
 
     test('should throw error if variant not found', async () => {
-      mockPrisma.productVariant.findUnique.mockResolvedValue(null);
+      mockPrisma.productVariant.findMany.mockResolvedValue([]);
       
       await expect(orderService.createOrder({ items: [{ productVariantId: 'v-none', quantity: 1 }] }))
         .rejects.toThrow('Product variant not found');
     });
 
     test('should throw error if stock is insufficient', async () => {
-      mockPrisma.productVariant.findUnique.mockResolvedValue({ sku: 'SKU-1', stock: 5 });
+      mockPrisma.productVariant.findMany.mockResolvedValue([{ id: 'v-1', sku: 'SKU-1', stock: 5 }]);
       
       await expect(orderService.createOrder({ items: [{ productVariantId: 'v-1', quantity: 10 }] }))
         .rejects.toThrow('Not enough stock');
@@ -105,7 +106,7 @@ describe('OrderService Checkout', () => {
       };
 
       mockPrisma.cart.findUnique.mockResolvedValue(mockCart);
-      mockPrisma.productVariant.findUnique.mockResolvedValue(mockCart.items[0].productVariant);
+      mockPrisma.productVariant.findMany.mockResolvedValue(mockCart.items.map(i => i.productVariant));
       mockPrisma.order.create.mockResolvedValue({ id: 'order-1' });
 
       const result = await orderService.createOrderFromCart({

@@ -1,49 +1,17 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getPublicMerchants } from "@/lib/api/merchant";
-import { Skeleton } from "@/components/ui/Skeleton";
 
-export default function TrendingBrands() {
-  const [brands, setBrands] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchTrendingBrands() {
-      try {
-        const res = await getPublicMerchants({ isTrending: true, limit: 6 });
-        if (res.success && Array.isArray(res.data)) {
-          setBrands(res.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch trending brands:", error);
-      } finally {
-        setLoading(false);
-      }
+export default async function TrendingBrands() {
+  let brands: any[] = [];
+  try {
+    const res = await getPublicMerchants({ isTrending: true, limit: 6 });
+    if (res.success && Array.isArray(res.data)) {
+      brands = res.data;
     }
-    fetchTrendingBrands();
-  }, []);
-
-  if (loading) {
-    return (
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-end justify-between mb-12">
-            <div className="space-y-4">
-              <Skeleton className="h-10 w-48" />
-              <Skeleton className="h-4 w-64" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Skeleton key={i} className="h-32 w-full rounded-2xl" />
-            ))}
-          </div>
-        </div>
-      </section>
-    );
+  } catch (error) {
+    console.error("Failed to fetch trending brands on server:", error);
+    return null;
   }
 
   if (!brands || brands.length === 0) return null;
@@ -62,7 +30,7 @@ export default function TrendingBrands() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
-          {brands.map((brand, index) => (
+          {brands.map((brand: any) => (
             <Link
               href={`/merchants/${brand.id}`}
               key={brand.id}
@@ -75,6 +43,7 @@ export default function TrendingBrands() {
                     alt={brand.storeName}
                     fill
                     className="object-contain"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 16vw"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center font-black text-neutral-300 text-xl tracking-tighter italic">

@@ -15,6 +15,7 @@ export interface CartItem {
     product: {
       id: string;
       name: string;
+      images?: { url: string }[];
     };
   };
 }

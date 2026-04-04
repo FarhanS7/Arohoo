@@ -1,49 +1,17 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { productService, Product } from "@/lib/api/products";
-import { Skeleton } from "@/components/ui/Skeleton";
 
-export default function TrendingProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchTrending() {
-      try {
-        const res = await productService.getPublicProducts({ isTrending: true, limit: 4 });
-        if (res.success && Array.isArray(res.data)) {
-          setProducts(res.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch trending products:", error);
-      } finally {
-        setLoading(false);
-      }
+export default async function TrendingProducts() {
+  let products: Product[] = [];
+  try {
+    const res = await productService.getPublicProducts({ isTrending: true, limit: 4 });
+    if (res.success && Array.isArray(res.data)) {
+      products = res.data;
     }
-    fetchTrending();
-  }, []);
-
-  if (loading) {
-    return (
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-end justify-between mb-12">
-            <div className="space-y-4">
-              <Skeleton className="h-10 w-48" />
-              <Skeleton className="h-4 w-64" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-96 w-full rounded-2xl" />
-            ))}
-          </div>
-        </div>
-      </section>
-    );
+  } catch (error) {
+    console.error("Failed to fetch trending products on server:", error);
+    return null;
   }
 
   if (!products || products.length === 0) return null;
@@ -54,7 +22,7 @@ export default function TrendingProducts() {
         <div className="flex items-end justify-between mb-8 sm:mb-12">
           <div>
             <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-2 tracking-tight">Trending Selection</h2>
-            <p className="text-sm sm:text-base text-gray-500 font-medium">Handpicked premium items trending across the platform.</p>
+            <p className="text-sm sm:text-base text-gray-500 font-medium tracking-tight">Handpicked premium items trending across the platform.</p>
           </div>
           <Link href="/shop" className="hidden sm:block text-primary font-black text-xs uppercase tracking-widest hover:opacity-70 transition-all border-b-2 border-primary/20 pb-1">
             Explore All
@@ -62,7 +30,7 @@ export default function TrendingProducts() {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
-          {products.map((product) => (
+          {products.map((product, index) => (
             <Link 
               href={`/products/${product.id}`}
               key={product.id} 
@@ -74,7 +42,9 @@ export default function TrendingProducts() {
                     src={product.images[0].url}
                     alt={product.name}
                     fill
+                    priority={index === 0}
                     className="object-cover group-hover:scale-110 transition-transform duration-700"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-neutral-200 font-black text-4xl">

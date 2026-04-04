@@ -84,7 +84,12 @@ export default function ImageUpload({ productId, onUpload, onChange, existingIma
         {/* New Selected Previews */}
         {previews.map((preview, idx) => (
           <div key={idx} className="aspect-square rounded-xl overflow-hidden border-2 border-indigo-500 relative group animate-pulse">
-            <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+            <img 
+              src={preview} 
+              alt="Preview" 
+              loading="lazy"
+              className="w-full h-full object-cover" 
+            />
             <button
               onClick={() => removeSelectedFile(idx)}
               className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-lg"

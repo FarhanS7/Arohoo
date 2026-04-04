@@ -1,8 +1,7 @@
-import { beforeAll, describe, expect, test } from '@jest/globals';
-import getPrisma from '../../../infrastructure/database/prisma.js';
-import { PrismaProductRepository } from './prisma.product.repository';
+import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals';
+import prisma from '../../../infrastructure/database/prisma.js';
+import { PrismaProductRepository } from './prisma.product.repository.js';
 
-const prisma = getPrisma();
 const repository = new PrismaProductRepository();
 
 describe('PrismaProductRepository', () => {

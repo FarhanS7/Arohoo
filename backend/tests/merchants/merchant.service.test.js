@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { MerchantService } from '../../src/modules/merchants/merchant.service.js';
 
 describe('MerchantService Analytics', () => {
@@ -51,10 +51,10 @@ describe('MerchantService Analytics', () => {
             });
 
             expect(stats).toEqual({
-                totalRevenue: 1000.5,
-                totalSales: 50,
+                revenue: 1000.5,
+                salesVolume: 50,
                 fulfillmentRate: 90, // 9 / 10 * 100
-                lowStockProducts: 2
+                lowStockAlerts: 2
             });
         });
 
@@ -72,10 +72,10 @@ describe('MerchantService Analytics', () => {
             const stats = await merchantService.getMerchantDashboardStats(merchantId);
 
             expect(stats).toEqual({
-                totalRevenue: 0,
-                totalSales: 0,
+                revenue: 0,
+                salesVolume: 0,
                 fulfillmentRate: 0,
-                lowStockProducts: 0
+                lowStockAlerts: 0
             });
         });
 

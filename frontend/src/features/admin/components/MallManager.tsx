@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import NextImage from "next/image";
 import { Mall, CreateMallDTO, mallService } from "@/lib/api/mall";
 import { MerchantApplication } from "@/lib/api/admin";
@@ -25,13 +25,13 @@ export default function MallManager({ malls, allMerchants, onRefresh }: MallMana
   });
   const [loading, setLoading] = useState(false);
 
-  const handleOpenCreate = () => {
+  const handleOpenCreate = useCallback(() => {
     setSelectedMall(null);
     setFormData({ name: "", location: "", description: "", coverImage: "" });
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleOpenEdit = (mall: Mall) => {
+  const handleOpenEdit = useCallback((mall: Mall) => {
     setSelectedMall(mall);
     setFormData({
       name: mall.name,
@@ -40,7 +40,7 @@ export default function MallManager({ malls, allMerchants, onRefresh }: MallMana
       coverImage: mall.coverImage || "",
     });
     setIsModalOpen(true);
-  };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +60,7 @@ export default function MallManager({ malls, allMerchants, onRefresh }: MallMana
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (!confirm("Are you sure you want to delete this mall?")) return;
     try {
       await mallService.deleteMall(id);
@@ -68,9 +68,9 @@ export default function MallManager({ malls, allMerchants, onRefresh }: MallMana
     } catch (error) {
       console.error("Failed to delete mall:", error);
     }
-  };
+  }, [onRefresh]);
 
-  const toggleMerchant = async (mallId: string, merchantId: string, isAssigned: boolean) => {
+  const toggleMerchant = useCallback(async (mallId: string, merchantId: string, isAssigned: boolean) => {
     try {
       if (isAssigned) {
         await mallService.removeMerchantFromMall(mallId, merchantId);
@@ -78,11 +78,25 @@ export default function MallManager({ malls, allMerchants, onRefresh }: MallMana
         await mallService.addMerchantToMall(mallId, merchantId);
       }
       onRefresh();
-      // We don't close the modal so admin can toggle multiple
     } catch (error) {
       console.error("Failed to toggle merchant:", error);
     }
-  };
+  }, [onRefresh]);
+
+  // Memoize filtered merchants to prevent expensive filtering on every re-render
+  const filteredMerchants = useMemo(() => {
+    return allMerchants.filter(m => 
+      m.businessName.toLowerCase().includes(merchantSearch.toLowerCase()) ||
+      m.ownerName.toLowerCase().includes(merchantSearch.toLowerCase())
+    );
+  }, [allMerchants, merchantSearch]);
+
+  // Memoize assignment check to prevent expensive lookups in the map
+  const assignedMerchantIds = useMemo(() => {
+    if (!selectedMall) return new Set<string>();
+    const mall = malls.find(m => m.id === selectedMall.id);
+    return new Set(mall?.merchants?.map(m => m.id) || []);
+  }, [malls, selectedMall]);
 
   return (
     <div className="space-y-8">
@@ -227,33 +241,29 @@ export default function MallManager({ malls, allMerchants, onRefresh }: MallMana
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
-              {allMerchants
-                .filter(m => m.businessName.toLowerCase().includes(merchantSearch.toLowerCase()))
-                .map(merchant => {
-                  const isAssigned = malls.find(m => m.id === selectedMall.id)?.merchants?.some(mer => mer.id === merchant.id) || false;
-                  // Note: The useAdmin hook malls list should ideally include full merchant objects now if fetched correctly
-                  // but we'll adapt based on what's available.
-                  
-                  return (
-                    <div key={merchant.id} className={`p-5 rounded-2xl border flex items-center justify-between transition-all ${isAssigned ? 'border-primary/20 bg-primary/5 shadow-sm' : 'border-neutral-100 hover:border-neutral-200'}`}>
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-xs ${isAssigned ? 'bg-primary text-white' : 'bg-neutral-100 text-neutral-400'}`}>
-                          {merchant.businessName.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-black text-neutral-900">{merchant.businessName}</h4>
-                          <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">{merchant.ownerName}</p>
-                        </div>
+              {filteredMerchants.map(merchant => {
+                const isAssigned = assignedMerchantIds.has(merchant.id);
+                
+                return (
+                  <div key={merchant.id} className={`p-5 rounded-2xl border flex items-center justify-between transition-all ${isAssigned ? 'border-primary/20 bg-primary/5 shadow-sm' : 'border-neutral-100 hover:border-neutral-200'}`}>
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-xs ${isAssigned ? 'bg-primary text-white' : 'bg-neutral-100 text-neutral-400'}`}>
+                        {merchant.businessName.substring(0, 2).toUpperCase()}
                       </div>
-                      <button
-                        onClick={() => toggleMerchant(selectedMall.id, merchant.id, isAssigned)}
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isAssigned ? 'bg-white text-primary shadow-sm hover:text-red-500' : 'bg-neutral-100 text-neutral-400 hover:bg-neutral-900 hover:text-white'}`}
-                      >
-                         {isAssigned ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                      </button>
+                      <div>
+                        <h4 className="text-sm font-black text-neutral-900">{merchant.businessName}</h4>
+                        <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">{merchant.ownerName}</p>
+                      </div>
                     </div>
-                  );
-                })}
+                    <button
+                      onClick={() => toggleMerchant(selectedMall.id, merchant.id, isAssigned)}
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isAssigned ? 'bg-white text-primary shadow-sm hover:text-red-500' : 'bg-neutral-100 text-neutral-400 hover:bg-neutral-900 hover:text-white'}`}
+                    >
+                       {isAssigned ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
             
             <div className="p-8 border-t border-neutral-50 bg-neutral-50/50 flex justify-end flex-shrink-0">

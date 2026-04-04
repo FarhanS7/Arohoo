@@ -1,11 +1,86 @@
-import { CreateProductInput, Product } from "@/lib/api/products";
+"use client";
+
+import { Product } from "@/lib/api/products";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useState, useCallback, memo, useMemo } from "react";
 import { useCategories } from "../hooks/useCategories";
+import { Trash2 } from "lucide-react";
 
 const ImageUpload = dynamic(() => import("./ImageUpload"), {
   loading: () => <div className="h-40 w-full bg-gray-50 animate-pulse rounded-xl" />,
 });
+
+interface VariantRowProps {
+  index: number;
+  variant: any;
+  onChange: (index: number, field: string, value: any) => void;
+  onRemove: (index: number) => void;
+}
+
+// Memoized Variant Row to prevent re-rendering all rows when product name changes
+const VariantRow = memo(({ index, variant, onChange, onRemove }: VariantRowProps) => (
+  <div className="p-6 bg-gray-50/50 rounded-2xl border border-gray-100 relative group transition-all hover:bg-white hover:shadow-xl hover:shadow-purple-50">
+    <button
+      type="button"
+      onClick={() => onRemove(index)}
+      className="absolute -top-2 -right-2 bg-white text-red-500 rounded-full w-8 h-8 flex items-center justify-center shadow-lg border border-red-50 opacity-0 group-hover:opacity-100 transition-all hover:scale-110 active:scale-95 z-10"
+    >
+      <Trash2 className="w-4 h-4" />
+    </button>
+    <div className="grid grid-cols-2 gap-4">
+      <div className="col-span-2">
+        <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">SKU</label>
+        <input
+          type="text"
+          value={variant.sku}
+          onChange={(e) => onChange(index, "sku", e.target.value)}
+          className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
+          placeholder="e.g. SNK-BLK-42"
+        />
+      </div>
+      <div>
+        <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">Price (৳)</label>
+        <input
+          type="number"
+          value={variant.price}
+          onChange={(e) => onChange(index, "price", parseFloat(e.target.value) || 0)}
+          className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold text-purple-600"
+        />
+      </div>
+      <div>
+        <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">Stock</label>
+        <input
+          type="number"
+          value={variant.stock}
+          onChange={(e) => onChange(index, "stock", parseInt(e.target.value) || 0)}
+          className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
+        />
+      </div>
+      <div>
+        <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">Size</label>
+        <input
+          type="text"
+          value={variant.size || ""}
+          onChange={(e) => onChange(index, "size", e.target.value)}
+          className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
+          placeholder="M, 42, 10..."
+        />
+      </div>
+      <div>
+        <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">Color</label>
+        <input
+          type="text"
+          value={variant.color || ""}
+          onChange={(e) => onChange(index, "color", e.target.value)}
+          className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
+          placeholder="Matte Black..."
+        />
+      </div>
+    </div>
+  </div>
+));
+
+VariantRow.displayName = "VariantRow";
 
 interface ProductFormProps {
   initialData?: Product;
@@ -44,36 +119,40 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const handleAddVariant = () => {
-    setFormData({
-      ...formData,
+  const handleAddVariant = useCallback(() => {
+    setFormData((prev: any) => ({
+      ...prev,
       variants: [
-        ...(formData.variants || []),
+        ...(prev.variants || []),
         {
           sku: "",
-          price: formData.basePrice,
+          price: prev.basePrice,
           stock: 10,
           size: "",
           color: "",
         },
       ],
+    }));
+  }, []);
+
+  const handleRemoveVariant = useCallback((index: number) => {
+    setFormData((prev: any) => {
+      const newVariants = [...(prev.variants || [])];
+      newVariants.splice(index, 1);
+      return { ...prev, variants: newVariants };
     });
-  };
+  }, []);
 
-  const handleRemoveVariant = (index: number) => {
-    const newVariants = [...(formData.variants || [])];
-    newVariants.splice(index, 1);
-    setFormData({ ...formData, variants: newVariants });
-  };
-
-  const handleVariantChange = (index: number, field: string, value: any) => {
-    const newVariants = [...(formData.variants || [])];
-    newVariants[index] = {
-      ...newVariants[index],
-      [field]: value,
-    };
-    setFormData({ ...formData, variants: newVariants });
-  };
+  const handleVariantChange = useCallback((index: number, field: string, value: any) => {
+    setFormData((prev: any) => {
+      const newVariants = [...(prev.variants || [])];
+      newVariants[index] = {
+        ...newVariants[index],
+        [field]: value,
+      };
+      return { ...prev, variants: newVariants };
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,65 +259,13 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
               </div>
             )}
             {formData.variants?.map((variant: any, index: number) => (
-              <div key={index} className="p-6 bg-gray-50/50 rounded-2xl border border-gray-100 relative group transition-all hover:bg-white hover:shadow-xl hover:shadow-purple-50">
-                <button
-                  type="button"
-                  onClick={() => handleRemoveVariant(index)}
-                  className="absolute -top-2 -right-2 bg-white text-red-500 rounded-full w-8 h-8 flex items-center justify-center shadow-lg border border-red-50 opacity-0 group-hover:opacity-100 transition-all hover:scale-110 active:scale-95 z-10"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">SKU</label>
-                    <input
-                      type="text"
-                      value={variant.sku}
-                      onChange={(e) => handleVariantChange(index, "sku", e.target.value)}
-                      className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
-                      placeholder="e.g. SNK-BLK-42"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">Price (৳)</label>
-                    <input
-                      type="number"
-                      value={variant.price}
-                      onChange={(e) => handleVariantChange(index, "price", parseFloat(e.target.value) || 0)}
-                      className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold text-purple-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">Stock</label>
-                    <input
-                      type="number"
-                      value={variant.stock}
-                      onChange={(e) => handleVariantChange(index, "stock", parseInt(e.target.value) || 0)}
-                      className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">Size</label>
-                    <input
-                      type="text"
-                      value={variant.size || ""}
-                      onChange={(e) => handleVariantChange(index, "size", e.target.value)}
-                      className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
-                      placeholder="M, 42, 10..."
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">Color</label>
-                    <input
-                      type="text"
-                      value={variant.color || ""}
-                      onChange={(e) => handleVariantChange(index, "color", e.target.value)}
-                      className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
-                      placeholder="Matte Black..."
-                    />
-                  </div>
-                </div>
-              </div>
+              <VariantRow 
+                key={index}
+                index={index}
+                variant={variant}
+                onChange={handleVariantChange}
+                onRemove={handleRemoveVariant}
+              />
             ))}
           </div>
         </div>

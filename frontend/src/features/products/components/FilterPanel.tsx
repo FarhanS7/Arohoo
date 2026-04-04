@@ -1,13 +1,15 @@
 "use client";
 
 import { useCategories } from "../hooks/useCategories";
+import { memo } from "react";
+import { ProductSearchParams } from "../hooks/usePublicProducts";
 
 interface FilterPanelProps {
-  currentParams: any;
-  onFilterChange: (newParams: any) => void;
+  currentParams: ProductSearchParams;
+  onFilterChange: (newParams: Partial<ProductSearchParams>) => void;
 }
 
-export default function FilterPanel({ currentParams, onFilterChange }: FilterPanelProps) {
+const FilterPanel = memo(({ currentParams, onFilterChange }: FilterPanelProps) => {
   const { categories } = useCategories();
 
   const handleCategoryChange = (id: string) => {
@@ -95,4 +97,8 @@ export default function FilterPanel({ currentParams, onFilterChange }: FilterPan
       </div>
     </div>
   );
-}
+});
+
+FilterPanel.displayName = "FilterPanel";
+
+export default FilterPanel;

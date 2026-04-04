@@ -2,6 +2,7 @@ import { AppError } from '../../common/errors/AppError.js';
 import { generateToken } from '../../common/utils/jwt.js';
 import { hashPassword, verifyPassword } from '../../common/utils/password.js';
 import prisma from '../../infrastructure/database/prisma.js';
+import { cacheUtil } from '../../common/utils/cache.js';
 
 export class AuthService {
   /**
@@ -155,6 +156,10 @@ export class AuthService {
    * @returns {Promise<Object>} - The user object.
    */
   async getUserById(userId) {
+    const cacheKey = `user:profile:${userId}`;
+    const cachedUser = cacheUtil.get(cacheKey);
+    if (cachedUser) return cachedUser;
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -178,12 +183,15 @@ export class AuthService {
     // Flatten merchant info if it exists
     const merchantId = user.merchant?.id || null;
     
-    return {
+    const result = {
       id: user.id,
       email: user.email,
       role: user.role,
       merchantId,
       merchant: user.merchant
     };
+
+    cacheUtil.set(cacheKey, result, 300); // Cache for 5 mins
+    return result;
   }
 }

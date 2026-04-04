@@ -8,6 +8,7 @@ const mockPrisma = {
   },
   cartItem: {
     findUnique: jest.fn(),
+    findFirst: jest.fn(),
     upsert: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -67,8 +68,8 @@ describe('CartService', () => {
   describe('addItem', () => {
     test('should add a new item and validate stock', async () => {
       mockPrisma.cart.findUnique.mockResolvedValue({ id: cartId });
-      mockPrisma.productVariant.findUnique.mockResolvedValue({ id: productVariantId, stock: 10 });
-      mockPrisma.cartItem.findUnique.mockResolvedValue(null);
+      mockPrisma.productVariant.findUnique.mockResolvedValue({ id: productVariantId, stock: 10, sku: 'SKU-1' });
+      mockPrisma.cartItem.findFirst.mockResolvedValue(null);
       mockPrisma.cartItem.upsert.mockResolvedValue({ id: 'item-1', quantity: 2 });
 
       const result = await cartService.addItem({ userId, productVariantId, quantity: 2 });
@@ -81,8 +82,8 @@ describe('CartService', () => {
 
     test('should increment quantity if variant already in cart', async () => {
       mockPrisma.cart.findUnique.mockResolvedValue({ id: cartId });
-      mockPrisma.productVariant.findUnique.mockResolvedValue({ id: productVariantId, stock: 10 });
-      mockPrisma.cartItem.findUnique.mockResolvedValue({ id: 'item-1', quantity: 3 });
+      mockPrisma.productVariant.findUnique.mockResolvedValue({ id: productVariantId, stock: 10, sku: 'SKU-1' });
+      mockPrisma.cartItem.findFirst.mockResolvedValue({ id: 'item-1', quantity: 3 });
       mockPrisma.cartItem.upsert.mockResolvedValue({ id: 'item-1', quantity: 5 });
 
       await cartService.addItem({ userId, productVariantId, quantity: 2 });
@@ -94,8 +95,8 @@ describe('CartService', () => {
 
     test('should throw error if quantity exceeds stock', async () => {
       mockPrisma.cart.findUnique.mockResolvedValue({ id: cartId });
-      mockPrisma.productVariant.findUnique.mockResolvedValue({ id: productVariantId, stock: 5 });
-      mockPrisma.cartItem.findUnique.mockResolvedValue({ id: 'item-1', quantity: 4 });
+      mockPrisma.productVariant.findUnique.mockResolvedValue({ id: productVariantId, stock: 5, sku: 'SKU-1' });
+      mockPrisma.cartItem.findFirst.mockResolvedValue({ id: 'item-1', quantity: 4 });
 
       await expect(cartService.addItem({ userId, productVariantId, quantity: 2 }))
         .rejects.toThrow('Cannot add more. Stock limit: 5');
@@ -103,7 +104,7 @@ describe('CartService', () => {
 
     test('should throw error if variant is out of stock', async () => {
       mockPrisma.cart.findUnique.mockResolvedValue({ id: cartId });
-      mockPrisma.productVariant.findUnique.mockResolvedValue({ id: productVariantId, stock: 0 });
+      mockPrisma.productVariant.findUnique.mockResolvedValue({ id: productVariantId, stock: 0, sku: 'SKU-1' });
 
       await expect(cartService.addItem({ userId, productVariantId, quantity: 1 }))
         .rejects.toThrow('Variant is out of stock');

@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthUser, getCurrentUser, logout } from "@/lib/auth/auth.service";
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState, useMemo, useCallback } from "react";
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -17,7 +17,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function loadUser() {
+  const loadUser = useCallback(async () => {
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     
     if (!token) {
@@ -35,19 +35,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     loadUser();
-  }, []);
+  }, [loadUser]);
 
-  function logoutUser() {
+  const logoutUser = useCallback(() => {
     logout();
     setUser(null);
-  }
+  }, []);
+
+  const value = useMemo(() => ({ 
+    user, 
+    loading, 
+    setUser, 
+    logoutUser, 
+    refreshUser: loadUser 
+  }), [user, loading, logoutUser, loadUser]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, setUser, logoutUser, refreshUser: loadUser }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

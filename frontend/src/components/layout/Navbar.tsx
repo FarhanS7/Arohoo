@@ -6,8 +6,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { useCart } from "@/features/cart/hooks/useCart";
+
 export default function Navbar() {
   const { user, logoutUser } = useAuth();
+  const { itemCount } = useCart();
   const pathname = usePathname();
 
   // Don't show navbar on login/register pages if they are separate full-screen experiences
@@ -46,10 +49,14 @@ export default function Navbar() {
           </div>
           
           <div className="flex items-center gap-4">
-            <Link href="/cart" className="p-2 text-gray-600 hover:text-primary transition-colors relative">
-               <ShoppingCart className="w-5 h-5" />
-               <span className="absolute top-1 right-1 bg-primary text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
-            </Link>
+             <Link href="/cart" className="p-2 text-gray-600 hover:text-primary transition-colors relative">
+                <ShoppingCart className="w-5 h-5" />
+                {itemCount > 0 && (
+                  <span className="absolute top-1 right-1 bg-primary text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-in zoom-in duration-300">
+                    {itemCount}
+                  </span>
+                )}
+             </Link>
 
             {user && (pathname.startsWith("/merchant") || pathname.startsWith("/admin")) && (
               <Link 

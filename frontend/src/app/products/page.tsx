@@ -4,7 +4,7 @@ import FilterPanel from "@/features/products/components/FilterPanel";
 import ProductCard from "@/features/products/components/ProductCard";
 import ProductCardSkeleton from "@/features/products/components/ProductCardSkeleton";
 import { usePublicProducts } from "@/features/products/hooks/usePublicProducts";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ProductCatalogPage() {
   const { 
@@ -17,6 +17,15 @@ export default function ProductCatalogPage() {
   } = usePublicProducts({ limit: 12 });
 
   const [searchInput, setSearchInput] = useState("");
+
+  // Sync search input with URL params (e.g. on manual URL change or browser back/forward)
+  useEffect(() => {
+    if (params.q !== undefined) {
+      setSearchInput(params.q);
+    } else {
+      setSearchInput("");
+    }
+  }, [params.q]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,13 +90,17 @@ export default function ProductCatalogPage() {
                  )}
                </div>
                
-               {/* Sort Toggle (Mock) */}
+                {/* Sort Toggle */}
                <div className="flex items-center gap-2">
                  <span className="text-[10px] font-bold text-gray-400 uppercase">Sort by:</span>
-                 <select className="text-xs font-bold border-none outline-none focus:ring-0 bg-transparent cursor-pointer">
-                   <option>Newest Arrivals</option>
-                   <option>Price: Low to High</option>
-                   <option>Price: High to Low</option>
+                 <select 
+                   value={params.sort || "newest"}
+                   onChange={(e) => updateParams({ sort: e.target.value })}
+                   className="text-xs font-bold border-none outline-none focus:ring-0 bg-transparent cursor-pointer"
+                 >
+                   <option value="newest">Newest Arrivals</option>
+                   <option value="price_asc">Price: Low to High</option>
+                   <option value="price_desc">Price: High to Low</option>
                  </select>
                </div>
              </div>
@@ -112,8 +125,8 @@ export default function ProductCatalogPage() {
              ) : (
                <>
                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
-                   {products.map((product) => (
-                     <ProductCard key={product.id} product={product} />
+                   {products.map((product, index) => (
+                     <ProductCard key={product.id} product={product} priority={index < 4} />
                    ))}
                  </div>
 

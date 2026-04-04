@@ -1,5 +1,6 @@
 import prisma from '../../infrastructure/database/prisma.js';
 import { PrismaProductRepository } from './repositories/prisma.product.repository.js';
+import { cacheUtil } from '../../common/utils/cache.js';
 
 export class AppError extends Error {
   constructor(message, statusCode = 400) {
@@ -44,7 +45,10 @@ export class ProductService {
     }
 
     try {
-      return await this.repository.createProduct(data, merchantId);
+      const product = await this.repository.createProduct(data, merchantId);
+      // Invalidate search results
+      cacheUtil.delByPrefix('products:search');
+      return product;
     } catch (error) {
       if (error.code === 'P2002' && error.meta?.target?.includes('sku')) {
         throw new AppError('SKU already exists', 409);
@@ -64,7 +68,13 @@ export class ProductService {
     }
 
     try {
-      return await this.repository.updateProduct(id, merchantId, data);
+      const updated = await this.repository.updateProduct(id, merchantId, data);
+      
+      // Invalidate caches
+      cacheUtil.delete(`product:detail:${id}`);
+      cacheUtil.delByPrefix('products:search');
+      
+      return updated;
     } catch (error) {
       if (error.code === 'P2002' && error.meta?.target?.includes('sku')) {
         throw new AppError('SKU conflict in update', 409);
@@ -79,13 +89,29 @@ export class ProductService {
     if (existing.merchantId !== merchantId) throw new AppError('Unauthorized access', 403);
 
     await this.repository.deleteProduct(id, merchantId);
+    
+    // Invalidate caches
+    cacheUtil.delete(`product:detail:${id}`);
+    cacheUtil.delByPrefix('products:search');
+    
     return true;
   }
 
   async getProductById(id, merchantId) {
+    const cacheKey = `product:detail:${id}`;
+    
+    // Only use cache for public views (no merchantId restriction check needed or same as cached)
+    // Actually, the check at line 88 handles authorization.
+    const cached = cacheUtil.get(cacheKey);
+    if (cached && (!merchantId || cached.merchantId === merchantId)) {
+      return cached;
+    }
+
     const product = await this.repository.findProductById(id);
     if (!product) throw new AppError('Product not found', 404);
     if (merchantId && product.merchantId !== merchantId) throw new AppError('Unauthorized', 403);
+    
+    cacheUtil.set(cacheKey, product, 600); // 10 mins
     return product;
   }
 

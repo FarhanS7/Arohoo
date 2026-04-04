@@ -1,23 +1,26 @@
+"use client";
+
 import { Category, categoryService } from "@/lib/api/categories";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
+/**
+ * Hook to fetch and cache public categories.
+ * Uses React Query for automatic caching and revalidation.
+ */
 export function useCategories() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["public_categories"],
+    queryFn: async () => {
+      const res = await categoryService.getPublicCategories();
+      if (!res.success) throw new Error("Failed to fetch categories");
+      return res.data || [];
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes (categories are stable)
+  });
 
-  useEffect(() => {
-    async function fetch() {
-      try {
-        const res = await categoryService.getPublicCategories();
-        if (res.success) setCategories(res.data || []);
-      } catch (err) {
-        console.error("Failed to fetch categories:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetch();
-  }, []);
-
-  return { categories, loading };
+  return { 
+    categories: data || [], 
+    loading: isLoading,
+    error 
+  };
 }

@@ -18,22 +18,41 @@ export class CheckoutService {
     const summaryItems = [];
     let subtotal = 0;
 
-    for (const item of cartItems) {
-      const variant = await tx.productVariant.findUnique({
-        where: { id: item.productVariantId },
-        select: {
-          id: true,
-          price: true,
-          stock: true,
-          productId: true,
-          product: {
-            select: { 
-              name: true,
-              merchantId: true
+    // 1. Batch fetch all variants involved in the checkout
+    const variantIds = cartItems.map(item => item.productVariantId);
+    const variants = await tx.productVariant.findMany({
+      where: { id: { in: variantIds } },
+      select: {
+        id: true,
+        price: true,
+        stock: true,
+        productId: true,
+        size: true,
+        color: true,
+        sku: true,
+        product: {
+          select: { 
+            name: true,
+            merchantId: true,
+            images: {
+              take: 1,
+              orderBy: { order: 'asc' },
+              select: { url: true }
+            },
+            merchant: {
+              select: { storeName: true }
             }
           }
         }
-      });
+      }
+    });
+
+    // 2. Map variants for efficient lookup
+    const variantMap = new Map(variants.map(v => [v.id, v]));
+
+    // 3. Validate and calculate subtotal
+    for (const item of cartItems) {
+      const variant = variantMap.get(item.productVariantId);
 
       if (!variant) {
         throw new AppError(`Product variant with ID ${item.productVariantId} not found`, 404);
@@ -52,19 +71,24 @@ export class CheckoutService {
         productId: variant.productId,
         merchantId: variant.product.merchantId,
         name: variant.product.name,
+        image: variant.product.images?.[0]?.url,
+        variantName: `${variant.size || ''} ${variant.color || ''} ${variant.sku || ''}`.trim(),
+        merchantName: variant.product.merchant.storeName,
         price,
         quantity: item.quantity,
-        subtotal: itemSubtotal
+        subtotal: itemSubtotal,
+        stock: variant.stock
       });
     }
 
     return { summaryItems, subtotal };
   }
 
-  /**
-   * Public validation endpoint for dry-run (Step 4.1).
-   */
-  async validateCheckout(data) {
+  async validateCheckoutSummary(data) {
+    if (!data.cartItems || !Array.isArray(data.cartItems) || data.cartItems.length === 0) {
+      return { items: [], subtotal: 0, total: 0 };
+    }
+
     const { summaryItems, subtotal } = await this._validateAndPrepareItems(prisma, data.cartItems);
     
     return {

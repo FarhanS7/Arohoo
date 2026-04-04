@@ -1,9 +1,8 @@
 import { beforeAll, describe, expect, test } from '@jest/globals';
-import getPrisma from '../../infrastructure/database/prisma.js';
+import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
+import prisma from '../../infrastructure/database/prisma.js';
 
-const prisma = getPrisma();
-
-describe('ProductImage Schema Verification', () => {
+describe('Product Image Schema Verification', () => {
   let testProduct;
 
   beforeAll(async () => {

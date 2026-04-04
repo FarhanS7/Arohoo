@@ -64,9 +64,10 @@ export default function CartPage() {
                   <li key={item.id} className="flex py-6 sm:py-10">
                     <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900 sm:h-32 sm:w-32">
                       <Image
-                        src="/api/placeholder/400/400" // Fallback placeholder
+                        src={item.productVariant.product.images?.[0]?.url || "/placeholder-product.png"}
                         alt={item.productVariant.product.name}
                         fill
+                        sizes="128px"
                         className="object-cover object-center"
                       />
                     </div>

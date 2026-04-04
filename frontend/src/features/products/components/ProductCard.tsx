@@ -6,9 +6,10 @@ import Link from "next/link";
 
 interface ProductCardProps {
   product: Product;
+  priority?: boolean;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, priority = false }: ProductCardProps) {
   const mainImage = product.images.length > 0 ? product.images[0].url : null;
   const displayImage = mainImage || '/placeholder-product.png';
 
@@ -21,8 +22,9 @@ export default function ProductCard({ product }: ProductCardProps) {
           src={displayImage}
           alt={product.name}
           fill
+          priority={priority}
           className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
           <div className="absolute bottom-4 left-4 right-4">
             <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg inline-block shadow-sm">

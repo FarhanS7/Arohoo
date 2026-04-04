@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { ProductService } from '../../src/modules/products/product.service.js';
 
 describe('ProductService', () => {

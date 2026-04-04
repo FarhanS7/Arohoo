@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { MerchantService } from '../../src/modules/merchants/merchant.service.js';
 import { updateMerchantProfileSchema } from '../../src/modules/merchants/merchant.validator.js';
 

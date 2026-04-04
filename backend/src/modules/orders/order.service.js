@@ -1,4 +1,5 @@
 import { AppError } from '../../common/errors/AppError.js';
+import { cacheUtil } from '../../common/utils/cache.js';
 
 export class OrderService {
   constructor(prisma) {
@@ -97,6 +98,16 @@ export class OrderService {
         }
       });
 
+      // 5. Invalidate caches
+      const merchantIds = new Set();
+      if (orderItemId) {
+        merchantIds.add(target.merchantId);
+      } else {
+        order.orderItems.forEach(item => merchantIds.add(item.merchantId));
+      }
+
+      merchantIds.forEach(mId => cacheUtil.delete(`merchant:stats:${mId}`));
+
       return {
         orderId: id,
         orderItemId,
@@ -116,9 +127,14 @@ export class OrderService {
     const [orders, total] = await Promise.all([
       this.prisma.order.findMany({
         where: { userId },
-        include: {
+        select: {
+          id: true,
+          status: true,
+          totalAmount: true,
+          createdAt: true,
           orderItems: {
-            include: {
+            select: {
+              quantity: true,
               product: { select: { id: true, name: true } },
               productVariant: {
                 select: { id: true, price: true }
@@ -242,22 +258,28 @@ export class OrderService {
       let totalAmount = 0;
       const orderItemsData = [];
 
-      // 1. Process items and validate stock
+      // 1. Batch fetch all variants involved in the order for validation
+      const variantIds = items.map(item => item.productVariantId || item.variantId).filter(Boolean);
+      const variants = await innerTx.productVariant.findMany({
+        where: { id: { in: variantIds } },
+        include: { product: true }
+      });
+      const variantMap = new Map(variants.map(v => [v.id, v]));
+
+      // 2. Process items and validate stock
       for (const item of items) {
-        const variant = await innerTx.productVariant.findUnique({
-          where: { id: item.productVariantId || item.variantId }, // Support both naming styles
-          include: { product: true }
-        });
+        const variantId = item.productVariantId || item.variantId;
+        const variant = variantMap.get(variantId);
 
         if (!variant) {
-          throw new AppError(`Product variant not found: ${item.productVariantId || item.variantId}`, 404);
+          throw new AppError(`Product variant not found: ${variantId}`, 404);
         }
 
         if (variant.stock < item.quantity) {
           throw new AppError(`Not enough stock for SKU ${variant.sku}. Available: ${variant.stock}`, 400);
         }
 
-        // Decrement stock
+        // Decrement stock (Note: individual updates within transaction ensure data integrity)
         await innerTx.productVariant.update({
           where: { id: variant.id },
           data: { stock: { decrement: item.quantity } }
@@ -294,6 +316,12 @@ export class OrderService {
           orderItems: true
         }
       });
+
+      // 4. Invalidate caches
+      cacheUtil.delByPrefix('products:search');
+      const uniqueMerchants = [...new Set(orderItemsData.map(item => item.merchantId))];
+      uniqueMerchants.forEach(mId => cacheUtil.delete(`merchant:stats:${mId}`));
+      orderItemsData.forEach(item => cacheUtil.delete(`product:detail:${item.productId}`));
 
       return order;
     });
@@ -357,15 +385,30 @@ export class OrderService {
         where: {
           orderItems: { some: { merchantId } }
         },
-        include: {
+        select: {
+          id: true,
+          status: true,
+          createdAt: true,
+          shippingName: true,
+          shippingPhone: true,
+          shippingAddress: true,
+          shippingDistrict: true,
+          shippingCost: true,
+          totalAmount: true,
           user: {
             select: { id: true, email: true }
           },
           orderItems: {
             where: { merchantId },
-            include: {
+            select: {
+              id: true,
+              quantity: true,
+              price: true,
+              subtotal: true,
               productVariant: {
-                include: {
+                select: {
+                  id: true,
+                  sku: true,
                   product: { select: { id: true, name: true } }
                 }
               }
@@ -435,12 +478,20 @@ export class OrderService {
 
     const [orders, total] = await Promise.all([
       this.prisma.order.findMany({
-        include: {
+        select: {
+          id: true,
+          status: true,
+          totalAmount: true,
+          createdAt: true,
           user: {
             select: { id: true, email: true }
           },
           orderItems: {
-            include: {
+            select: {
+              id: true,
+              quantity: true,
+              price: true,
+              status: true,
               product: { select: { id: true, name: true } },
               productVariant: {
                 select: { id: true, size: true, color: true, price: true }

@@ -76,6 +76,7 @@ model Merchant {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
+  @@index([isTrending, isApproved, createdAt(sort: Desc)])
   @@map("merchants")
 }
 
@@ -95,7 +96,7 @@ model Order {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
-  @@index([userId])
+  @@index([userId, status, createdAt(sort: Desc)])
   @@map("orders")
 }
 
@@ -118,7 +119,7 @@ model OrderItem {
   updatedAt        DateTime       @updatedAt
 
   @@index([orderId])
-  @@index([merchantId])
+  @@index([merchantId, status, createdAt(sort: Desc)])
   @@map("order_items")
 }
 
@@ -163,8 +164,10 @@ model Product {
   updatedAt   DateTime @updatedAt
 
   @@index([name])
-  @@index([categoryId])
-  @@index([merchantId])
+  @@index([categoryId, isTrending, createdAt(sort: Desc)])
+  @@index([merchantId, createdAt(sort: Desc)])
+  @@index([isTrending])
+  @@index([categoryId, basePrice, createdAt(sort: Desc)])
   @@map("products")
 }
 
@@ -186,7 +189,7 @@ model ProductVariant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([productId])
+  @@index([productId, stock])
   @@index([price])
   @@map("product_variants")
 }

@@ -22,7 +22,7 @@ interface ShippingFormProps {
   isLoading?: boolean;
 }
 
-const ShippingForm: React.FC<ShippingFormProps> = ({ onSubmit, onDistrictChange, isLoading }) => {
+const ShippingForm: React.FC<ShippingFormProps> = React.memo(({ onSubmit, onDistrictChange, isLoading }) => {
   const {
     register,
     handleSubmit,
@@ -179,6 +179,6 @@ const ShippingForm: React.FC<ShippingFormProps> = ({ onSubmit, onDistrictChange,
       </form>
     </div>
   );
-};
+});
 
 export default ShippingForm;

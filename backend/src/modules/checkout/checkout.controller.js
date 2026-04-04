@@ -15,3 +15,16 @@ export const validateCheckout = asyncHandler(async (req, res, next) => {
     error: null
   });
 });
+
+/**
+ * Returns a live checkout summary without creating an order.
+ */
+export const validateCheckoutSummary = asyncHandler(async (req, res, next) => {
+  const summary = await checkoutService.validateCheckoutSummary(req.body);
+
+  res.status(200).json({
+    success: true,
+    data: summary,
+    error: null
+  });
+});

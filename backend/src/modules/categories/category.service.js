@@ -32,19 +32,31 @@ export class CategoryService {
     }
 
     // 3. Create
-    return await prisma.category.create({
+    const category = await prisma.category.create({
       data: categoryData,
     });
+
+    // 4. Invalidate cache
+    cacheUtil.delete(['public_categories', 'categories:all']);
+
+    return category;
   }
 
   /**
    * Retrieves all active/visible categories.
    */
   async getCategories() {
-    return await prisma.category.findMany({
+    const cacheKey = 'categories:all';
+    const cachedData = cacheUtil.get(cacheKey);
+    if (cachedData) return cachedData;
+
+    const categories = await prisma.category.findMany({
       where: { isActive: true },
       orderBy: { displayOrder: 'asc' },
     });
+
+    cacheUtil.set(cacheKey, categories, 1800); // 30 mins
+    return categories;
   }
 
   /**
@@ -84,10 +96,15 @@ export class CategoryService {
       }
     }
 
-    return await prisma.category.update({
+    const updated = await prisma.category.update({
       where: { id },
       data,
     });
+
+    // Invalidate cache
+    cacheUtil.delete(['public_categories', 'categories:all']);
+
+    return updated;
   }
 
   /**
@@ -102,9 +119,14 @@ export class CategoryService {
       throw new AppError('Forbidden: You do not own this category', 403);
     }
 
-    return await prisma.category.delete({
+    const deleted = await prisma.category.delete({
       where: { id },
     });
+
+    // Invalidate cache
+    cacheUtil.delete(['public_categories', 'categories:all']);
+
+    return deleted;
   }
 
   /**

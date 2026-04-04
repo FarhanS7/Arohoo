@@ -1,5 +1,6 @@
 import { getPagination } from '../../../common/types/pagination.types.js';
 import prisma from '../../../infrastructure/database/prisma.js';
+import { cacheUtil } from '../../../common/utils/cache.js';
 
 export class PrismaProductRepository {
   /**
@@ -12,6 +13,57 @@ export class PrismaProductRepository {
       images: {
         orderBy: { order: 'asc' }
       }
+    };
+  }
+
+  /**
+   * Lighter include for list views to reduce payload size
+   */
+  get summaryInclude() {
+    return {
+      images: {
+        take: 1,
+        orderBy: { order: 'asc' },
+        select: { 
+          id: true, 
+          url: true, 
+          order: true 
+        }
+      },
+      merchant: {
+        select: {
+          id: true,
+          storeName: true,
+          logo: true
+        }
+      },
+      variants: {
+        take: 1,
+        select: {
+          id: true,
+          sku: true,
+          price: true,
+          stock: true,
+          size: true,
+          color: true
+        }
+      }
+    };
+  }
+
+  /**
+   * Selection object for listing views to prevent over-fetching
+   */
+  get summarySelect() {
+    return {
+      id: true,
+      name: true,
+      basePrice: true,
+      categoryId: true,
+      description: true, // Needed for the 'essential' line clamp in UI
+      isTrending: true,
+      createdAt: true,
+      ...this.summaryInclude
     };
   }
 
@@ -56,7 +108,7 @@ export class PrismaProductRepository {
     return { data, meta: { ...meta, total } };
   }
 
-  async searchProducts({ query, categoryId, minPrice, maxPrice, variants, isTrending }, { page, limit }) {
+  async searchProducts({ query, categoryId, minPrice, maxPrice, variants, isTrending, cursor }, { page, limit }) {
     const { skip, take, meta } = getPagination(page, limit);
 
     const where = {
@@ -79,18 +131,65 @@ export class PrismaProductRepository {
       }
     };
 
-    const [total, data] = await Promise.all([
-      prisma.product.count({ where }),
-      prisma.product.findMany({
-        where,
-        skip,
-        take,
-        include: this.includeDetails,
-        orderBy: { createdAt: 'desc' }
-      })
-    ]);
+    const cacheKey = cacheUtil.generateKey('products:search', { ...arguments[0], ...arguments[1] });
+    const countCacheKey = cacheUtil.generateKey('products:count', { where });
+    
+    const cachedResult = cacheUtil.get(cacheKey);
+    if (cachedResult) return cachedResult;
 
-    return { data, meta: { ...meta, total } };
+    // Optimization: Cursor-based pagination is more stable for large datasets
+    const sort = arguments[0].sort || 'newest';
+    let orderBy = { createdAt: 'desc' };
+    
+    if (sort === 'price_asc') {
+      orderBy = { basePrice: 'asc' };
+    } else if (sort === 'price_desc') {
+      orderBy = { basePrice: 'desc' };
+    }
+
+    // Optimization: Cursor-based pagination is more stable for large datasets
+    const queryOptions = {
+      where,
+      take,
+      select: this.summarySelect,
+      orderBy
+    };
+
+    if (cursor) {
+      queryOptions.cursor = { id: cursor };
+      queryOptions.skip = 1; // Skip the item identified by the cursor
+    } else {
+      queryOptions.skip = skip;
+    }
+
+    // Try to get total count from cache
+    let total = cacheUtil.get(countCacheKey);
+    let data;
+
+    if (total !== null && total !== undefined) {
+      data = await prisma.product.findMany(queryOptions);
+    } else {
+      [total, data] = await Promise.all([
+        prisma.product.count({ where }),
+        prisma.product.findMany(queryOptions)
+      ]);
+      // Cache total count for 5 minutes (reduced DB load for repeat filter queries)
+      cacheUtil.set(countCacheKey, total, 300);
+    }
+
+    const nextCursor = data.length === take ? data[data.length - 1].id : null;
+
+    const result = { 
+      data, 
+      meta: { 
+        ...meta, 
+        total,
+        nextCursor 
+      } 
+    };
+
+    cacheUtil.set(cacheKey, result, 300); // 5 mins
+    return result;
   }
 
   async updateProduct(id, merchantId, data) {
@@ -111,17 +210,16 @@ export class PrismaProductRepository {
   }
 
   async addProductImages(productId, images) {
-    const created = await Promise.all(
-      images.map(img => 
-        prisma.productImage.create({
-          data: {
-            ...img,
-            productId
-          }
-        })
-      )
-    );
-    return created;
+    const data = images.map(img => ({
+      ...img,
+      productId
+    }));
+
+    const result = await prisma.productImage.createMany({
+      data
+    });
+
+    return result;
   }
 
   async findVariantById(id) {

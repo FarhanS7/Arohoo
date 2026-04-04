@@ -7,6 +7,13 @@ import { checkoutSchema } from './checkout.validator.js';
 
 const router = express.Router();
 
+// Validate checkout summary (Live prices/stock)
+router.post(
+  '/validate',
+  checkoutLimiter,
+  checkoutController.validateCheckoutSummary
+);
+
 // Checkout usually requires authentication to bind to a user
 router.post(
   '/',

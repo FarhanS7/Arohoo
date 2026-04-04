@@ -1,4 +1,7 @@
 import { ToastProvider } from "@/components/providers/ToastProvider";
+import { QueryProvider } from "@/components/providers/QueryProvider";
+import { AuthProvider } from "@/features/auth/auth.context";
+import { CartProvider } from "@/features/cart/cart.context";
 import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
 import AuthLayoutWrapper from "./auth-layout-wrapper";
@@ -25,11 +28,17 @@ export default function RootLayout({
       <body
         className={`${openSans.variable} antialiased`}
       >
-        <ToastProvider>
-          <AuthLayoutWrapper>
-            {children}
-          </AuthLayoutWrapper>
-        </ToastProvider>
+        <QueryProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <CartProvider>
+                <AuthLayoutWrapper>
+                  {children}
+                </AuthLayoutWrapper>
+              </CartProvider>
+            </AuthProvider>
+          </ToastProvider>
+        </QueryProvider>
       </body>
     </html>
   );

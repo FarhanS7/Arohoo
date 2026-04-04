@@ -21,7 +21,15 @@ export class CartService {
             productVariant: {
               include: {
                 product: {
-                  select: { id: true, name: true }
+                  select: { 
+                    id: true, 
+                    name: true,
+                    images: {
+                      select: { url: true },
+                      take: 1,
+                      orderBy: { order: 'asc' }
+                    }
+                  }
                 }
               }
             }
@@ -39,7 +47,15 @@ export class CartService {
               productVariant: {
                 include: {
                   product: {
-                    select: { id: true, name: true }
+                    select: { 
+                      id: true, 
+                      name: true,
+                      images: {
+                        select: { url: true },
+                        take: 1,
+                        orderBy: { order: 'asc' }
+                      }
+                    }
                   }
                 }
               }
@@ -63,44 +79,55 @@ export class CartService {
       throw new AppError('Quantity must be a positive integer', 400);
     }
 
-    const cart = await this.getOrCreateCart(userId);
+    // 1. Parallel fetch for validation data - Optimized: Fetch only required fields
+    const [cart, variant, existingItem] = await Promise.all([
+      prisma.cart.findUnique({ 
+        where: { userId }, 
+        select: { id: true } 
+      }),
+      prisma.productVariant.findUnique({ 
+        where: { id: productVariantId },
+        select: { id: true, stock: true, sku: true }
+      }),
+      prisma.cartItem.findFirst({
+        where: {
+          cart: { userId },
+          productVariantId
+        },
+        select: { id: true, quantity: true }
+      })
+    ]);
 
-    // 1. Fetch variant and validate stock
-    const variant = await prisma.productVariant.findUnique({
-      where: { id: productVariantId }
-    });
-
+    // 2. Validate existence and stock
     if (!variant) throw new AppError('Product variant not found', 404);
     if (variant.stock <= 0) throw new AppError('Variant is out of stock', 400);
 
-    // 2. Check for existing item to aggregate quantity
-    const existingItem = await prisma.cartItem.findUnique({
-      where: {
-        cartId_productVariantId: {
-          cartId: cart.id,
-          productVariantId
-        }
-      }
-    });
-
     const totalQuantity = (existingItem?.quantity || 0) + quantity;
-
-    // 3. Final stock validation
     if (totalQuantity > variant.stock) {
       throw new AppError(`Cannot add more. Stock limit: ${variant.stock}`, 400);
     }
 
-    // 4. Atomic upsert
+    // 3. Handle cart creation if missing
+    let cartId = cart?.id;
+    if (!cartId) {
+      const newCart = await prisma.cart.create({
+        data: { userId },
+        select: { id: true }
+      });
+      cartId = newCart.id;
+    }
+
+    // 4. Atomic upsert with selective return
     return await prisma.cartItem.upsert({
       where: {
         cartId_productVariantId: {
-          cartId: cart.id,
+          cartId,
           productVariantId
         }
       },
       update: { quantity: totalQuantity },
       create: {
-        cartId: cart.id,
+        cartId,
         productVariantId,
         quantity
       },

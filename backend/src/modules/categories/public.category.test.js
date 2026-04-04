@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, jest, test } from '@jest/globals';
 
-// Define mocks
+// Define mocks at the top level with 'mock' prefix
 const mockPrisma = {
   category: {
     findMany: jest.fn(),
@@ -20,7 +20,7 @@ jest.unstable_mockModule('../../common/utils/cache.js', () => ({
 
 jest.unstable_mockModule('../../infrastructure/database/prisma.js', () => ({
   __esModule: true,
-  default: () => mockPrisma,
+  default: mockPrisma,
 }));
 
 // Dynamic imports

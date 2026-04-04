@@ -1,4 +1,5 @@
 import { AppError } from '../../common/errors/AppError.js';
+import { cacheUtil } from '../../common/utils/cache.js';
 import prisma from '../../infrastructure/database/prisma.js';
 
 /**
@@ -19,35 +20,38 @@ export class MerchantService {
   async getMerchantDashboardStats(merchantId) {
     if (!merchantId) throw new AppError('Merchant ID is required', 400);
 
-    // 1. Efficiently aggregate revenue, sales volume, and total/delivered counts
-    const statsAggregate = await this.prisma.orderItem.aggregate({
-      where: {
-        merchantId,
-        status: { not: 'CANCELLED' }
-      },
-      _sum: {
-        subtotal: true,
-        quantity: true
-      },
-      _count: {
-        id: true
-      }
-    });
+    const cacheKey = `merchant:stats:${merchantId}`;
+    const cached = cacheUtil.get(cacheKey);
+    if (cached) return cached;
 
-    const deliveredCount = await this.prisma.orderItem.count({
-      where: {
-        merchantId,
-        status: 'DELIVERED'
-      }
-    });
-
-    // 2. Count product variants with low stock (<= 5 items)
-    const lowStockProducts = await this.prisma.productVariant.count({
-      where: {
-        product: { merchantId },
-        stock: { lte: 5 }
-      }
-    });
+    // 1. Parallel fetch for all stats - Optimized: avoid sequential DB roundtrips
+    const [statsAggregate, deliveredCount, lowStockProducts] = await Promise.all([
+      this.prisma.orderItem.aggregate({
+        where: {
+          merchantId,
+          status: { not: 'CANCELLED' }
+        },
+        _sum: {
+          subtotal: true,
+          quantity: true
+        },
+        _count: {
+          id: true
+        }
+      }),
+      this.prisma.orderItem.count({
+        where: {
+          merchantId,
+          status: 'DELIVERED'
+        }
+      }),
+      this.prisma.productVariant.count({
+        where: {
+          product: { merchantId },
+          stock: { lte: 5 }
+        }
+      })
+    ]);
 
     const totalRevenue = Number(statsAggregate._sum.subtotal || 0);
     const totalSales = Number(statsAggregate._sum.quantity || 0);
@@ -58,12 +62,15 @@ export class MerchantService {
         ? Math.round((deliveredCount / totalItems) * 100) 
         : 0;
 
-    return {
-      totalRevenue,
-      totalSales,
+    const result = {
+      revenue: totalRevenue,
+      salesVolume: totalSales,
       fulfillmentRate,
-      lowStockProducts
+      lowStockAlerts: lowStockProducts
     };
+
+    cacheUtil.set(cacheKey, result, 120); // 2 mins
+    return result;
   }
 
   /**

@@ -1,3 +1,4 @@
+import { beforeAll, describe, expect, it, jest } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 import { authLimiter } from '../../src/common/middleware/rate-limit.middleware.js';
@@ -33,6 +34,6 @@ describe('Rate Limiting Middleware', () => {
         const response = await request(app).post('/test-auth').send({});
         
         expect(response.status).toBe(429);
-        expect(response.body).toEqual({ error: 'Too many requests' });
+        expect(response.body).toEqual({ error: 'Too many login attempts. Please try again in 15 minutes.' });
     });
 });
