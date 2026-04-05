@@ -1,11 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { productService, Product } from "@/lib/api/products";
+import { unstable_cache } from "next/cache";
+
+export const getCachedTrendingProducts = unstable_cache(
+  async () => productService.getPublicProducts({ isTrending: true, limit: 4 }),
+  ["trending-products"],
+  { revalidate: 600, tags: ["products", "trending"] }
+);
 
 export default async function TrendingProducts() {
   let products: Product[] = [];
   try {
-    const res = await productService.getPublicProducts({ isTrending: true, limit: 4 });
+    const res = await getCachedTrendingProducts();
     if (res.success && Array.isArray(res.data)) {
       products = res.data;
     }

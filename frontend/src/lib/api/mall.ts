@@ -1,4 +1,5 @@
 import { api } from "./client";
+import { cache } from "react";
 
 export interface Merchant {
   id: string;
@@ -28,18 +29,18 @@ export const mallService = {
   /**
    * Public: Get all malls
    */
-  async getAllMalls(): Promise<{ status: string; data: Mall[] }> {
+  getAllMalls: cache(async (): Promise<{ status: string; data: Mall[] }> => {
     const res = await api.get<{ status: string; data: Mall[] }>("/malls");
     return res.data;
-  },
+  }),
 
   /**
    * Public: Get mall by ID (includes merchants)
    */
-  async getMallById(id: string): Promise<{ status: string; data: Mall }> {
+  getMallById: cache(async (id: string): Promise<{ status: string; data: Mall }> => {
     const res = await api.get<{ status: string; data: Mall }>(`/malls/${id}`);
     return res.data;
-  },
+  }),
 
   /**
    * Admin: Create a new mall

@@ -166,6 +166,10 @@ export class MerchantService {
    * @returns {Promise<Object>} Formatted merchant list with pagination.
    */
   async getPublicMerchants(filters = {}, page = 1, limit = 20) {
+    const cacheKey = cacheUtil.generateKey('merchants:public', { ...filters, page, limit });
+    const cached = cacheUtil.get(cacheKey);
+    if (cached) return cached;
+
     const skip = (page - 1) * limit;
     
     const where = {
@@ -191,7 +195,7 @@ export class MerchantService {
       })
     ]);
 
-    return {
+    const result = {
       data,
       meta: {
         page,
@@ -199,6 +203,9 @@ export class MerchantService {
         total
       }
     };
+
+    cacheUtil.set(cacheKey, result, 300); // 5 mins
+    return result;
   }
 
   /**
@@ -208,6 +215,10 @@ export class MerchantService {
    */
   async getPublicMerchantById(id) {
     if (!id) throw new AppError('Merchant ID is required', 400);
+
+    const cacheKey = `merchant:public:${id}`;
+    const cached = cacheUtil.get(cacheKey);
+    if (cached) return cached;
 
     const merchant = await this.prisma.merchant.findUnique({
       where: { id, isApproved: true },
@@ -235,6 +246,7 @@ export class MerchantService {
 
     if (!merchant) throw new AppError('Merchant not found', 404);
 
+    cacheUtil.set(cacheKey, merchant, 300); // 5 mins
     return merchant;
   }
 }

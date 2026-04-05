@@ -1,5 +1,6 @@
 import { api } from "./client";
 import { Order } from "./orders";
+import { cache } from "react";
 
 export interface MerchantStats {
   totalRevenue: number;
@@ -51,12 +52,12 @@ export const uploadMerchantBanner = async (file: File): Promise<any> => {
   return data.data;
 };
 
-export const getPublicMerchantProfile = async (id: string): Promise<any> => {
+export const getPublicMerchantProfile = cache(async (id: string): Promise<any> => {
   const { data } = await api.get(`/public/merchants/${id}`);
   return data.data;
-};
+});
 
-export const getPublicMerchants = async (params: any): Promise<any> => {
+export const getPublicMerchants = cache(async (params: any): Promise<any> => {
   const { data } = await api.get("/public/merchants", { params });
   return data;
-};
+});

@@ -68,6 +68,33 @@ export class PrismaProductRepository {
   }
 
   /**
+   * Selection object for full product details
+   */
+  get detailSelect() {
+    return {
+      id: true,
+      name: true,
+      description: true,
+      basePrice: true,
+      categoryId: true,
+      merchantId: true,
+      isTrending: true,
+      createdAt: true,
+      updatedAt: true,
+      images: {
+        orderBy: { order: 'asc' },
+        select: { id: true, url: true, order: true }
+      },
+      variants: {
+        select: { id: true, sku: true, size: true, color: true, price: true, stock: true }
+      },
+      merchant: {
+        select: { id: true, storeName: true, logo: true, description: true, bannerUrl: true }
+      }
+    };
+  }
+
+  /**
    * Create product with nested variants and images
    */
   async createProduct(data, merchantId) {
@@ -87,7 +114,7 @@ export class PrismaProductRepository {
   async findProductById(id) {
     return await prisma.product.findUnique({
       where: { id },
-      include: this.includeDetails
+      select: this.detailSelect
     });
   }
 

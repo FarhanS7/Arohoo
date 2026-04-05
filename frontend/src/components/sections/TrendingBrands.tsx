@@ -1,11 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getPublicMerchants } from "@/lib/api/merchant";
+import { unstable_cache } from "next/cache";
+
+export const getCachedTrendingBrands = unstable_cache(
+  async () => getPublicMerchants({ isTrending: true, limit: 6 }),
+  ["trending-brands"],
+  { revalidate: 600, tags: ["merchants", "trending"] }
+);
 
 export default async function TrendingBrands() {
   let brands: any[] = [];
   try {
-    const res = await getPublicMerchants({ isTrending: true, limit: 6 });
+    const res = await getCachedTrendingBrands();
     if (res.success && Array.isArray(res.data)) {
       brands = res.data;
     }

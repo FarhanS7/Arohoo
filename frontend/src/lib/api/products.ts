@@ -1,4 +1,5 @@
 import { api } from "./client";
+import { cache } from "react";
 
 export interface ProductVariant {
   id: string;
@@ -124,36 +125,36 @@ export const productService = {
   /**
    * Get all public products (with filters)
    */
-  async getPublicProducts(params: any): Promise<PaginatedResponse<Product>> {
+  getPublicProducts: cache(async (params: any): Promise<PaginatedResponse<Product>> => {
     const res = await api.get<PaginatedResponse<Product>>("/public/products", {
       params,
     });
     return res.data;
-  },
+  }),
 
   /**
    * Search public products
    */
-  async searchPublicProducts(params: any): Promise<PaginatedResponse<Product>> {
+  searchPublicProducts: cache(async (params: any): Promise<PaginatedResponse<Product>> => {
     const res = await api.get<PaginatedResponse<Product>>("/public/products/search", {
       params,
     });
     return res.data;
-  },
+  }),
 
   /**
    * Get public product details by ID
    */
-  async getPublicProductById(id: string): Promise<{ success: boolean; data: Product }> {
+  getPublicProductById: cache(async (id: string): Promise<{ success: boolean; data: Product }> => {
     const res = await api.get<{ success: boolean; data: Product }>(`/public/products/${id}`);
     return res.data;
-  },
+  }),
 
   /**
    * Get public variant details by ID
    */
-  async getPublicVariantById(id: string): Promise<{ success: boolean; data: any }> {
+  getPublicVariantById: cache(async (id: string): Promise<{ success: boolean; data: any }> => {
     const res = await api.get<{ success: boolean; data: any }>(`/public/products/variants/${id}`);
     return res.data;
-  },
+  }),
 };

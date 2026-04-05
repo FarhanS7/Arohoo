@@ -10,8 +10,16 @@ import {
   TrendingMallsSkeleton, 
   TrendingProductsSkeleton 
 } from "@/components/sections/skeletons/SectionSkeletons";
+import { getCachedTrendingBrands } from "@/components/sections/TrendingBrands";
+import { getCachedMalls } from "@/components/sections/TrendingMalls";
+import { getCachedTrendingProducts } from "@/components/sections/TrendingProducts";
 
 export default function Home() {
+  // Parallel pre-fetch (Starts fetches immediately to prevent sequential waterfalls)
+  getCachedTrendingBrands();
+  getCachedMalls();
+  getCachedTrendingProducts();
+
   return (
     <PageLayout>
       {/* Hero Section - Static/Pre-rendered */}

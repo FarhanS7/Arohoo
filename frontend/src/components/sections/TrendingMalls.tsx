@@ -1,11 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { mallService, Mall } from "@/lib/api/mall";
+import { unstable_cache } from "next/cache";
+
+export const getCachedMalls = unstable_cache(
+  async () => mallService.getAllMalls(),
+  ["all-malls"],
+  { revalidate: 600, tags: ["malls"] }
+);
 
 export default async function TrendingMalls() {
   let malls: Mall[] = [];
   try {
-    const res = await mallService.getAllMalls();
+    const res = await getCachedMalls();
     if (res.status === "success") {
       malls = res.data.slice(0, 4); // Show top 4 on landing page
     }
