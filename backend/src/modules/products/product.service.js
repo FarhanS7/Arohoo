@@ -31,10 +31,12 @@ export class ProductService {
       data.variants = variants.map(v => {
         if (v.price <= 0) throw new AppError('Variant price must be positive');
         if (v.stock !== undefined && v.stock < 0) throw new AppError('Stock cannot be negative');
-        if (!v.size || !v.color) throw new AppError('Variant must include size and color');
-
-        const sig = JSON.stringify({ size: v.size, color: v.color });
-        if (signatures.has(sig)) throw new AppError('Duplicate variant detected');
+        // If both are missing in one variant but some stock/price is given, that's fine (it's a default variant)
+        const sizeVal = v.size || '';
+        const colorVal = v.color || '';
+        
+        const sig = JSON.stringify({ size: sizeVal, color: colorVal });
+        if (signatures.has(sig)) throw new AppError('Duplicate variant detected (same size and color)');
         signatures.add(sig);
 
         return {

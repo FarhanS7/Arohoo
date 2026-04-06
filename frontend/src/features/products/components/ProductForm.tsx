@@ -15,10 +15,13 @@ interface VariantRowProps {
   variant: any;
   onChange: (index: number, field: string, value: any) => void;
   onRemove: (index: number) => void;
+  sizeLabel?: string;
+  colorLabel?: string;
+  showColor?: boolean;
 }
 
 // Memoized Variant Row to prevent re-rendering all rows when product name changes
-const VariantRow = memo(({ index, variant, onChange, onRemove }: VariantRowProps) => (
+const VariantRow = memo(({ index, variant, onChange, onRemove, sizeLabel = "Size", colorLabel = "Color", showColor = true }: VariantRowProps) => (
   <div className="p-6 bg-gray-50/50 rounded-2xl border border-gray-100 relative group transition-all hover:bg-white hover:shadow-xl hover:shadow-purple-50">
     <button
       type="button"
@@ -56,26 +59,28 @@ const VariantRow = memo(({ index, variant, onChange, onRemove }: VariantRowProps
           className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
         />
       </div>
-      <div>
-        <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">Size</label>
+      <div className={showColor ? "" : "col-span-2"}>
+        <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">{sizeLabel}</label>
         <input
           type="text"
           value={variant.size || ""}
           onChange={(e) => onChange(index, "size", e.target.value)}
           className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
-          placeholder="M, 42, 10..."
+          placeholder={sizeLabel === "Size" ? "M, 42, 10..." : "Value..."}
         />
       </div>
-      <div>
-        <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">Color</label>
-        <input
-          type="text"
-          value={variant.color || ""}
-          onChange={(e) => onChange(index, "color", e.target.value)}
-          className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
-          placeholder="Matte Black..."
-        />
-      </div>
+      {showColor && (
+        <div>
+          <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">{colorLabel}</label>
+          <input
+            type="text"
+            value={variant.color || ""}
+            onChange={(e) => onChange(index, "color", e.target.value)}
+            className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
+            placeholder="Matte Black..."
+          />
+        </div>
+      )}
     </div>
   </div>
 ));
@@ -161,7 +166,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
     if (!formData.name) return setFormError("Product name is required");
     if (!formData.categoryId) return setFormError("Category is required");
     if (formData.basePrice <= 0) return setFormError("Base price must be greater than 0");
-    if (!formData.variants || formData.variants.length === 0) return setFormError("Add at least one variant (Size/Color)");
+    if (!formData.variants || formData.variants.length === 0) return setFormError("Add at least one variant");
 
     try {
       await onSubmit(formData, selectedFiles);
@@ -255,18 +260,46 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
             {(formData.variants || []).length === 0 && (
               <div className="text-center py-12 px-6 bg-purple-50/50 rounded-3xl border border-dashed border-purple-200">
                 <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">No variants added yet</p>
-                <p className="text-[10px] text-purple-300 mt-1">Add at least one size/color combination</p>
+                <p className="text-[10px] text-purple-300 mt-1">Add at least one variant combination</p>
               </div>
             )}
-            {formData.variants?.map((variant: any, index: number) => (
-              <VariantRow 
-                key={index}
-                index={index}
-                variant={variant}
-                onChange={handleVariantChange}
-                onRemove={handleRemoveVariant}
-              />
-            ))}
+            {formData.variants?.map((variant: any, index: number) => {
+              const selectedCategory = categories.find(c => c.id === formData.categoryId);
+              const categorySlug = selectedCategory?.slug || "";
+              
+              let sizeLabel = "Variant/Size";
+              let colorLabel = "Color/Type";
+              let showColor = true;
+
+              switch (categorySlug.toLowerCase()) {
+                 case "skincare":
+                   sizeLabel = "Volume/Weight (e.g. 50ml, 100g)";
+                   showColor = false;
+                   break;
+                 case "shoes":
+                   sizeLabel = "Shoe Size (US/UK/EU)";
+                   break;
+                 case "fashion":
+                 case "mens":
+                 case "female":
+                 case "kids":
+                   sizeLabel = "Clothing Size (S/M/L/XL)";
+                   break;
+              }
+
+              return (
+                <VariantRow 
+                  key={index}
+                  index={index}
+                  variant={variant}
+                  onChange={handleVariantChange}
+                  onRemove={handleRemoveVariant}
+                  sizeLabel={sizeLabel}
+                  colorLabel={colorLabel}
+                  showColor={showColor}
+                />
+              );
+            })}
           </div>
         </div>
       </div>

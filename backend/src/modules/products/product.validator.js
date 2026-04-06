@@ -11,8 +11,8 @@ export const createProductSchema = z.object({
       price: z.number().positive('Variant price must be positive'),
       stock: z.number().int().min(0, 'Stock cannot be negative').optional(),
       attributes: z.object({
-        size: z.string().min(1, 'Size is required'),
-        color: z.string().min(1, 'Color is required')
+        size: z.string().optional().or(z.literal('')),
+        color: z.string().optional().or(z.literal(''))
       }).catchall(z.string())
     })).optional()
   })
