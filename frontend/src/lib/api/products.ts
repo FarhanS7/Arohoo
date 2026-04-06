@@ -53,6 +53,9 @@ export interface PaginatedResponse<T> {
   };
 }
 
+// Temporary tracking for performance auditing
+const requestTracker: Record<string, number> = {};
+
 /**
  * Product API Service
  */
@@ -146,8 +149,21 @@ export const productService = {
    * Get public product details by ID
    */
   getPublicProductById: cache(async (id: string): Promise<{ success: boolean; data: Product }> => {
-    const res = await api.get<{ success: boolean; data: Product }>(`/public/products/${id}`);
-    return res.data;
+    const start = performance.now();
+    requestTracker[id] = (requestTracker[id] || 0) + 1;
+    
+    // If this log appears, it means the React cache was BYPASSED (Network request triggered)
+    console.log(`[PERF:API] NETWORK FETCH (ID: ${id}) - Global Total Calls: ${requestTracker[id]}`);
+    
+    try {
+      const res = await api.get<{ success: boolean; data: Product }>(`/public/products/${id}`);
+      const duration = performance.now() - start;
+      console.log(`[PERF:API] FETCH END (ID: ${id}) - Duration: ${duration.toFixed(2)}ms`);
+      return res.data;
+    } catch (error) {
+      console.log(`[PERF:API] FETCH FAILED (ID: ${id}) - Error: ${error instanceof Error ? error.message : 'Unknown'}`);
+      throw error;
+    }
   }),
 
   /**

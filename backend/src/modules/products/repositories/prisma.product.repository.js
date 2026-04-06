@@ -89,7 +89,7 @@ export class PrismaProductRepository {
         select: { id: true, sku: true, size: true, color: true, price: true, stock: true }
       },
       merchant: {
-        select: { id: true, storeName: true, logo: true, description: true, bannerUrl: true }
+        select: { id: true, storeName: true, logo: true }
       }
     };
   }
@@ -112,10 +112,19 @@ export class PrismaProductRepository {
   }
 
   async findProductById(id) {
-    return await prisma.product.findUnique({
-      where: { id },
-      select: this.detailSelect
-    });
+    const start = performance.now();
+    try {
+      const result = await prisma.product.findUnique({
+        where: { id },
+        select: this.detailSelect
+      });
+      const duration = performance.now() - start;
+      console.log(`[PERF:BACKEND] Prisma findProductById (ID: ${id}) - Duration: ${duration.toFixed(2)}ms`);
+      return result;
+    } catch (error) {
+      console.log(`[PERF:BACKEND] Prisma Error (ID: ${id}) - Error: ${error.message}`);
+      throw error;
+    }
   }
 
   async findProductsByMerchant(merchantId, { page, limit }) {

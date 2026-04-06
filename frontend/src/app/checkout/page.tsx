@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 import { useToastContext } from '@/components/providers/ToastProvider';
 import { useCart } from '@/features/cart/hooks/useCart';
-import Navbar from '@/components/layout/Navbar';
+import PageLayout from '@/components/layout/UX/PageLayout';
 
 interface LiveItem {
   productVariantId: string;
@@ -34,8 +34,7 @@ const CheckoutPage = () => {
   const [shippingCost, setShippingCost] = useState(70);
   const [shippingDistrict, setShippingDistrict] = useState<'Chattogram' | 'Other'>('Chattogram');
   const [error, setError] = useState<string | null>(null);
- 
-  // 1. Fetch live data for the entire cart in ONE request
+  
   useEffect(() => {
     if (cartLoading || !cart || cart.items.length === 0) {
       if (!cartLoading && (!cart || cart.items.length === 0)) {
@@ -81,7 +80,6 @@ const CheckoutPage = () => {
     setShippingCost(district === 'Chattogram' ? 70 : 130);
   }, []);
 
-  // 2. Checkout Mutation
   const checkoutMutation = useMutation({
     mutationFn: async (shippingData: ShippingFormData) => {
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -138,47 +136,44 @@ const CheckoutPage = () => {
 
   if (!cartLoading && (!cart || cart.items.length === 0)) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center font-sans">
-        <Navbar />
-        <div className="text-center space-y-4">
+      <PageLayout>
+        <div className="flex flex-col items-center justify-center py-20 px-4">
           <div className="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg className="w-10 h-10 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-neutral-900">Your cart is empty</h2>
-          <p className="text-neutral-500">Pick some premium footwear before checking out.</p>
+          <h2 className="text-2xl font-black text-neutral-900 uppercase italic">Your cart is empty</h2>
+          <p className="text-neutral-500 mb-8 font-medium">Pick some premium footwear before checking out.</p>
           <button 
             onClick={() => router.push('/products')}
-            className="px-8 py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-all"
+            className="px-8 py-4 bg-purple-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-purple-700 transition-all shadow-xl shadow-purple-200 active:scale-95"
           >
             Go to Shop
           </button>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 pt-28 pb-12 px-4 sm:px-6 lg:px-8 font-sans">
-      <Navbar />
-      <div className="max-w-6xl mx-auto">
+    <PageLayout showBackButton={true}>
+      <div className="responsive-container pb-12">
         <header className="mb-10 text-center md:text-left">
-          <h1 className="text-4xl font-bold text-neutral-900 tracking-tight">Checkout</h1>
-          <p className="mt-2 text-neutral-500">Fast guest checkout. No login required.</p>
+          <h1 className="text-4xl font-black text-neutral-900 tracking-tighter uppercase italic">Checkout</h1>
+          <p className="mt-2 text-neutral-500 font-medium">Fast guest checkout. No login required.</p>
         </header>
 
         {error && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-700 text-sm flex items-center gap-3 animate-fade-in">
+          <div className="mb-8 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-700 text-sm flex items-center gap-3 animate-fade-in shadow-sm">
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            {error}
+            <span className="font-bold">{error}</span>
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Left: Shipping Form */}
           <div className="lg:col-span-7">
             <ShippingForm 
               onSubmit={handleCheckout} 
@@ -187,7 +182,6 @@ const CheckoutPage = () => {
             />
           </div>
 
-          {/* Right: Summary */}
           <div className="lg:col-span-5">
             <div className="sticky top-28">
               <CheckoutSummary 
@@ -203,7 +197,7 @@ const CheckoutPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

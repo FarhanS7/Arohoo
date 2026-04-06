@@ -4,7 +4,6 @@ import { AuthProvider } from "@/features/auth/auth.context";
 import { CartProvider } from "@/features/cart/cart.context";
 import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
-import AuthLayoutWrapper from "./auth-layout-wrapper";
 import "./globals.css";
 
 const openSans = Open_Sans({
@@ -32,9 +31,7 @@ export default function RootLayout({
           <ToastProvider>
             <AuthProvider>
               <CartProvider>
-                <AuthLayoutWrapper>
-                  {children}
-                </AuthLayoutWrapper>
+                {children}
               </CartProvider>
             </AuthProvider>
           </ToastProvider>

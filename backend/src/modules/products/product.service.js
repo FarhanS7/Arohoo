@@ -98,20 +98,29 @@ export class ProductService {
   }
 
   async getProductById(id, merchantId) {
+    const start = performance.now();
     const cacheKey = `product:detail:${id}`;
     
-    // Only use cache for public views (no merchantId restriction check needed or same as cached)
-    // Actually, the check at line 88 handles authorization.
+    // Only use cache for public views (no merchantId restriction check needed)
     const cached = cacheUtil.get(cacheKey);
     if (cached && (!merchantId || cached.merchantId === merchantId)) {
+      const duration = performance.now() - start;
+      console.log(`[PERF:BACKEND] getProductById Service (ID: ${id}) - CACHE HIT - Duration: ${duration.toFixed(2)}ms`);
       return cached;
     }
 
+    const repoStart = performance.now();
     const product = await this.repository.findProductById(id);
+    const repoEnd = performance.now();
+    
     if (!product) throw new AppError('Product not found', 404);
     if (merchantId && product.merchantId !== merchantId) throw new AppError('Unauthorized', 403);
     
     cacheUtil.set(cacheKey, product, 600); // 10 mins
+    
+    const totalDuration = performance.now() - start;
+    console.log(`[PERF:BACKEND] getProductById Service (ID: ${id}) - CACHE MISS - Total: ${totalDuration.toFixed(2)}ms, Repo: ${(repoEnd - repoStart).toFixed(2)}ms`);
+    
     return product;
   }
 

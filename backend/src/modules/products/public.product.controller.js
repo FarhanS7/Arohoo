@@ -46,7 +46,11 @@ export const listProducts = asyncHandler(async (req, res) => {
 export const searchProducts = listProducts; // Currently identical, but separate for future extension
 
 export const getProductDetail = asyncHandler(async (req, res) => {
+  const start = performance.now();
   const product = await productService.getProductById(req.params.id);
+  const duration = performance.now() - start;
+
+  console.log(`[PERF:BACKEND] getProductDetail Controller (ID: ${req.params.id}) - Duration: ${duration.toFixed(2)}ms`);
 
   res.status(200).json({
     success: true,
