@@ -21,8 +21,9 @@ export const protect = (req, res, next) => {
     // 2. Verification token
     const decoded = verifyToken(token);
 
-    // 3. Attach user to request
+    // 3. Attach user to request and set .id alias for backward compatibility
     req.user = decoded;
+    req.user.id = decoded.userId || decoded.id;
     next();
   } catch (error) {
     return next(new AppError('Invalid token. Please log in again!', 401));
@@ -42,6 +43,7 @@ export const optionalProtect = (req, res, next) => {
     try {
       const decoded = verifyToken(token);
       req.user = decoded;
+      req.user.id = decoded.userId || decoded.id;
     } catch (error) {
       // Ignore invalid token for optional protection
     }

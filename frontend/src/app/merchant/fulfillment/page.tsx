@@ -19,8 +19,8 @@ export default function MerchantFulfillmentPage() {
     }
   };
 
-  const pendingCount = orders.filter((o: any) => o.status === "PROCESSING").length;
-  const shippedCount = orders.filter((o: any) => o.status === "SHIPPED").length;
+  const pendingCount = orders.filter((o: any) => ["PENDING", "CONFIRMED", "PROCESSING"].includes(o.status.toUpperCase())).length;
+  const shippedCount = orders.filter((o: any) => o.status.toUpperCase() === "SHIPPED").length;
 
   return (
     <ProtectedRoute allowedRoles={["MERCHANT", "ADMIN"]}>
@@ -47,7 +47,7 @@ export default function MerchantFulfillmentPage() {
         {/* Quick Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-16">
           <div className="bg-neutral-50 p-10 rounded-[2.5rem] border border-neutral-100 group hover:border-black transition-all">
-            <h3 className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Total Requests</h3>
+            <h3 className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Incoming Requests</h3>
             <p className="text-4xl font-black text-neutral-900 leading-none">{orders.length}</p>
           </div>
           <div className="bg-amber-50 p-10 rounded-[2.5rem] border border-amber-100">

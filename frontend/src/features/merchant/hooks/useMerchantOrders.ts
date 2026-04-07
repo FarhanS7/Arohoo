@@ -12,7 +12,8 @@ export function useMerchantOrders() {
     setError(null);
     try {
       const data = await getMerchantOrders();
-      setOrders(data);
+      // Backend returns { orders: [...], pagination: {...} }
+      setOrders(Array.isArray(data) ? data : (data as any).orders || []);
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Failed to fetch orders");
     } finally {
@@ -23,9 +24,10 @@ export function useMerchantOrders() {
   const changeStatus = async (orderId: string, status: string) => {
     try {
       const updatedOrder = await updateOrderStatus(orderId, status);
-      setOrders((prev) => 
-        prev.map((o) => (o.id === orderId ? updatedOrder : o))
-      );
+      setOrders((prev) => {
+        const currentOrders = Array.isArray(prev) ? prev : [];
+        return currentOrders.map((o) => (o.id === orderId ? updatedOrder : o));
+      });
       return updatedOrder;
     } catch (err: any) {
       throw err.response?.data?.message || err.message || "Failed to update order status";

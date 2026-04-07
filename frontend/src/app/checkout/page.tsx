@@ -137,19 +137,18 @@ const CheckoutPage = () => {
   if (!cartLoading && (!cart || cart.items.length === 0)) {
     return (
       <PageLayout>
-        <div className="flex flex-col items-center justify-center py-20 px-4">
-          <div className="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-            </svg>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] bg-surface font-body px-4">
+          <div className="w-24 h-24 bg-surface-container-low rounded-full flex items-center justify-center mx-auto mb-6">
+            <span className="material-symbols-outlined text-4xl text-on-surface-variant">shopping_cart</span>
           </div>
-          <h2 className="text-2xl font-black text-neutral-900 uppercase italic">Your cart is empty</h2>
-          <p className="text-neutral-500 mb-8 font-medium">Pick some premium footwear before checking out.</p>
+          <h2 className="text-3xl font-extrabold text-on-surface font-headline mb-3">Your cart is empty</h2>
+          <p className="text-on-surface-variant max-w-md text-center mb-10">Pick some premium footwear or structural aesthetics before checking out.</p>
           <button 
             onClick={() => router.push('/products')}
-            className="px-8 py-4 bg-purple-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-purple-700 transition-all shadow-xl shadow-purple-200 active:scale-95"
+            className="px-8 py-4 bg-primary text-white rounded-xl font-bold tracking-widest hover:bg-primary-hover transition-all shadow-xl active:scale-95 flex items-center gap-2"
           >
-            Go to Shop
+            Start Exploring
+            <span className="material-symbols-outlined text-sm">arrow_forward</span>
           </button>
         </div>
       </PageLayout>
@@ -158,22 +157,16 @@ const CheckoutPage = () => {
 
   return (
     <PageLayout showBackButton={true}>
-      <div className="responsive-container pb-12">
-        <header className="mb-10 text-center md:text-left">
-          <h1 className="text-4xl font-black text-neutral-900 tracking-tighter uppercase italic">Checkout</h1>
-          <p className="mt-2 text-neutral-500 font-medium">Fast guest checkout. No login required.</p>
-        </header>
+      <main className="bg-surface p-6 lg:p-12 font-body text-on-surface min-h-screen">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 pt-8">
+          
+          {error && (
+            <div className="lg:col-span-12 mb-2 p-4 bg-error-container border border-error/20 rounded-xl text-on-error-container text-sm flex items-center gap-3 animate-fade-in shadow-sm">
+              <span className="material-symbols-outlined flex-shrink-0">error</span>
+              <span className="font-bold">{error}</span>
+            </div>
+          )}
 
-        {error && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-700 text-sm flex items-center gap-3 animate-fade-in shadow-sm">
-            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="font-bold">{error}</span>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-7">
             <ShippingForm 
               onSubmit={handleCheckout} 
@@ -196,7 +189,7 @@ const CheckoutPage = () => {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </PageLayout>
   );
 };

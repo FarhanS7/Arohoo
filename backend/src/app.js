@@ -28,7 +28,9 @@ app.use(express.static('public')); // Serve static files
 
 // 2. ROUTES
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'success', message: 'Server is healthy' });
+  res.status(200).json({ status: 'success', message: 'Server is healthy' ,
+ uptime: process.uptime(),
+});
 });
 
 app.use('/api/v1', apiRouter);

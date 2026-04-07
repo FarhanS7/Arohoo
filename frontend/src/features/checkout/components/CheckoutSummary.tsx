@@ -22,19 +22,21 @@ interface CheckoutSummaryProps {
 }
 
 const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({ items, subtotal, shippingCost, isLoading }) => {
-  const total = subtotal + shippingCost;
+  const tax = subtotal * 0.08; // Estimated 8% tax
+  const total = subtotal + shippingCost + tax;
   
   if (isLoading) {
     return (
-      <div className="bg-white p-6 rounded-2xl border border-neutral-100 animate-pulse font-sans">
-        <div className="h-6 w-32 bg-neutral-100 rounded mb-6" />
-        <div className="space-y-4">
+      <div className="bg-surface-container-lowest p-10 rounded-xl shadow-[0px_20px_40px_rgba(74,68,85,0.06)] animate-pulse font-body space-y-8">
+        <div className="h-6 w-32 bg-surface-container-high rounded" />
+        <div className="space-y-6">
           {[1, 2].map((i) => (
             <div key={i} className="flex gap-4">
-              <div className="h-16 w-16 bg-neutral-100 rounded-lg" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 w-2/3 bg-neutral-100 rounded" />
-                <div className="h-4 w-1/4 bg-neutral-100 rounded" />
+              <div className="h-24 w-20 bg-surface-container-low rounded-lg" />
+              <div className="flex-1 space-y-3 py-1">
+                <div className="h-4 w-2/3 bg-surface-container-high rounded" />
+                <div className="h-3 w-1/3 bg-surface-container-high rounded" />
+                <div className="h-5 w-1/4 bg-surface-container-low rounded mt-4" />
               </div>
             </div>
           ))}
@@ -44,68 +46,91 @@ const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({ items, subtotal, ship
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-neutral-100 font-sans">
-      <h2 className="text-xl font-bold mb-6 text-neutral-900">Order Summary</h2>
-      
-      <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-        {items.map((item) => (
-          <div key={item.productVariantId} className="flex gap-4 items-start pb-4 border-b border-neutral-50 last:border-0 last:pb-0">
-            <div className="relative h-16 w-16 rounded-lg bg-neutral-50 overflow-hidden flex-shrink-0 border border-neutral-100">
-              {item.image ? (
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-neutral-300">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-              )}
+    <div className="space-y-8 font-body text-on-surface">
+      <div className="bg-surface-container-lowest p-10 rounded-xl shadow-[0px_20px_40px_rgba(74,68,85,0.06)]">
+        <h3 className="text-xl font-bold font-headline mb-8 text-on-surface">Order Summary</h3>
+        
+        <div className="space-y-6 mb-10 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+          {items.map((item) => (
+            <div key={item.productVariantId} className="flex items-start gap-4">
+              <div className="w-20 h-24 bg-surface-container-low rounded-lg flex-shrink-0 overflow-hidden">
+                {item.image ? (
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    width={80}
+                    height={96}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-on-surface-variant opacity-50">
+                    <span className="material-symbols-outlined text-3xl">imagesmode</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-sm text-on-surface max-w-[180px] truncate" title={item.name}>{item.name}</p>
+                <p className="text-xs text-on-surface-variant mb-2">
+                  {item.variantName ? `${item.variantName} | Qty: ${item.quantity}` : `Qty: ${item.quantity}`}
+                </p>
+                <p className="font-headline font-bold text-primary">
+                  ৳{item.price.toLocaleString()}
+                </p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold text-neutral-900 truncate">{item.name}</h3>
-              <p className="text-xs text-neutral-500 mt-0.5">
-                {item.variantName || 'Standard Variant'} • Qty: {item.quantity}
-              </p>
-              <p className="text-sm font-bold text-purple-600 mt-1">
-                ৳{item.price.toLocaleString()}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm font-bold text-neutral-900">
-                ৳{item.subtotal.toLocaleString()}
-              </p>
-            </div>
+          ))}
+        </div>
+
+        <div className="border-t border-surface-container-high pt-8 space-y-4">
+          <div className="flex justify-between text-sm">
+            <span className="text-on-surface-variant">Subtotal</span>
+            <span className="font-medium text-on-surface">৳{subtotal.toLocaleString()}</span>
           </div>
-        ))}
+          <div className="flex justify-between text-sm">
+            <span className="text-on-surface-variant">Estimated Shipping</span>
+            <span className="font-medium text-on-surface">৳{shippingCost.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-on-surface-variant">Tax (8% Est.)</span>
+            <span className="font-medium text-on-surface">৳{tax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          </div>
+          
+          <div className="flex justify-between pt-4 border-t border-surface-container-high mt-4">
+            <span className="text-lg font-bold font-headline text-on-surface">Total</span>
+            <span className="text-lg font-bold font-headline text-primary">
+              ৳{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+          </div>
+        </div>
+
+        <button 
+          onClick={() => {
+            const btn = document.getElementById('checkout-submit-btn');
+            if (btn) btn.click();
+          }}
+          disabled={isLoading || items.length === 0}
+          className="w-full mt-10 bg-primary text-white py-5 rounded-xl font-bold tracking-wide text-sm shadow-xl hover:bg-primary-hover hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+        >
+          PLACE ORDER
+        </button>
+
+        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-on-surface-variant">
+          <span className="material-symbols-outlined text-sm">lock</span>
+          <span>SSL Encrypted Secure Payment (COD Proxy)</span>
+        </div>
       </div>
 
-      <div className="mt-8 pt-6 border-t border-neutral-100 space-y-3">
-        <div className="flex justify-between text-base text-neutral-600">
-          <span>Subtotal</span>
-          <span className="font-semibold text-neutral-900">৳{subtotal.toLocaleString()}</span>
+      {/* Merchant Trust Card */}
+      <div className="bg-primary/5 p-6 rounded-xl flex items-start gap-4 border border-primary/10">
+        <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+          <span className="material-symbols-outlined text-on-secondary-container text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>
         </div>
-        <div className="flex justify-between text-base text-neutral-600">
-          <span>Shipping Cost</span>
-          <span className="font-semibold text-neutral-900">
-            {shippingCost > 0 ? `৳${shippingCost}` : 'Calculated next'}
-          </span>
+        <div>
+          <p className="text-sm font-bold text-on-secondary-container">Ethereal Guarantee</p>
+          <p className="text-xs text-on-secondary-container/80 leading-relaxed mt-1">
+            Shop with peace of mind. Every purchase is protected by our zero-liability secure checkout and editorial return policy.
+          </p>
         </div>
-        <div className="flex justify-between text-xl font-bold text-neutral-900 pt-4 border-t border-neutral-50 border-dashed">
-          <span>Total Payable</span>
-          <span className="text-purple-600">৳{total.toLocaleString()}</span>
-        </div>
-      </div>
-
-      <div className="mt-6 p-4 bg-purple-50 rounded-xl flex gap-3 text-xs text-purple-700 border border-purple-100">
-        <svg className="w-5 h-5 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-        </svg>
-        <p>Your order is secured by <b>Cash on Delivery</b>. Pay only when you receive your package.</p>
       </div>
     </div>
   );

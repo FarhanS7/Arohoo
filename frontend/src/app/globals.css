@@ -42,9 +42,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: #5300b7;
+  --color-primary-hover: #4a00a4;
+  --color-primary-foreground: #ffffff;
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
@@ -52,7 +52,59 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-border: var(--border);
-  --font-sans: var(--font-open-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* Typography */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-headline: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-label: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Ethereal M3 Tokens */
+  --color-tertiary-fixed-dim: #ffb68b;
+  --color-on-primary-fixed: #250059;
+  --color-surface-variant: #e1e3e4;
+  --color-surface: #f8f9fa;
+  --color-tertiary-container: #8f4200;
+  --color-surface-container-high: #e7e8e9;
+  --color-on-surface: #191c1d;
+  --color-on-surface-variant: #4a4455;
+  --color-surface-container-highest: #e1e3e4;
+  --color-outline-variant: #ccc3d7;
+  --color-surface-dim: #d9dadb;
+  --color-on-tertiary: #ffffff;
+  --color-secondary-fixed-dim: #cebdff;
+  --color-on-background: #191c1d;
+  --color-secondary: #674bb5;
+  --color-on-tertiary-fixed: #321300;
+  --color-on-primary-container: #dac5ff;
+  --color-inverse-primary: #d3bbff;
+  --color-primary-fixed: #ebddff;
+  --color-on-error: #ffffff;
+  --color-inverse-on-surface: #f0f1f2;
+  --color-outline: #7b7486;
+  --color-surface-bright: #f8f9fa;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-secondary-container: #3f1e8c;
+  --color-on-secondary-fixed: #21005e;
+  --color-on-primary-fixed-variant: #5b00c5;
+  --color-on-secondary-fixed-variant: #4f319c;
+  --color-on-primary: #ffffff;
+  --color-on-tertiary-fixed-variant: #743400;
+  --color-secondary-fixed: #e8ddff;
+  --color-surface-container: #edeeef;
+  --color-primary-container: #6d28d9;
+  --color-error: #ba1a1a;
+  --color-surface-container-low: #f3f4f5;
+  --color-primary-fixed-dim: #d3bbff;
+  --color-on-secondary: #ffffff;
+  --color-surface-tint: #7331df;
+  --color-error-container: #ffdad6;
+  --color-tertiary-fixed: #ffdbc8;
+  --color-inverse-surface: #2e3132;
+  --color-tertiary: #6b3000;
+  --color-secondary-container: #ab8ffe;
+  --color-on-tertiary-container: #ffc19e;
+  --color-on-error-container: #93000a;
 }
 
 body {
@@ -63,11 +115,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* GLOBAL ANIMATION RESET */
-* {
-  transition: none !important;
-  animation: none !important;
-}
+/* Removed global animation reset to allow Ethereal UI hover effects */
 
 .bg-purple-gradient {
   background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%);

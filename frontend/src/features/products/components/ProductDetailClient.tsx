@@ -41,158 +41,164 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const images = product.images.length > 0 ? product.images : [{ url: '/placeholder-product.png', order: 0 }];
 
   return (
-    <div className="bg-white font-sans overflow-hidden">
-      <div className="responsive-container py-12 md:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24">
-          {/* Image Gallery */}
-          <div className="space-y-6">
-            <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden bg-neutral-50 border border-neutral-100">
-               <Image 
-                 src={mainImage || '/placeholder-product.png'}
-                 alt={product.name}
-                 fill
-                 priority
-                 className="object-cover object-center"
-                 sizes="(max-width: 768px) 100vw, 50vw"
-               />
+    <main className="max-w-7xl mx-auto px-8 pt-8 pb-24 font-body min-h-screen">
+      {/* Breadcrumbs */}
+      <nav className="mb-6 flex items-center space-x-2 text-sm font-medium tracking-wide text-on-surface-variant">
+        <Link className="hover:text-primary transition-colors" href="/">Home</Link>
+        <span className="material-symbols-outlined text-xs">chevron_right</span>
+        <Link className="hover:text-primary transition-colors" href="/products">Shop</Link>
+        <span className="material-symbols-outlined text-xs">chevron_right</span>
+        <span className="text-on-surface font-semibold truncate">{product.name}</span>
+      </nav>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        {/* Left Column: Product Gallery */}
+        <div className="lg:col-span-1 space-y-4">
+          <div className="aspect-[4/5] max-h-[520px] bg-surface-container-low rounded-xl overflow-hidden relative group">
+            <Image 
+              src={mainImage || '/placeholder-product.png'}
+              alt={product.name}
+              fill
+              priority
+              className="object-cover object-top transform group-hover:scale-105 transition-transform duration-700"
+              sizes="(max-width: 1024px) 100vw, 60vw"
+            />
+            <div className="absolute top-6 right-6">
+              <button className="w-12 h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-on-surface-variant hover:text-error transition-colors shadow-sm">
+                <span className="material-symbols-outlined">favorite</span>
+              </button>
             </div>
-            {images.length > 1 && (
-              <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
-                {images.map((img, idx) => (
-                  <button 
-                    key={idx}
-                    onClick={() => setMainImage(img.url)}
-                    className={`relative flex-shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 ${mainImage === img.url ? 'border-primary border-4' : 'border-transparent opacity-60'}`}
+          </div>
+          
+          {images.length > 1 && (
+            <div className="grid grid-cols-4 gap-4">
+              {images.slice(0, 4).map((img, idx) => (
+                <button 
+                  key={idx}
+                  onClick={() => setMainImage(img.url)}
+                  className={`aspect-square bg-surface-container-low rounded-lg overflow-hidden transition-opacity cursor-pointer relative ${mainImage === img.url ? 'border-2 border-primary' : 'hover:opacity-80'}`}
+                >
+                  <Image 
+                    src={img.url} 
+                    alt={`${product.name} thumbnail ${idx + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Right Column: Product Info */}
+        <div className="lg:col-span-1 flex flex-col">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="bg-tertiary-fixed text-on-tertiary-fixed text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">
+              {product.isTrending ? 'Trending' : 'New Arrival'}
+            </span>
+          </div>
+
+          <h1 className="text-3xl font-extrabold text-on-surface leading-tight mb-1 font-headline">{product.name}</h1>
+          <p className="text-2xl font-light text-primary mb-4">৳{(selectedVariant?.price || product.basePrice).toLocaleString()}</p>
+
+          <div className="flex items-center p-3 bg-surface-container-low rounded-xl mb-4">
+            <div className="relative w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center mr-3 overflow-hidden">
+               {product.merchant?.logo ? (
+                 <Image src={product.merchant.logo} alt={product.merchant.storeName || 'Merchant'} fill className="object-cover" />
+               ) : (
+                 <span className="material-symbols-outlined text-on-secondary-container">storefront</span>
+               )}
+            </div>
+            <div>
+              <p className="text-xs text-on-surface-variant uppercase tracking-tighter">Sold by</p>
+              <Link href={`/merchants/${product.merchantId}`} className="text-sm font-bold text-on-surface hover:underline underline-offset-4 decoration-primary/50">
+                {product.merchant?.storeName || 'Verified Merchant'}
+              </Link>
+            </div>
+            <span className="material-symbols-outlined text-primary ml-auto">verified</span>
+          </div>
+
+          {/* Selectors */}
+          <div className="space-y-4 mb-5">
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Variant</h3>
+                <button className="text-xs font-medium text-primary underline underline-offset-4 decoration-secondary-fixed">Size Guide</button>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {product.variants.map((v) => (
+                  <button
+                    key={v.id}
+                    onClick={() => setSelectedVariant(v)}
+                    className={`h-12 border rounded-lg flex items-center justify-center text-sm font-medium transition-all ${selectedVariant?.id === v.id ? 'border-2 border-primary text-primary font-bold bg-primary/5' : 'border-surface-container-high hover:border-primary hover:text-primary text-on-surface'}`}
                   >
-                    <Image 
-                      src={img.url} 
-                      alt={`${product.name} view ${idx + 1}`}
-                      fill
-                      className="object-cover"
-                    />
+                    {v.color ? `${v.color} ${v.size ? `(${v.size})` : ''}` : v.size}
                   </button>
                 ))}
               </div>
-            )}
+              {selectedVariant?.stock === 0 && (
+                <p className="text-error text-xs font-bold mt-2">Currently out of stock.</p>
+              )}
+            </div>
           </div>
- 
-          {/* Product Info */}
-          <div className="flex flex-col">
-            <div className="border-b border-neutral-100 pb-10">
-              <div className="flex items-center justify-between mb-6">
-                <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em] italic">New Arrival</span>
-                {product.merchant && (
-                  <Link 
-                    href={`/merchants/${product.merchant.id}`}
-                    className="flex items-center gap-2"
-                  >
-                    <div className="relative w-8 h-8 rounded-2xl overflow-hidden bg-black border border-neutral-100">
-                      {product.merchant.logo ? (
-                        <Image src={product.merchant.logo} alt={product.merchant.storeName} fill className="object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-white italic">{product.merchant.storeName.substring(0, 1)}</div>
-                      )}
-                    </div>
-                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest border-b border-transparent pb-0.5">
-                      {product.merchant.storeName}
-                    </span>
-                  </Link>
-                )}
-              </div>
-              <h1 className="text-5xl lg:text-7xl font-black text-neutral-900 tracking-tighter uppercase leading-none mb-6 italic">
-                {product.name}
-              </h1>
-              <p className="text-3xl font-black text-neutral-900 leading-none tracking-tighter italic">
-                ৳{(selectedVariant?.price || product.basePrice).toLocaleString()}
-              </p>
-            </div>
- 
-            <div className="py-10 space-y-10">
-              <div className="prose prose-neutral text-neutral-500 font-medium leading-relaxed italic text-base">
-                {product.description || "A masterfully crafted essential designed for comfort and longevity. Made from premium, planet-friendly materials."}
-              </div>
- 
-              {/* Variant Selectors */}
-              <div className="space-y-8">
-                <div>
-                   <h3 className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-6">Select Size</h3>
-                   <div className="flex flex-wrap gap-4">
-                     {product.variants.map((v) => (
-                       <button
-                         key={v.id}
-                         onClick={() => setSelectedVariant(v)}
-                         className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 ${selectedVariant?.id === v.id ? 'bg-primary border-primary text-white' : 'bg-white border-neutral-100 text-neutral-500'}`}
-                       >
-                         {v.size} {v.color && `- ${v.color}`}
-                       </button>
-                     ))}
-                   </div>
-                </div>
-              </div>
- 
-              <div className="pt-4 flex flex-col gap-4">
-                <button 
-                  disabled={addingToCart || !selectedVariant || selectedVariant.stock === 0}
-                  onClick={handleAddToCart}
-                  className="w-full py-6 bg-primary text-white font-black rounded-[2rem] text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-4 disabled:opacity-50"
-                >
-                  {addingToCart ? "Adding..." : selectedVariant?.stock === 0 ? "Out of Stock" : "Add to Cart"}
-                  {!addingToCart && (selectedVariant?.stock ?? 0) !== 0 && (
-                    <>
-                      <span className="opacity-20 text-lg font-thin">|</span>
-                      <span className="opacity-90">Bag</span>
-                    </>
-                  )}
-                </button>
-                
-                {product.merchant && (
-                  <Link 
-                    href={`/merchants/${product.merchant.id}`}
-                    className="w-full py-5 border-2 border-neutral-100 text-center text-[10px] font-black uppercase tracking-widest text-neutral-400 rounded-2xl"
-                  >
-                    Visit {product.merchant.storeName} Store
-                  </Link>
-                )}
- 
-                <div className="flex items-center justify-center gap-8 text-[10px] uppercase font-black text-neutral-300 tracking-[0.2em] pt-4 italic">
-                   <div className="flex items-center gap-2">
-                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                     In Stock
-                   </div>
-                   <div className="flex items-center gap-2">
-                     <span className="w-2 h-2 border-2 border-primary/40 rounded-full"></span>
-                     Ships Worldwide
-                   </div>
-                </div>
+
+          {/* CTAs */}
+          <div className="flex flex-col gap-3 mb-6">
+            <button 
+              onClick={handleAddToCart}
+              disabled={addingToCart || !selectedVariant || selectedVariant.stock === 0}
+              className="w-full h-12 bg-primary text-white rounded-xl font-bold hover:bg-primary-hover hover:shadow-lg transition-all scale-100 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:active:scale-100"
+            >
+              <span className="material-symbols-outlined">shopping_bag</span>
+              {addingToCart ? 'Syncing...' : selectedVariant?.stock === 0 ? 'Out of Stock' : 'Add to Bag'}
+            </button>
+            <button className="w-full h-14 bg-surface-container-high text-on-surface rounded-xl font-bold hover:bg-secondary-fixed transition-all flex items-center justify-center gap-2">
+              <span className="material-symbols-outlined">favorite</span>
+              Add to Wishlist
+            </button>
+          </div>
+
+          {/* Editorial Description */}
+          <div className="border-t border-surface-container-high pt-8 space-y-6">
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">The Narrative</h3>
+              <div className="text-on-surface-variant leading-relaxed font-body">
+                {product.description || "Meticulously crafted from premium materials, this piece redefines effortless sophistication. Featuring a contemporary silhouette, it strikes the perfect balance between uncompromising luxury and relaxed seasonal wear."}
               </div>
             </div>
- 
-            {/* Product Meta (Simplified) */}
-            <div className="mt-auto border-t border-neutral-100 pt-10 grid grid-cols-2 gap-10">
-               <div>
-                  <h4 className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-2 italic">SKU</h4>
-                  <p className="text-xs font-black text-neutral-900 italic uppercase tracking-tighter">{selectedVariant?.sku || '--'}</p>
-               </div>
-               <div>
-                  <h4 className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-2 italic">Category</h4>
-                  <p className="text-xs font-black text-neutral-900 underline underline-offset-8 decoration-primary/20 decoration-4 italic uppercase tracking-tighter">Sustainability</p>
-               </div>
+
+            <div className="flex items-start gap-3 p-4 bg-primary/5 rounded-xl border-l-4 border-primary">
+              <span className="material-symbols-outlined text-primary mt-0.5">local_shipping</span>
+              <div>
+                <p className="text-sm font-bold text-on-surface">Protected Transaction</p>
+                <p className="text-xs text-on-surface-variant">Your order is secured by the Ethereal Marketplace zero-liability guarantee policy.</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
- 
-      {/* Recommended Section (Mock) */}
-      <div className="bg-neutral-50 py-32 border-t border-neutral-100">
-         <div className="responsive-container">
-            <h2 className="text-3xl font-black text-neutral-900 uppercase tracking-tighter mb-16 italic underline decoration-primary/20 decoration-8 underline-offset-[12px]">You May Also Like</h2>
-            <div className="responsive-grid grid-cols-2 lg:grid-cols-4 gap-8">
-               {[...Array(4)].map((_, i) => (
-                 <div key={i} className="aspect-[4/5] bg-white border border-neutral-100 rounded-[2.5rem]" />
-               ))}
-            </div>
-         </div>
-      </div>
-    </div>
+
+      {/* You May Also Like (Mock) */}
+      <section className="mt-32 border-t border-surface-container-high pt-16">
+        <div className="flex justify-between items-end mb-12">
+          <div>
+            <h2 className="text-3xl font-extrabold text-on-surface font-headline">Featured Collection</h2>
+            <p className="text-on-surface-variant mt-2 font-body">Curated selections from trending merchants.</p>
+          </div>
+          <Link href="/products" className="text-primary font-bold text-sm tracking-widest uppercase hover:underline underline-offset-8">Explore All</Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+           {[1,2,3,4].map((i) => (
+             <div key={i} className="group cursor-pointer">
+               <div className="aspect-[3/4] bg-surface-container-low rounded-xl overflow-hidden mb-4 relative flex items-center justify-center">
+                  <span className="material-symbols-outlined text-4xl text-on-surface-variant opacity-20">inventory_2</span>
+               </div>
+               <div className="h-4 w-3/4 bg-surface-container-high rounded mb-2"></div>
+               <div className="h-3 w-1/4 bg-surface-container-low rounded"></div>
+             </div>
+           ))}
+        </div>
+      </section>
+    </main>
   );
 }

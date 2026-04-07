@@ -6,7 +6,7 @@ import { cartService } from './cart.service.js';
  * Exposes CartService functionality via REST endpoints.
  */
 export const getCart = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user.userId;
   const cart = await cartService.getCart(userId);
   
   res.status(200).json({
@@ -21,18 +21,20 @@ export const getCart = asyncHandler(async (req, res) => {
  * If the item already exists, increments the quantity.
  */
 export const addItem = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user.userId;
   const { productVariantId, quantity } = req.body;
 
-  const cartItem = await cartService.addItem({
+  await cartService.addItem({
     userId,
     productVariantId,
     quantity: quantity || 1
   });
   
+  const updatedCart = await cartService.getCart(userId);
+  
   res.status(201).json({
     success: true,
-    data: cartItem,
+    data: updatedCart,
     error: null
   });
 });
@@ -41,19 +43,21 @@ export const addItem = asyncHandler(async (req, res) => {
  * Updates the quantity of a specific item in the cart.
  */
 export const updateQuantity = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user.userId;
   const cartItemId = req.params.id;
   const { quantity } = req.body;
 
-  const updatedItem = await cartService.updateQuantity({
+  await cartService.updateQuantity({
     userId,
     cartItemId,
     quantity
   });
   
+  const updatedCart = await cartService.getCart(userId);
+  
   res.status(200).json({
     success: true,
-    data: updatedItem,
+    data: updatedCart,
     error: null
   });
 });
@@ -62,7 +66,7 @@ export const updateQuantity = asyncHandler(async (req, res) => {
  * Removes a specific item from the user's cart.
  */
 export const removeItem = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user.userId;
   const cartItemId = req.params.id;
 
   await cartService.removeItem({
@@ -70,9 +74,11 @@ export const removeItem = asyncHandler(async (req, res) => {
     cartItemId
   });
   
+  const updatedCart = await cartService.getCart(userId);
+  
   res.status(200).json({
     success: true,
-    data: null,
+    data: updatedCart,
     error: null
   });
 });
@@ -81,13 +87,15 @@ export const removeItem = asyncHandler(async (req, res) => {
  * Clears all items from the user's cart.
  */
 export const clearCart = asyncHandler(async (req, res) => {
-  const userId = req.user.id;
+  const userId = req.user.userId;
 
   await cartService.clearCart(userId);
   
+  const updatedCart = await cartService.getCart(userId);
+  
   res.status(200).json({
     success: true,
-    data: null,
+    data: updatedCart,
     error: null
   });
 });

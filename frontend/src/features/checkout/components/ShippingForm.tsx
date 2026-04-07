@@ -6,8 +6,8 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const shippingSchema = z.object({
-  name: z.string().min(2, 'Name is required (min 2 characters)'),
-  phone: z.string().min(11, 'Valid phone number is required (min 11 digits)').max(15),
+  name: z.string().min(2, 'Name is required'),
+  phone: z.string().min(11, 'Valid phone number required').max(15),
   addressLine1: z.string().min(5, 'Specific address is required'),
   shippingDistrict: z.enum(['Chattogram', 'Other']),
   city: z.string().min(2, 'City/Area is required'),
@@ -47,133 +47,105 @@ const ShippingForm: React.FC<ShippingFormProps> = React.memo(({ onSubmit, onDist
   }, [selectedDistrict, onDistrictChange]);
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-neutral-100 font-sans">
-      <h2 className="text-xl font-bold mb-6 text-neutral-900">Shipping Information</h2>
-      
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <div className="space-y-6 font-body">
+      <header className="flex items-center justify-between">
+        <h3 className="text-2xl font-bold font-headline tracking-tight text-on-surface">Shipping Address</h3>
+        <span className="text-xs font-bold tracking-widest uppercase text-primary">Step 2 of 4</span>
+      </header>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-surface-container-high space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-semibold text-neutral-700 mb-2">Full Name</label>
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Full Name</label>
             <input
               {...register('name')}
-              className={`w-full px-4 py-3 rounded-xl border ${
-                errors.name ? 'border-red-500' : 'border-neutral-200'
-              } focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
+              className={`w-full bg-surface-container-low border-b-2 ${errors.name ? 'border-error' : 'border-transparent'} focus:border-primary-container focus:ring-0 transition-all px-4 py-3 rounded-t-lg text-sm text-on-surface`}
               placeholder="Your Name"
             />
-            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+            {errors.name && <p className="text-error text-xs">{errors.name.message}</p>}
           </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-neutral-700 mb-2">Mobile Number</label>
+          
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Mobile Number</label>
             <input
               {...register('phone')}
-              className={`w-full px-4 py-3 rounded-xl border ${
-                errors.phone ? 'border-red-500' : 'border-neutral-200'
-              } focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
+              className={`w-full bg-surface-container-low border-b-2 ${errors.phone ? 'border-error' : 'border-transparent'} focus:border-primary-container focus:ring-0 transition-all px-4 py-3 rounded-t-lg text-sm text-on-surface`}
               placeholder="017XXXXXXXX"
             />
-            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
+            {errors.phone && <p className="text-error text-xs">{errors.phone.message}</p>}
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-semibold text-neutral-700 mb-3">Delivery Area</label>
-          <div className="grid grid-cols-2 gap-4">
-            <label 
-              className={`flex items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                selectedDistrict === 'Chattogram' 
-                ? 'border-purple-600 bg-purple-50 text-purple-900' 
-                : 'border-neutral-100 text-neutral-500 hover:border-neutral-200'
-              }`}
-            >
-              <input 
-                type="radio" 
-                value="Chattogram" 
-                {...register('shippingDistrict')} 
-                className="hidden" 
-              />
-              <div className="text-center">
-                <p className="font-bold">Inside CTG</p>
-                <p className="text-xs opacity-70">৳70 Shipping</p>
-              </div>
-            </label>
-
-            <label 
-              className={`flex items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                selectedDistrict === 'Other' 
-                ? 'border-purple-600 bg-purple-50 text-purple-900' 
-                : 'border-neutral-100 text-neutral-500 hover:border-neutral-200'
-              }`}
-            >
-              <input 
-                type="radio" 
-                value="Other" 
-                {...register('shippingDistrict')} 
-                className="hidden" 
-              />
-              <div className="text-center">
-                <p className="font-bold">Outside CTG</p>
-                <p className="text-xs opacity-70">৳130 Shipping</p>
-              </div>
-            </label>
-          </div>
-          {errors.shippingDistrict && <p className="text-red-500 text-xs mt-1">{errors.shippingDistrict.message}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-neutral-700 mb-2">Full Shipping Address</label>
-          <textarea
+        <div className="space-y-1">
+          <label className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Street Address</label>
+          <input
             {...register('addressLine1')}
-            rows={3}
-            className={`w-full px-4 py-3 rounded-xl border ${
-              errors.addressLine1 ? 'border-red-500' : 'border-neutral-200'
-            } focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
+            className={`w-full bg-surface-container-low border-b-2 ${errors.addressLine1 ? 'border-error' : 'border-transparent'} focus:border-primary-container focus:ring-0 transition-all px-4 py-3 rounded-t-lg text-sm text-on-surface`}
             placeholder="House #, Road #, Area Details"
           />
-          {errors.addressLine1 && (
-            <p className="text-red-500 text-xs mt-1">{errors.addressLine1.message}</p>
-          )}
+          {errors.addressLine1 && <p className="text-error text-xs">{errors.addressLine1.message}</p>}
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-semibold text-neutral-700 mb-2">City / Upazilla</label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">City / Upazilla</label>
             <input
               {...register('city')}
-              className={`w-full px-4 py-3 rounded-xl border ${
-                errors.city ? 'border-red-500' : 'border-neutral-200'
-              } focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
-              placeholder="e.g. Agrabad"
+              className={`w-full bg-surface-container-low border-b-2 ${errors.city ? 'border-error' : 'border-transparent'} focus:border-primary-container focus:ring-0 transition-all px-4 py-3 rounded-t-lg text-sm text-on-surface`}
+              placeholder="Agrabad"
             />
-            {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city.message}</p>}
+            {errors.city && <p className="text-error text-xs">{errors.city.message}</p>}
           </div>
-          <div>
-            <label className="block text-sm font-semibold text-neutral-700 mb-2">Postal Code (Opt.)</label>
+
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Delivery Area</label>
+            <select
+              {...register('shippingDistrict')}
+              className="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary-container focus:ring-0 transition-all px-4 py-3 rounded-t-lg text-sm text-on-surface"
+            >
+              <option value="Chattogram">Inside CTG (৳70)</option>
+              <option value="Other">Outside CTG (৳130)</option>
+            </select>
+            {errors.shippingDistrict && <p className="text-error text-xs">{errors.shippingDistrict.message}</p>}
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Postal Code</label>
             <input
               {...register('postalCode')}
-              className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-              placeholder="1200"
+              className="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary-container focus:ring-0 transition-all px-4 py-3 rounded-t-lg text-sm text-on-surface"
+              placeholder="Optional"
             />
+          </div>
+        </div>
+
+        {/* Temporary Payment Method visualization (COD only for now but matching template) */}
+        <div className="pt-6 mt-6 border-t border-surface-container-high space-y-6">
+          <h3 className="text-xl font-bold font-headline tracking-tight text-on-surface">Payment Method</h3>
+          <div className="flex gap-4">
+            <button type="button" className="flex-1 border-2 border-primary-container bg-primary/5 p-4 rounded-xl flex items-center justify-center gap-3 transition-all">
+              <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>money</span>
+              <span className="font-bold text-sm text-primary">Cash on Delivery</span>
+            </button>
+            <button type="button" disabled className="flex-1 border-2 border-transparent bg-surface-container-low p-4 rounded-xl flex items-center justify-center gap-3 opacity-50 cursor-not-allowed">
+              <span className="material-symbols-outlined text-on-surface-variant">credit_card</span>
+              <span className="font-medium text-sm text-on-surface-variant">Online (Soon)</span>
+            </button>
           </div>
         </div>
 
         <button
-          id="checkout-submit-btn"
           type="submit"
           disabled={isLoading}
-          className="w-full mt-4 bg-purple-600 text-white py-4 rounded-xl font-bold hover:bg-purple-700 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-200"
+          className="w-full mt-8 bg-primary text-white py-4 rounded-xl font-bold hover:bg-primary-hover disabled:bg-surface-container-highest disabled:text-on-surface-variant disabled:cursor-not-allowed transition-all shadow-lg"
         >
           {isLoading ? (
             <div className="flex items-center justify-center gap-2">
-              <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Processing Order...
+              <span className="material-symbols-outlined animate-spin">refresh</span>
+              Processing...
             </div>
           ) : (
-            'Confirm Order (Cash on Delivery)'
+            'Confirm Order'
           )}
         </button>
       </form>

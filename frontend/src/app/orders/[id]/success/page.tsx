@@ -67,30 +67,8 @@ const OrderSuccessPage = () => {
 
   return (
     <PageLayout>
-      <div className="responsive-container py-12">
+      <div className="bg-surface min-h-screen pt-12">
         <OrderSuccessDetails order={order} />
-        
-        <div className="mt-16 text-center border-t border-neutral-100 pt-16">
-          <h3 className="text-2xl font-black text-neutral-900 uppercase italic mb-6 tracking-tighter">What's Next?</h3>
-          <p className="text-neutral-500 mb-10 font-medium max-w-lg mx-auto">
-            Your order is being processed by the merchant. You can track your fulfillment status in your dashboard.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              href="/products" 
-              className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-2xl shadow-primary/20 active:scale-95 group"
-            >
-              <ShoppingBag className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              Continue Shopping
-            </Link>
-            <Link 
-              href="/" 
-              className="inline-flex items-center justify-center px-10 py-5 border-2 border-neutral-100 bg-white text-neutral-900 rounded-2xl text-xs font-black uppercase tracking-widest hover:border-neutral-900 transition-all active:scale-95"
-            >
-              Return Home
-            </Link>
-          </div>
-        </div>
       </div>
     </PageLayout>
   );

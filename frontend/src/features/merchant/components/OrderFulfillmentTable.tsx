@@ -9,7 +9,7 @@ interface OrderFulfillmentTableProps {
   loading: boolean;
 }
 
-const STATUS_OPTIONS = ["PROCESSING", "SHIPPED", "DELIVERED"];
+const STATUS_OPTIONS = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED"];
 
 export default function OrderFulfillmentTable({ orders, onStatusChange, loading }: OrderFulfillmentTableProps) {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -25,6 +25,9 @@ export default function OrderFulfillmentTable({ orders, onStatusChange, loading 
 
   const getStatusBadgeStyles = (status: string) => {
     switch (status.toUpperCase()) {
+      case "PENDING":
+        return "bg-neutral-50 text-neutral-400 border-neutral-100";
+      case "CONFIRMED":
       case "PROCESSING":
         return "bg-amber-50 text-amber-600 border-amber-100";
       case "SHIPPED":
