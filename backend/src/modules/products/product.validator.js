@@ -10,10 +10,8 @@ export const createProductSchema = z.object({
       sku: z.string().optional(),
       price: z.number().positive('Variant price must be positive'),
       stock: z.number().int().min(0, 'Stock cannot be negative').optional(),
-      attributes: z.object({
-        size: z.string().optional().or(z.literal('')),
-        color: z.string().optional().or(z.literal(''))
-      }).catchall(z.string())
+      size: z.string().optional().or(z.literal('')),
+      color: z.string().optional().or(z.literal(''))
     })).optional()
   })
 });
