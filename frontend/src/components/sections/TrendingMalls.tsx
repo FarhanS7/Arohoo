@@ -6,7 +6,7 @@ import { unstable_cache } from "next/cache";
 export const getCachedMalls = unstable_cache(
   async () => mallService.getAllMalls(),
   ["all-malls"],
-  { revalidate: 600, tags: ["malls"] }
+  { revalidate: 60, tags: ["malls"] }
 );
 
 export default async function TrendingMalls() {

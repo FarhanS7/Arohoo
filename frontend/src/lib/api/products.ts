@@ -146,6 +146,16 @@ export const productService = {
   }),
 
   /**
+   * Get trending products for landing page (Surgical query)
+   */
+  getTrendingProducts: cache(async (limit = 4): Promise<{ success: boolean; data: Product[] }> => {
+    const res = await api.get<{ success: boolean; data: Product[] }>("/public/products/trending", {
+      params: { limit },
+    });
+    return res.data;
+  }),
+
+  /**
    * Get public product details by ID
    */
   getPublicProductById: cache(async (id: string): Promise<{ success: boolean; data: Product }> => {

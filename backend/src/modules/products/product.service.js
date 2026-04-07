@@ -149,6 +149,10 @@ export class ProductService {
     return await this.repository.searchProducts(filters, { page, limit });
   }
 
+  async getTrendingProducts(limit = 4) {
+    return await this.repository.findTrendingProducts(limit);
+  }
+
   async getVariantById(id) {
     const variant = await this.repository.findVariantById(id);
     if (!variant) throw new AppError('Product variant not found', 404);

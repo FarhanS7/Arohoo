@@ -4,9 +4,9 @@ import { productService, Product } from "@/lib/api/products";
 import { unstable_cache } from "next/cache";
 
 export const getCachedTrendingProducts = unstable_cache(
-  async () => productService.getPublicProducts({ isTrending: true, limit: 4 }),
+  async () => productService.getTrendingProducts(4),
   ["trending-products"],
-  { revalidate: 600, tags: ["products", "trending"] }
+  { revalidate: 60, tags: ["products", "trending"] }
 );
 
 export default async function TrendingProducts() {

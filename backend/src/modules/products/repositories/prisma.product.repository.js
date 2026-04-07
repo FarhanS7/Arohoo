@@ -228,6 +228,22 @@ export class PrismaProductRepository {
     return result;
   }
 
+  async findTrendingProducts(limit = 4) {
+    const cacheKey = `products:trending:limit:${limit}`;
+    const cached = cacheUtil.get(cacheKey);
+    if (cached) return cached;
+
+    const data = await prisma.product.findMany({
+      where: { isTrending: true },
+      take: limit,
+      select: this.summarySelect,
+      orderBy: { createdAt: 'desc' }
+    });
+
+    cacheUtil.set(cacheKey, data, 600); // 10 mins
+    return { data, success: true };
+  }
+
   async updateProduct(id, merchantId, data) {
     const { variants, images, ...rest } = data;
 

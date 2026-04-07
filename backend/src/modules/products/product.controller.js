@@ -97,3 +97,33 @@ export const deleteProduct = asyncHandler(async (req, res) => {
     error: null
   });
 });
+
+export const getPublicTrendingProducts = asyncHandler(async (req, res) => {
+  const limit = parseInt(req.query.limit) || 4;
+  const result = await productService.getTrendingProducts(limit);
+
+  res.status(200).json(result);
+});
+
+export const getPublicProducts = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+  
+  const result = await productService.getPublicProducts(req.query, page, limit);
+
+  res.status(200).json({
+    success: true,
+    ...result,
+    error: null
+  });
+});
+
+export const getPublicProductById = asyncHandler(async (req, res) => {
+  const result = await productService.getProductById(req.params.id);
+
+  res.status(200).json({
+    success: true,
+    data: result,
+    error: null
+  });
+});

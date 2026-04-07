@@ -6,7 +6,7 @@ import { unstable_cache } from "next/cache";
 export const getCachedTrendingBrands = unstable_cache(
   async () => getPublicMerchants({ isTrending: true, limit: 6 }),
   ["trending-brands"],
-  { revalidate: 600, tags: ["merchants", "trending"] }
+  { revalidate: 60, tags: ["merchants", "trending"] }
 );
 
 export default async function TrendingBrands() {

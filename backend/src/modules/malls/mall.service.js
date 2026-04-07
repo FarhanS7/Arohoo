@@ -1,5 +1,6 @@
 import prisma from '../../infrastructure/database/prisma.js';
 import { AppError } from '../../common/errors/AppError.js';
+import { cacheUtil } from '../../common/utils/cache.js';
 
 export class MallService {
   /**
@@ -15,7 +16,10 @@ export class MallService {
    * Retrieves all malls.
    */
   async getAllMalls() {
-    return await prisma.mall.findMany({
+    const cached = cacheUtil.get('malls:all');
+    if (cached) return cached;
+
+    const malls = await prisma.mall.findMany({
       include: {
         _count: {
           select: { merchants: true },
@@ -23,6 +27,9 @@ export class MallService {
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    cacheUtil.set('malls:all', malls, 600); // 10 mins
+    return malls;
   }
 
   /**

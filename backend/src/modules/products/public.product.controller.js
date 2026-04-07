@@ -7,6 +7,13 @@ const productService = new ProductService();
  * Controller for public product catalog
  */
 
+export const getTrendingProducts = asyncHandler(async (req, res) => {
+  const limit = parseInt(req.query.limit) || 4;
+  const result = await productService.getTrendingProducts(limit);
+
+  res.status(200).json(result);
+});
+
 export const listProducts = asyncHandler(async (req, res) => {
   const { 
     categoryId, 
