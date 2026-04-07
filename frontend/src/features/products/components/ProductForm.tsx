@@ -2,90 +2,13 @@
 
 import { Product } from "@/lib/api/products";
 import dynamic from "next/dynamic";
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useCategories } from "../hooks/useCategories";
-import { Trash2 } from "lucide-react";
+import { Trash2, Plus, Package, Palette, LayoutGrid, Layers } from "lucide-react";
 
 const ImageUpload = dynamic(() => import("./ImageUpload"), {
-  loading: () => <div className="h-40 w-full bg-gray-50 rounded-xl" />,
+  loading: () => <div className="h-40 w-full bg-gray-50 rounded-xl animate-pulse" />,
 });
-
-interface VariantRowProps {
-  index: number;
-  variant: any;
-  onChange: (index: number, field: string, value: any) => void;
-  onRemove: (index: number) => void;
-  sizeLabel?: string;
-  colorLabel?: string;
-  showColor?: boolean;
-}
-
-// Memoized Variant Row to prevent re-rendering all rows when product name changes
-const VariantRow = memo(({ index, variant, onChange, onRemove, sizeLabel = "Size", colorLabel = "Color", showColor = true }: VariantRowProps) => (
-  <div className="p-6 bg-gray-50/50 rounded-2xl border border-gray-100 relative">
-    <button
-      type="button"
-      onClick={() => onRemove(index)}
-      className="absolute -top-2 -right-2 bg-white text-red-500 rounded-full w-8 h-8 flex items-center justify-center shadow-lg border border-red-50 z-10"
-    >
-      <Trash2 className="w-4 h-4" />
-    </button>
-    <div className="grid grid-cols-2 gap-4">
-      <div className="col-span-2">
-        <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">SKU</label>
-        <input
-          type="text"
-          value={variant.sku}
-          onChange={(e) => onChange(index, "sku", e.target.value)}
-          className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
-          placeholder="e.g. SNK-BLK-42"
-        />
-      </div>
-      <div>
-        <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">Price (৳)</label>
-        <input
-          type="number"
-          value={variant.price}
-          onChange={(e) => onChange(index, "price", parseFloat(e.target.value) || 0)}
-          className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold text-purple-600"
-        />
-      </div>
-      <div>
-        <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">Stock</label>
-        <input
-          type="number"
-          value={variant.stock}
-          onChange={(e) => onChange(index, "stock", parseInt(e.target.value) || 0)}
-          className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
-        />
-      </div>
-      <div className={showColor ? "" : "col-span-2"}>
-        <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">{sizeLabel}</label>
-        <input
-          type="text"
-          value={variant.size || ""}
-          onChange={(e) => onChange(index, "size", e.target.value)}
-          className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
-          placeholder={sizeLabel === "Size" ? "M, 42, 10..." : "Value..."}
-        />
-      </div>
-      {showColor && (
-        <div>
-          <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1 block">{colorLabel}</label>
-          <input
-            type="text"
-            value={variant.color || ""}
-            onChange={(e) => onChange(index, "color", e.target.value)}
-            className="w-full px-4 py-2 text-sm rounded-xl border border-gray-100 outline-none focus:ring-2 focus:ring-purple-600 bg-white font-bold"
-            placeholder="Matte Black..."
-          />
-        </div>
-      )}
-    </div>
-  </div>
-));
-
-VariantRow.displayName = "VariantRow";
 
 interface ProductFormProps {
   initialData?: Product;
@@ -95,252 +18,454 @@ interface ProductFormProps {
   loading: boolean;
 }
 
+type ProductMode = "simple" | "multi-color";
+
+// Types for our internal simplified state
+interface SimpleInventory {
+  size: string;
+  color: string;
+  stock: number;
+}
+
+interface ColorVariation {
+  colorName: string;
+  sizes: { sizeLabel: string; stock: number }[];
+}
+
 export default function ProductForm({ initialData, onSubmit, onUpload, onCancel, loading }: ProductFormProps) {
   const { categories } = useCategories();
-  const [formData, setFormData] = useState<any>(
-    initialData
-      ? {
-          name: initialData.name,
-          description: initialData.description,
-          basePrice: Number(initialData.basePrice),
-          categoryId: initialData.categoryId,
-          variants: initialData.variants.map((v) => ({
-            sku: v.sku,
-            price: Number(v.price),
-            stock: v.stock,
-            size: v.size,
-            color: v.color,
-          })),
-        }
-      : {
-          name: "",
-          description: "",
-          basePrice: 0,
-          categoryId: "",
-          variants: [],
-        }
+  const [productMode, setProductMode] = useState<ProductMode>("simple");
+  
+  // Base product fields
+  const [baseData, setBaseData] = useState({
+    name: initialData?.name || "",
+    description: initialData?.description || "",
+    basePrice: Number(initialData?.basePrice || 0),
+    categoryId: initialData?.categoryId || "",
+  });
+
+  // Simple Inventory state
+  const [simpleInventory, setSimpleInventory] = useState<SimpleInventory>({
+    size: initialData?.variants?.[0]?.size || "",
+    color: initialData?.variants?.[0]?.color || "",
+    stock: initialData?.variants?.[0]?.stock || 0,
+  });
+
+  // Multi-color state: Group existing variants by color if editing
+  const initialVariations = useMemo(() => {
+    if (!initialData || initialData.variants.length === 0) return [];
+    
+    const colorGroups: Record<string, { sizeLabel: string; stock: number }[]> = {};
+    initialData.variants.forEach(v => {
+      const color = v.color || "Default";
+      if (!colorGroups[color]) colorGroups[color] = [];
+      colorGroups[color].push({ sizeLabel: v.size || "", stock: v.stock });
+    });
+
+    return Object.entries(colorGroups).map(([colorName, sizes]) => ({
+      colorName,
+      sizes
+    }));
+  }, [initialData]);
+
+  const [colorVariations, setColorVariations] = useState<ColorVariation[]>(
+    initialVariations.length > 0 ? initialVariations : []
   );
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const handleAddVariant = useCallback(() => {
-    setFormData((prev: any) => ({
-      ...prev,
-      variants: [
-        ...(prev.variants || []),
-        {
-          sku: "",
-          price: prev.basePrice,
-          stock: 10,
-          size: "",
-          color: "",
-        },
-      ],
-    }));
-  }, []);
+  // Set initial mode based on variants
+  useEffect(() => {
+    if (initialData && initialData.variants.length > 1) {
+      // Check if they have different colors
+      const colors = new Set(initialData.variants.map(v => v.color));
+      if (colors.size > 1 || (colors.size === 1 && initialData.variants.length > 1)) {
+        setProductMode("multi-color");
+      }
+    }
+  }, [initialData]);
 
-  const handleRemoveVariant = useCallback((index: number) => {
-    setFormData((prev: any) => {
-      const newVariants = [...(prev.variants || [])];
-      newVariants.splice(index, 1);
-      return { ...prev, variants: newVariants };
-    });
-  }, []);
+  // Color management
+  const addColor = () => {
+    setColorVariations(prev => [...prev, { colorName: "", sizes: [{ sizeLabel: "", stock: 10 }] }]);
+  };
 
-  const handleVariantChange = useCallback((index: number, field: string, value: any) => {
-    setFormData((prev: any) => {
-      const newVariants = [...(prev.variants || [])];
-      newVariants[index] = {
-        ...newVariants[index],
-        [field]: value,
-      };
-      return { ...prev, variants: newVariants };
+  const removeColor = (idx: number) => {
+    setColorVariations(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const updateColorName = (idx: number, name: string) => {
+    setColorVariations(prev => {
+      const next = [...prev];
+      next[idx].colorName = name;
+      return next;
     });
-  }, []);
+  };
+
+  // Size management
+  const addSizeToColor = (colorIdx: number) => {
+    setColorVariations(prev => {
+      const next = [...prev];
+      next[colorIdx].sizes.push({ sizeLabel: "", stock: 10 });
+      return next;
+    });
+  };
+
+  const removeSizeFromColor = (colorIdx: number, sizeIdx: number) => {
+    setColorVariations(prev => {
+      const next = [...prev];
+      next[colorIdx].sizes = next[colorIdx].sizes.filter((_, i) => i !== sizeIdx);
+      if (next[colorIdx].sizes.length === 0) {
+          // If no sizes left, maybe remove the color or leave it empty? 
+          // For now let's just leave it empty so they can add another size.
+      }
+      return next;
+    });
+  };
+
+  const updateSizeField = (colorIdx: number, sizeIdx: number, field: "sizeLabel" | "stock", value: any) => {
+     setColorVariations(prev => {
+        const next = [...prev];
+        next[colorIdx].sizes[sizeIdx] = { ...next[colorIdx].sizes[sizeIdx], [field]: value };
+        return next;
+     });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
 
-    if (!formData.name) return setFormError("Product name is required");
-    if (!formData.categoryId) return setFormError("Category is required");
-    if (formData.basePrice <= 0) return setFormError("Base price must be greater than 0");
-    if (!formData.variants || formData.variants.length === 0) return setFormError("Add at least one variant");
+    // Only mandatory fields as per user request
+    if (!baseData.name) return setFormError("Product name is required");
+    if (!baseData.categoryId) return setFormError("Category is required");
+
+    // Map UI state to API payload
+    let variants: any[] = [];
+
+    if (productMode === "simple") {
+       variants.push({
+          sku: `SKU-${Date.now()}-0`,
+          price: baseData.basePrice,
+          stock: Number(simpleInventory.stock) || 0,
+          size: simpleInventory.size,
+          color: simpleInventory.color
+       });
+    } else {
+       // Multi-color mapping
+       colorVariations.forEach((cv, cIdx) => {
+          cv.sizes.forEach((s, sIdx) => {
+             variants.push({
+                sku: `SKU-${Date.now()}-${cIdx}-${sIdx}`,
+                price: baseData.basePrice, // Using base price for simplicity per "plain" request
+                stock: Number(s.stock) || 0,
+                size: s.sizeLabel,
+                color: cv.colorName
+             });
+          });
+       });
+       
+       if (variants.length === 0) {
+          // If they chose multi-color but didn't add anything, maybe fallback to simple?
+          // Or just allow it (it might fail at backend if strict, let's allow it as "nothing required").
+       }
+    }
+
+    const payload = {
+      ...baseData,
+      variants
+    };
 
     try {
-      await onSubmit(formData, selectedFiles);
+      await onSubmit(payload, selectedFiles);
     } catch (err: any) {
       setFormError(err.message || String(err));
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="font-sans space-y-8 bg-white p-8 rounded-3xl border border-purple-50 max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="space-y-6">
-          <div className="flex items-center gap-3 border-b border-purple-50 pb-4">
-             <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-bold">1</div>
-             <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">Basic Info</h3>
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Product Name</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none bg-gray-50/50 font-bold text-gray-900"
-                placeholder="e.g. Premium Leather Boot"
-              />
+    <form onSubmit={handleSubmit} className="font-sans space-y-12 bg-white pb-12 rounded-[2.5rem] max-w-5xl mx-auto overflow-hidden">
+      {/* 1. HEADER SECTION (Always Modern & Clean) */}
+      <div className="bg-neutral-50 px-10 py-12 rounded-b-[3rem] border-b border-neutral-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+           <div className="flex items-center gap-2 mb-2">
+             <span className="px-3 py-1 bg-black text-white text-[10px] font-black rounded-full uppercase tracking-widest">Editor</span>
+             <span className="text-neutral-300">/</span>
+             <span className="text-neutral-400 text-[10px] font-bold uppercase tracking-widest">Inventory Management</span>
+           </div>
+           <h2 className="text-4xl font-black text-neutral-900 tracking-tighter">Product Refiner</h2>
+           <p className="text-neutral-500 font-medium mt-1">Refining the edges of your digital storefront.</p>
+        </div>
+
+        {/* Mode Switcher */}
+        <div className="flex bg-neutral-200/50 p-1.5 rounded-2xl border border-neutral-200">
+           <button
+             type="button"
+             onClick={() => setProductMode("simple")}
+             className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${productMode === "simple" ? "bg-white text-black shadow-lg shadow-neutral-200/50" : "text-neutral-400 hover:text-neutral-600"}`}
+           >
+             <Package className="w-4 h-4" />
+             Simple
+           </button>
+           <button
+             type="button"
+             onClick={() => setProductMode("multi-color")}
+             className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${productMode === "multi-color" ? "bg-white text-black shadow-lg shadow-neutral-200/50" : "text-neutral-400 hover:text-neutral-600"}`}
+           >
+             <Layers className="w-4 h-4" />
+             Variations
+           </button>
+        </div>
+      </div>
+
+      <div className="px-10 space-y-12">
+        {/* 2. CORE DETAILS */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+            <div className="md:col-span-12">
+                <div className="flex items-center gap-3 mb-8 border-b border-neutral-100 pb-4">
+                  <LayoutGrid className="w-5 h-5 text-neutral-400" />
+                  <h3 className="text-xs font-black text-neutral-900 uppercase tracking-[0.2em]">Core Identity</h3>
+                </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Description</label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none h-32 bg-gray-50/50 font-medium text-gray-600"
-                placeholder="Describe the premium craftsmanship..."
-              />
+            <div className="md:col-span-8 space-y-6">
+                <div className="relative group">
+                  <label className="absolute left-6 -top-2.5 px-2 bg-white text-[10px] font-black text-neutral-400 uppercase tracking-widest">Product Name <span className="text-rose-500">*</span></label>
+                  <input
+                    type="text"
+                    value={baseData.name}
+                    onChange={(e) => setBaseData({ ...baseData, name: e.target.value })}
+                    className="w-full px-8 py-5 rounded-3xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-bold text-neutral-900 text-lg transition-all placeholder:text-neutral-200"
+                    placeholder="e.g. Ethereal Silk Scarf"
+                  />
+                </div>
+
+                <div className="relative group">
+                   <label className="absolute left-6 -top-2.5 px-2 bg-white text-[10px] font-black text-neutral-400 uppercase tracking-widest">Aura / Description</label>
+                   <textarea
+                     value={baseData.description}
+                     onChange={(e) => setBaseData({ ...baseData, description: e.target.value })}
+                     className="w-full px-8 py-5 rounded-3xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-medium text-neutral-600 text-sm h-40 transition-all placeholder:text-neutral-200"
+                     placeholder="Describe the essence of this creation..."
+                   />
+                </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Base Price (৳)</label>
-                <input
-                  type="number"
-                  value={formData.basePrice}
-                  onChange={(e) => setFormData({ ...formData, basePrice: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none bg-gray-50/50 font-bold text-purple-600"
-                />
-              </div>
+            <div className="md:col-span-4 space-y-6">
+                <div className="relative group">
+                   <label className="absolute left-6 -top-2.5 px-2 bg-white text-[10px] font-black text-neutral-400 uppercase tracking-widest">Base Price (৳)</label>
+                   <input
+                     type="number"
+                     value={baseData.basePrice}
+                     onChange={(e) => setBaseData({ ...baseData, basePrice: parseFloat(e.target.value) || 0 })}
+                     className="w-full px-8 py-5 rounded-3xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-black text-neutral-900 text-2xl transition-all"
+                   />
+                </div>
 
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Category</label>
-                <div className="relative">
+                <div className="relative group">
+                  <label className="absolute left-6 -top-2.5 px-2 bg-white text-[10px] font-black text-neutral-400 uppercase tracking-widest">Category <span className="text-rose-500">*</span></label>
                   <select
-                    value={formData.categoryId}
-                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                    className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none appearance-none bg-gray-50/50 font-bold text-gray-900"
+                    value={baseData.categoryId}
+                    onChange={(e) => setBaseData({ ...baseData, categoryId: e.target.value })}
+                    className="w-full px-8 py-5 rounded-3xl border border-neutral-200 focus:border-black focus:ring-0 outline-none appearance-none font-bold text-neutral-900 text-sm bg-neutral-50/50 transition-all"
                   >
-                    <option value="">Select</option>
+                    <option value="">Choose Path</option>
                     {categories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
+                      <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                  </div>
                 </div>
-              </div>
             </div>
-          </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="flex justify-between items-center border-b border-purple-50 pb-4">
-            <div className="flex items-center gap-3">
-               <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-bold">2</div>
-               <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">Inventory</h3>
+        {/* 3. INVENTORY & VARIANTS */}
+        <div className="space-y-8">
+            <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
+               <div className="flex items-center gap-3">
+                 <Package className="w-5 h-5 text-neutral-400" />
+                 <h3 className="text-xs font-black text-neutral-900 uppercase tracking-[0.2em]">Inventory Logistics</h3>
+               </div>
+               
+               {productMode === "multi-color" && (
+                 <button
+                   type="button"
+                   onClick={addColor}
+                   className="flex items-center gap-2 px-6 py-2 bg-black text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-neutral-800 transition-all"
+                 >
+                   <Plus className="w-3 h-3" />
+                   Add Color
+                 </button>
+               )}
             </div>
-            <button
-              type="button"
-              onClick={handleAddVariant}
-              className="text-[10px] px-4 py-2 bg-purple-600 text-white rounded-xl font-black uppercase tracking-widest"
-            >
-              + Add Variant
-            </button>
-          </div>
 
-          <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-            {(formData.variants || []).length === 0 && (
-              <div className="text-center py-12 px-6 bg-purple-50/50 rounded-3xl border border-dashed border-purple-200">
-                <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">No variants added yet</p>
-                <p className="text-[10px] text-purple-300 mt-1">Add at least one variant combination</p>
-              </div>
+            {productMode === "simple" ? (
+               /* SIMPLE MODE UI */
+               <div className="bg-neutral-50 p-10 rounded-[3rem] border border-neutral-100 grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="space-y-2">
+                     <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest px-4 block">Stock Units</label>
+                     <input
+                       type="number"
+                       value={simpleInventory.stock}
+                       onChange={(e) => setSimpleInventory({ ...simpleInventory, stock: parseInt(e.target.value) || 0 })}
+                       className="w-full px-6 py-4 rounded-2xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-bold text-neutral-900 bg-white"
+                     />
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest px-4 block">Sizing (Optional)</label>
+                     <input
+                       type="text"
+                       value={simpleInventory.size}
+                       onChange={(e) => setSimpleInventory({ ...simpleInventory, size: e.target.value })}
+                       className="w-full px-6 py-4 rounded-2xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-bold text-neutral-900 bg-white"
+                       placeholder="M, 42, 100ml..."
+                     />
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest px-4 block">Color (Optional)</label>
+                     <input
+                       type="text"
+                       value={simpleInventory.color}
+                       onChange={(e) => setSimpleInventory({ ...simpleInventory, color: e.target.value })}
+                       className="w-full px-6 py-4 rounded-2xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-bold text-neutral-900 bg-white"
+                       placeholder="Obsidian, Ruby..."
+                     />
+                  </div>
+               </div>
+            ) : (
+               /* MULTI-COLOR MODE UI */
+               <div className="space-y-10">
+                  {colorVariations.length === 0 && (
+                    <div className="py-20 text-center border-2 border-dashed border-neutral-200 rounded-[3rem] bg-neutral-50/50">
+                       <Palette className="w-10 h-10 text-neutral-200 mx-auto mb-4" />
+                       <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest">No variations mapped</p>
+                       <button onClick={addColor} className="mt-4 text-[10px] text-black font-black uppercase tracking-widest border-b border-black">Initialize First Color</button>
+                    </div>
+                  )}
+                  {colorVariations.map((cv, cIdx) => (
+                    <div key={cIdx} className="bg-neutral-50 p-8 rounded-[3rem] border border-neutral-100 relative group animate-in fade-in slide-in-from-bottom-4">
+                       <button
+                         type="button"
+                         onClick={() => removeColor(cIdx)}
+                         className="absolute -top-3 -right-3 w-10 h-10 bg-white border border-neutral-100 flex items-center justify-center text-rose-500 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
+                       >
+                         <Trash2 className="w-4 h-4" />
+                       </button>
+
+                       <div className="flex flex-col lg:flex-row gap-10">
+                          {/* Color Sidebar */}
+                          <div className="lg:w-48 flex flex-col gap-4">
+                             <div className="space-y-2">
+                                <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest px-2 block text-center lg:text-left">Color Identity</label>
+                                <input
+                                  type="text"
+                                  value={cv.colorName}
+                                  onChange={(e) => updateColorName(cIdx, e.target.value)}
+                                  className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-black outline-none font-black text-xs text-neutral-900 bg-white uppercase text-center lg:text-left"
+                                  placeholder="e.g. Cobalt"
+                                />
+                             </div>
+                             <div className="aspect-square w-full rounded-2xl bg-neutral-200 flex items-center justify-center overflow-hidden border border-neutral-100">
+                                <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Color Photo</span>
+                             </div>
+                          </div>
+
+                          {/* Sizes Repeater */}
+                          <div className="flex-1 space-y-4">
+                             <div className="flex items-center justify-between mb-2">
+                                <label className="text-[10px] font-black text-neutral-900 uppercase tracking-widest">Inventory Matrix (Sizes)</label>
+                                <button
+                                  type="button"
+                                  onClick={() => addSizeToColor(cIdx)}
+                                  className="text-[9px] font-black text-neutral-400 hover:text-black uppercase tracking-widest flex items-center gap-1 transition-colors"
+                                >
+                                  <Plus className="w-3 h-3" />
+                                  Link Size
+                                </button>
+                             </div>
+                             
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {cv.sizes.map((s, sIdx) => (
+                                   <div key={sIdx} className="bg-white p-4 rounded-2xl border border-neutral-200 flex items-center gap-4 group/size">
+                                      <div className="flex-1 space-y-1">
+                                         <input
+                                            type="text"
+                                            value={s.sizeLabel}
+                                            onChange={(e) => updateSizeField(cIdx, sIdx, "sizeLabel", e.target.value)}
+                                            className="w-full border-none focus:ring-0 p-0 text-xs font-black text-neutral-900 placeholder:text-neutral-200 uppercase"
+                                            placeholder="SIZE (e.g. XL)"
+                                         />
+                                         <div className="flex items-center gap-2">
+                                            <span className="text-[10px] font-medium text-neutral-300 uppercase tracking-widest">Stock:</span>
+                                            <input
+                                              type="number"
+                                              value={s.stock}
+                                              onChange={(e) => updateSizeField(cIdx, sIdx, "stock", parseInt(e.target.value) || 0)}
+                                              className="w-16 border-none focus:ring-0 p-0 text-[10px] font-black text-neutral-900"
+                                            />
+                                         </div>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => removeSizeFromColor(cIdx, sIdx)}
+                                        className="text-neutral-300 hover:text-rose-500 transition-colors"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                   </div>
+                                ))}
+                             </div>
+                          </div>
+                       </div>
+                    </div>
+                  ))}
+               </div>
             )}
-            {formData.variants?.map((variant: any, index: number) => {
-              const selectedCategory = categories.find(c => c.id === formData.categoryId);
-              const categorySlug = selectedCategory?.slug || "";
-              
-              let sizeLabel = "Variant/Size";
-              let colorLabel = "Color/Type";
-              let showColor = true;
+        </div>
 
-              switch (categorySlug.toLowerCase()) {
-                 case "skincare":
-                   sizeLabel = "Volume/Weight (e.g. 50ml, 100g)";
-                   showColor = false;
-                   break;
-                 case "shoes":
-                   sizeLabel = "Shoe Size (US/UK/EU)";
-                   break;
-                 case "fashion":
-                 case "mens":
-                 case "female":
-                 case "kids":
-                   sizeLabel = "Clothing Size (S/M/L/XL)";
-                   break;
-              }
+        {/* 4. VISUALS SECTION */}
+        <div className="">
+            <div className="flex items-center gap-3 mb-8 border-b border-neutral-100 pb-4">
+              <span className="w-5 h-5 flex items-center justify-center bg-black text-white text-[8px] font-black rounded-full">PV</span>
+              <h3 className="text-xs font-black text-neutral-900 uppercase tracking-[0.2em]">Visual Gallery</h3>
+            </div>
+            
+            <div className="bg-neutral-50 p-8 rounded-[3rem] border border-neutral-100">
+               <ImageUpload 
+                 productId={initialData?.id}
+                 existingImages={initialData?.images}
+                 onUpload={onUpload || (async () => {})}
+                 onChange={setSelectedFiles}
+                 loading={loading}
+               />
+            </div>
+        </div>
 
-              return (
-                <VariantRow 
-                  key={index}
-                  index={index}
-                  variant={variant}
-                  onChange={handleVariantChange}
-                  onRemove={handleRemoveVariant}
-                  sizeLabel={sizeLabel}
-                  colorLabel={colorLabel}
-                  showColor={showColor}
-                />
-              );
-            })}
+        {/* ERRORS */}
+        {formError && (
+          <div className="mx-auto max-w-lg bg-red-50 text-red-500 px-8 py-4 rounded-[2rem] text-[10px] font-black uppercase tracking-widest border border-red-100 flex items-center justify-center gap-3 animate-bounce">
+            <Trash2 className="w-4 h-4" />
+            {formError}
           </div>
-        </div>
-      </div>
+        )}
 
-      <div className="pt-8 border-t border-gray-50">
-        <div className="flex items-center gap-3 mb-6">
-           <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-bold">3</div>
-           <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">Product Visuals</h3>
+        {/* ACTIONS */}
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-6 pt-12 border-t border-neutral-50">
+           <button
+             type="button"
+             onClick={onCancel}
+             className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-300 hover:text-black transition-colors"
+             disabled={loading}
+           >
+             Abandon Changes
+           </button>
+           <button
+             type="submit"
+             className="w-full sm:w-auto px-16 py-6 bg-black text-white text-[11px] font-black uppercase tracking-[0.4em] rounded-full shadow-2xl shadow-neutral-400 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+             disabled={loading}
+           >
+             {loading ? "Processing..." : initialData ? "Synchronize" : "Project to Marketplace"}
+           </button>
         </div>
-        <ImageUpload 
-          productId={initialData?.id}
-          existingImages={initialData?.images}
-          onUpload={onUpload || (async () => {})}
-          onChange={setSelectedFiles}
-          loading={loading}
-        />
-      </div>
-
-      {formError && (
-        <div className="bg-red-50 text-red-600 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest border border-red-100 flex items-center gap-3">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          {formError}
-        </div>
-      )}
-
-      <div className="flex justify-end gap-4 pt-8 border-t border-gray-50">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-8 py-3 text-xs font-black uppercase tracking-widest text-gray-400"
-          disabled={loading}
-        >
-          Discard
-        </button>
-        <button
-          type="submit"
-          className="px-10 py-4 bg-purple-600 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl disabled:opacity-50"
-          disabled={loading}
-        >
-          {loading ? "Processing..." : initialData ? "Confirm Update" : "Launch Product"}
-        </button>
       </div>
     </form>
   );

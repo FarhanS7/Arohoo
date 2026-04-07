@@ -17,10 +17,10 @@ export class ProductService {
   async createProduct(data, merchantId) {
     if (!merchantId) throw new AppError('Only registered merchants can create products', 403);
 
-    const { name, categoryId, basePrice, variants } = data;
+    const { name, categoryId, basePrice = 0, variants } = data;
 
     if (!name || name.trim() === '') throw new AppError('Product name is required');
-    if (basePrice <= 0) throw new AppError('Base price must be positive');
+    if (basePrice < 0) throw new AppError('Base price cannot be negative');
     if (!categoryId) throw new AppError('Category ID is required');
 
     const category = await prisma.category.findUnique({ where: { id: categoryId } });
@@ -29,9 +29,11 @@ export class ProductService {
     if (variants && variants.length > 0) {
       const signatures = new Set();
       data.variants = variants.map(v => {
-        if (v.price <= 0) throw new AppError('Variant price must be positive');
+        // If variant price is missing or 0, use the base price
+        const finalPrice = v.price !== undefined && v.price !== null ? v.price : basePrice;
+        if (finalPrice < 0) throw new AppError('Variant price cannot be negative');
         if (v.stock !== undefined && v.stock < 0) throw new AppError('Stock cannot be negative');
-        // If both are missing in one variant but some stock/price is given, that's fine (it's a default variant)
+        
         const sizeVal = v.size || '';
         const colorVal = v.color || '';
         
@@ -41,6 +43,7 @@ export class ProductService {
 
         return {
           ...v,
+          price: finalPrice,
           sku: v.sku || `SKU-${Date.now()}-${Math.floor(Math.random() * 10000)}`
         };
       });
