@@ -42,8 +42,8 @@ export default function MerchantProfilePage() {
     return (
       <PageLayout>
         <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
-          <h1 className="text-2xl font-black text-neutral-300 uppercase italic">Merchant not found</h1>
-          <Link href="/merchants" className="mt-4 text-primary font-black uppercase tracking-widest hover:underline">Explore Brands</Link>
+          <h1 className="text-2xl font-black text-neutral-300 uppercase italic text-shadow-sm">Merchant not found</h1>
+          <Link href="/merchants" className="mt-8 text-primary font-black uppercase tracking-[0.2em] hover:text-black transition-colors">Explore Brands</Link>
         </div>
       </PageLayout>
     );
@@ -138,8 +138,8 @@ export default function MerchantProfilePage() {
           <main className="lg:col-span-3">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 border-b border-neutral-100 pb-10 gap-6">
               <div>
-                <h2 className="text-4xl font-black text-neutral-900 tracking-tighter uppercase italic leading-none underline decoration-primary/20 decoration-8 underline-offset-[12px]">Catalog</h2>
-                <p className="text-neutral-400 font-medium text-[10px] mt-6 uppercase tracking-[0.3em]">
+                <h2 className="text-4xl lg:text-5xl font-black text-neutral-900 tracking-tighter uppercase italic leading-none underline decoration-primary/20 decoration-8 underline-offset-[12px]">Catalog</h2>
+                <p className="text-neutral-400 font-black mt-6 uppercase tracking-[0.3em] text-[10px]">
                     Displaying limited selection
                 </p>
               </div>
@@ -157,8 +157,8 @@ export default function MerchantProfilePage() {
               </div>
             ) : (
               <div className="py-32 text-center bg-neutral-50 rounded-[3rem] border border-dashed border-neutral-200">
-                <p className="text-neutral-400 font-black uppercase italic tracking-widest text-xs">No products published yet.</p>
-                <p className="text-neutral-300 text-[10px] mt-2 font-bold italic uppercase tracking-widest">Sign up for updates</p>
+                <p className="text-neutral-400 font-black uppercase italic tracking-[0.2em] text-xs">No products published yet.</p>
+                <p className="text-neutral-300 text-[10px] mt-4 font-black italic uppercase tracking-[0.3em]">Sign up for updates</p>
               </div>
             )}
           </main>

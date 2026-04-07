@@ -6,15 +6,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useToastContext } from "@/components/providers/ToastProvider";
 
 interface ProductDetailClientProps {
   product: Product;
 }
-
-import PageLayout from "@/components/layout/UX/PageLayout";
-import BackButton from "@/components/layout/UX/BackButton";
-
-import { useToastContext } from "@/components/providers/ToastProvider";
 
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
   const router = useRouter();
@@ -45,18 +41,14 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const images = product.images.length > 0 ? product.images : [{ url: '/placeholder-product.png', order: 0 }];
 
   return (
-    <PageLayout>
-      <div className="bg-white font-sans overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
-          <BackButton className="mb-8" />
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24">
-          
+    <div className="bg-white font-sans overflow-hidden">
+      <div className="responsive-container py-12 md:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24">
           {/* Image Gallery */}
           <div className="space-y-6">
-            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-gray-50 shadow-sm border border-gray-100">
+            <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden bg-neutral-50 shadow-sm border border-neutral-100">
                <Image 
-                 src={mainImage!}
+                 src={mainImage || '/placeholder-product.png'}
                  alt={product.name}
                  fill
                  priority
@@ -70,7 +62,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   <button 
                     key={idx}
                     onClick={() => setMainImage(img.url)}
-                    className={`relative flex-shrink-0 w-20 h-24 rounded-xl overflow-hidden border-2 transition-all ${mainImage === img.url ? 'border-purple-600 ring-2 ring-purple-50 shadow-lg scale-95' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                    className={`relative flex-shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 transition-all ${mainImage === img.url ? 'border-primary border-4 shadow-xl scale-95' : 'border-transparent opacity-60 hover:opacity-100'}`}
                   >
                     <Image 
                       src={img.url} 
@@ -86,50 +78,50 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
  
           {/* Product Info */}
           <div className="flex flex-col">
-            <div className="border-b border-gray-100 pb-8">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold text-purple-600 uppercase tracking-widest block italic">New Arrival</span>
+            <div className="border-b border-neutral-100 pb-10">
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em] italic">New Arrival</span>
                 {product.merchant && (
                   <Link 
                     href={`/merchants/${product.merchant.id}`}
                     className="flex items-center gap-2 group/brand"
                   >
-                    <div className="relative w-6 h-6 rounded-full overflow-hidden bg-black border border-gray-100 group-hover/brand:border-purple-600 transition-colors">
+                    <div className="relative w-8 h-8 rounded-2xl overflow-hidden bg-black border border-neutral-100 group-hover/brand:border-primary transition-all">
                       {product.merchant.logo ? (
                         <Image src={product.merchant.logo} alt={product.merchant.storeName} fill className="object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[8px] font-black text-white">{product.merchant.storeName.substring(0, 1)}</div>
+                        <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-white italic">{product.merchant.storeName.substring(0, 1)}</div>
                       )}
                     </div>
-                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest group-hover/brand:text-purple-600 transition-colors border-b border-transparent group-hover/brand:border-purple-600/30 pb-0.5">
+                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest group-hover/brand:text-primary transition-colors border-b border-transparent group-hover/brand:border-primary/20 pb-0.5">
                       {product.merchant.storeName}
                     </span>
                   </Link>
                 )}
               </div>
-              <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight uppercase leading-none mb-4">
+              <h1 className="text-5xl lg:text-7xl font-black text-neutral-900 tracking-tighter uppercase leading-none mb-6 italic animate-in slide-in-from-bottom-4 duration-700">
                 {product.name}
               </h1>
-              <p className="text-2xl font-black text-gray-900 leading-none">
+              <p className="text-3xl font-black text-neutral-900 leading-none tracking-tighter italic">
                 ৳{(selectedVariant?.price || product.basePrice).toLocaleString()}
               </p>
             </div>
  
-            <div className="py-8 space-y-8">
-              <div className="prose prose-sm text-gray-500 font-medium leading-relaxed">
+            <div className="py-10 space-y-10">
+              <div className="prose prose-neutral text-neutral-500 font-medium leading-relaxed italic text-base">
                 {product.description || "A masterfully crafted essential designed for comfort and longevity. Made from premium, planet-friendly materials."}
               </div>
  
               {/* Variant Selectors */}
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <div>
-                   <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-4">Select Size</h3>
-                   <div className="flex flex-wrap gap-3">
+                   <h3 className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-6">Select Size</h3>
+                   <div className="flex flex-wrap gap-4">
                      {product.variants.map((v) => (
                        <button
                          key={v.id}
                          onClick={() => setSelectedVariant(v)}
-                         className={`px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider border-2 transition-all ${selectedVariant?.id === v.id ? 'bg-purple-600 border-purple-600 text-white shadow-xl -translate-y-1' : 'bg-white border-gray-100 text-gray-600 hover:border-gray-300'}`}
+                         className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${selectedVariant?.id === v.id ? 'bg-primary border-primary text-white shadow-2xl -translate-y-1' : 'bg-white border-neutral-100 text-neutral-500 hover:border-neutral-200'}`}
                        >
                          {v.size} {v.color && `- ${v.color}`}
                        </button>
@@ -142,12 +134,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 <button 
                   disabled={addingToCart || !selectedVariant || selectedVariant.stock === 0}
                   onClick={handleAddToCart}
-                  className="w-full py-5 bg-purple-600 text-white font-bold rounded-2xl text-xs uppercase tracking-[0.2em] shadow-2xl hover:bg-purple-700 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                  className="w-full py-6 bg-primary text-white font-black rounded-[2rem] text-xs uppercase tracking-[0.3em] shadow-2xl shadow-primary/20 hover:bg-black transition-all flex items-center justify-center gap-4 active:scale-95 disabled:opacity-50"
                 >
                   {addingToCart ? "Adding..." : selectedVariant?.stock === 0 ? "Out of Stock" : "Add to Cart"}
-                  {!addingToCart && selectedVariant?.stock !== 0 && (
+                  {!addingToCart && (selectedVariant?.stock ?? 0) !== 0 && (
                     <>
-                      <span className="opacity-40 text-sm">/</span>
+                      <span className="opacity-20 text-lg font-thin">|</span>
                       <span className="opacity-90">Bag</span>
                     </>
                   )}
@@ -156,19 +148,19 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 {product.merchant && (
                   <Link 
                     href={`/merchants/${product.merchant.id}`}
-                    className="w-full py-4 border-2 border-neutral-100 text-center text-[10px] font-black uppercase tracking-widest text-neutral-400 rounded-2xl hover:bg-neutral-50 hover:border-neutral-200 hover:text-neutral-900 transition-all shadow-sm"
+                    className="w-full py-5 border-2 border-neutral-100 text-center text-[10px] font-black uppercase tracking-widest text-neutral-400 rounded-2xl hover:bg-neutral-50 hover:border-neutral-200 hover:text-neutral-900 transition-all shadow-sm"
                   >
                     Visit {product.merchant.storeName} Store
                   </Link>
                 )}
-
-                <div className="flex items-center justify-center gap-6 text-[10px] uppercase font-bold text-gray-400 tracking-widest pt-2">
+ 
+                <div className="flex items-center justify-center gap-8 text-[10px] uppercase font-black text-neutral-300 tracking-[0.2em] pt-4 italic">
                    <div className="flex items-center gap-2">
-                     <span className="w-1 h-1 rounded-full bg-green-500"></span>
+                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
                      In Stock
                    </div>
                    <div className="flex items-center gap-2">
-                     <span className="w-1.5 h-1.5 border border-purple-400 rounded-full"></span>
+                     <span className="w-2 h-2 border-2 border-primary/40 rounded-full"></span>
                      Ships Worldwide
                    </div>
                 </div>
@@ -176,32 +168,31 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             </div>
  
             {/* Product Meta (Simplified) */}
-            <div className="mt-auto border-t border-gray-100 pt-8 grid grid-cols-2 gap-8">
+            <div className="mt-auto border-t border-neutral-100 pt-10 grid grid-cols-2 gap-10">
                <div>
-                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 italic">SKU</h4>
-                  <p className="text-xs font-bold text-gray-700">{selectedVariant?.sku || '--'}</p>
+                  <h4 className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-2 italic">SKU</h4>
+                  <p className="text-xs font-black text-neutral-900 italic uppercase tracking-tighter">{selectedVariant?.sku || '--'}</p>
                </div>
                <div>
-                  <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 italic">Category</h4>
-                  <p className="text-xs font-bold text-gray-700 underline underline-offset-4 decoration-purple-200">Sustainability</p>
+                  <h4 className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-2 italic">Category</h4>
+                  <p className="text-xs font-black text-neutral-900 underline underline-offset-8 decoration-primary/20 decoration-4 italic uppercase tracking-tighter">Sustainability</p>
                </div>
             </div>
           </div>
         </div>
       </div>
-
+ 
       {/* Recommended Section (Mock) */}
-      <div className="bg-gray-50 py-24 border-t border-gray-100">
-         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            <h2 className="text-2xl font-extrabold text-gray-900 uppercase tracking-tight mb-12 italic">You May Also Like</h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 opacity-50 grayscale transition-all hover:grayscale-0 hover:opacity-100">
+      <div className="bg-neutral-50 py-32 border-t border-neutral-100">
+         <div className="responsive-container">
+            <h2 className="text-3xl font-black text-neutral-900 uppercase tracking-tighter mb-16 italic underline decoration-primary/20 decoration-8 underline-offset-[12px]">You May Also Like</h2>
+            <div className="responsive-grid grid-cols-2 lg:grid-cols-4 gap-8 opacity-40 grayscale transition-all hover:grayscale-0 hover:opacity-100">
                {[...Array(4)].map((_, i) => (
-                 <div key={i} className="aspect-[4/5] bg-gray-200 rounded-2xl" />
+                 <div key={i} className="aspect-[4/5] bg-white border border-neutral-100 rounded-[2.5rem]" />
                ))}
             </div>
          </div>
       </div>
-      </div>
-    </PageLayout>
+    </div>
   );
 }

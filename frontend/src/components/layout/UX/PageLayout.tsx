@@ -24,7 +24,7 @@ export default function PageLayout({
       
       <div className="flex-1 w-full overflow-x-hidden">
         {showBackButton && (
-          <div className="responsive-container pt-8 pb-4">
+          <div className="responsive-container pt-8 pb-2">
             <BackButton />
           </div>
         )}

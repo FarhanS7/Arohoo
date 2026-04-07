@@ -47,8 +47,8 @@ export default function MallDetailPage({ params }: { params: Promise<{ id: strin
     return (
       <PageLayout>
         <div className="min-h-[60vh] flex flex-col items-center justify-center">
-          <h1 className="text-2xl font-black text-gray-300">Mall not found</h1>
-          <Link href="/malls" className="mt-4 text-primary font-bold hover:underline">Back to Destinations</Link>
+          <h1 className="text-2xl font-black text-neutral-300 uppercase italic text-shadow-sm">Mall not found</h1>
+          <Link href="/malls" className="mt-8 text-primary font-black uppercase tracking-[0.2em] hover:text-black transition-colors">Back to Destinations</Link>
         </div>
       </PageLayout>
     );
@@ -76,13 +76,8 @@ export default function MallDetailPage({ params }: { params: Promise<{ id: strin
         {/* Content */}
         <div className="absolute inset-0 flex flex-col justify-end pb-20">
           <div className="responsive-container w-full">
-            <Link 
-              href="/malls" 
-              className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors mb-8 group"
-            >
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Destinations</span>
-            </Link>
+            {/* Space Placeholder */}
+            <div className="mb-8 h-4" />
             
             <div className="max-w-3xl">
               <div className="flex items-center gap-3 mb-4">
@@ -105,9 +100,9 @@ export default function MallDetailPage({ params }: { params: Promise<{ id: strin
       {/* Stores Section - Standardized Grid */}
       <main className="fluid-py bg-white">
         <div className="responsive-container">
-          <div className="mb-16">
-            <h2 className="text-3xl font-black text-gray-900 tracking-tight uppercase italic underline decoration-primary/20 decoration-4 underline-offset-8">Available Stores</h2>
-            <p className="text-gray-400 font-medium mt-4 uppercase tracking-[0.2em] text-[10px]">Curated retailers at this destination</p>
+          <div className="mb-20">
+            <h2 className="text-4xl lg:text-5xl font-black text-neutral-900 tracking-tighter uppercase italic underline decoration-primary/20 decoration-8 underline-offset-[12px]">Available Stores</h2>
+            <p className="text-neutral-400 font-black mt-8 uppercase tracking-[0.3em] text-[10px]">Curated retailers at this destination</p>
           </div>
 
           {mall.merchants && mall.merchants.length > 0 ? (
