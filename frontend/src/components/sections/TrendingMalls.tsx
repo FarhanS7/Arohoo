@@ -28,10 +28,10 @@ export default async function TrendingMalls() {
       <div className="responsive-container">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-12 gap-4">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-2 tracking-tight">Trending Malls</h2>
-            <p className="text-gray-500 text-sm sm:text-base font-medium tracking-tight">Virtual access to the most popular shopping destinations.</p>
+            <h2 className="text-xl sm:text-3xl font-black text-neutral-900 mb-2 tracking-tighter uppercase italic">Trending Malls</h2>
+            <p className="text-neutral-500 text-xs sm:text-base font-medium tracking-tight">Virtual access to the most popular shopping destinations.</p>
           </div>
-          <Link href="/malls" className="text-primary font-black text-xs sm:text-sm uppercase tracking-widest hover:opacity-70 transition-all border-b-2 border-primary/20 pb-1 w-fit">
+          <Link href="/malls" className="text-primary font-black text-[10px] uppercase tracking-[0.2em] hover:opacity-70 border-b-2 border-primary/20 pb-1 w-fit hidden sm:block">
             See All Malls
           </Link>
         </div>
@@ -70,6 +70,10 @@ export default async function TrendingMalls() {
               </div>
             </Link>
           ))}
+        </div>
+        
+        <div className="mt-8 text-center sm:hidden">
+            <Link href="/malls" className="text-[10px] font-black uppercase tracking-[0.2em] bg-neutral-900 text-white py-5 px-8 rounded-2xl block shadow-xl shadow-neutral-200">See All Malls</Link>
         </div>
       </div>
     </section>

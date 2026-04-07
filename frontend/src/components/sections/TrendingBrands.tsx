@@ -28,15 +28,15 @@ export default async function TrendingBrands() {
       <div className="responsive-container">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-12 gap-4">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-neutral-900 mb-2 tracking-tight uppercase italic">Trending Brands</h2>
-            <p className="text-neutral-500 text-sm sm:text-base font-medium tracking-tight">The most influential brand boutiques curated for you.</p>
+            <h2 className="text-xl sm:text-3xl font-black text-neutral-900 mb-2 tracking-tighter uppercase italic">Trending Brands</h2>
+            <p className="text-neutral-500 text-xs sm:text-base font-medium tracking-tight">The most influential brand boutiques curated for you.</p>
           </div>
-          <Link href="/brands" className="text-primary font-black text-xs uppercase tracking-[0.2em] hover:opacity-70 transition-all border-b-2 border-primary/20 pb-1 w-fit">
+          <Link href="/brands" className="text-primary font-black text-[10px] uppercase tracking-[0.2em] hover:opacity-70 border-b-2 border-primary/20 pb-1 w-fit hidden sm:block">
             Explore All Brands
           </Link>
         </div>
 
-        <div className="responsive-grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-4 sm:mb-0">
+        <div className="responsive-grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
           {brands.map((brand: any) => (
             <Link
               href={`/merchants/${brand.id}`}
@@ -63,6 +63,10 @@ export default async function TrendingBrands() {
               </span>
             </Link>
           ))}
+        </div>
+        
+        <div className="mt-8 text-center sm:hidden">
+            <Link href="/brands" className="text-[10px] font-black uppercase tracking-[0.2em] bg-neutral-900 text-white py-5 px-8 rounded-2xl block shadow-xl shadow-neutral-200">Explore All Brands</Link>
         </div>
       </div>
     </section>
