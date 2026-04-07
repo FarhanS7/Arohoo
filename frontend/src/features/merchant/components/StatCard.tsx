@@ -40,10 +40,10 @@ const StatCard: React.FC<StatCardProps> = ({
   }
 
   return (
-    <div className={`bg-white rounded-3xl border border-neutral-100 p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-full group ${className}`}>
+    <div className={`bg-white rounded-3xl border border-neutral-100 p-8 shadow-sm flex flex-col justify-between h-full ${className}`}>
       <div>
         <div className="flex items-start justify-between mb-8">
-          <div className="p-4 rounded-2xl bg-neutral-50 text-neutral-900 group-hover:bg-black group-hover:text-white transition-colors duration-300 shadow-sm border border-neutral-100">
+          <div className="p-4 rounded-2xl bg-neutral-50 text-neutral-900 shadow-sm border border-neutral-100">
             {icon}
           </div>
           {trend && (

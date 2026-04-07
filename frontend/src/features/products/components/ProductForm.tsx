@@ -2,12 +2,12 @@
 
 import { Product } from "@/lib/api/products";
 import dynamic from "next/dynamic";
-import { useState, useCallback, memo, useMemo } from "react";
+import { useState, useCallback, memo } from "react";
 import { useCategories } from "../hooks/useCategories";
 import { Trash2 } from "lucide-react";
 
 const ImageUpload = dynamic(() => import("./ImageUpload"), {
-  loading: () => <div className="h-40 w-full bg-gray-50 animate-pulse rounded-xl" />,
+  loading: () => <div className="h-40 w-full bg-gray-50 rounded-xl" />,
 });
 
 interface VariantRowProps {
@@ -22,11 +22,11 @@ interface VariantRowProps {
 
 // Memoized Variant Row to prevent re-rendering all rows when product name changes
 const VariantRow = memo(({ index, variant, onChange, onRemove, sizeLabel = "Size", colorLabel = "Color", showColor = true }: VariantRowProps) => (
-  <div className="p-6 bg-gray-50/50 rounded-2xl border border-gray-100 relative group transition-all hover:bg-white hover:shadow-xl hover:shadow-purple-50">
+  <div className="p-6 bg-gray-50/50 rounded-2xl border border-gray-100 relative">
     <button
       type="button"
       onClick={() => onRemove(index)}
-      className="absolute -top-2 -right-2 bg-white text-red-500 rounded-full w-8 h-8 flex items-center justify-center shadow-lg border border-red-50 opacity-0 group-hover:opacity-100 transition-all hover:scale-110 active:scale-95 z-10"
+      className="absolute -top-2 -right-2 bg-white text-red-500 rounded-full w-8 h-8 flex items-center justify-center shadow-lg border border-red-50 z-10"
     >
       <Trash2 className="w-4 h-4" />
     </button>
@@ -176,7 +176,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
   };
 
   return (
-    <form onSubmit={handleSubmit} className="font-sans space-y-8 bg-white p-8 rounded-3xl shadow-2xl shadow-purple-100 border border-purple-50 max-w-4xl mx-auto">
+    <form onSubmit={handleSubmit} className="font-sans space-y-8 bg-white p-8 rounded-3xl border border-purple-50 max-w-4xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-6">
           <div className="flex items-center gap-3 border-b border-purple-50 pb-4">
@@ -191,7 +191,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all outline-none bg-gray-50/50 font-bold text-gray-900"
+                className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none bg-gray-50/50 font-bold text-gray-900"
                 placeholder="e.g. Premium Leather Boot"
               />
             </div>
@@ -201,7 +201,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all outline-none h-32 bg-gray-50/50 font-medium text-gray-600"
+                className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none h-32 bg-gray-50/50 font-medium text-gray-600"
                 placeholder="Describe the premium craftsmanship..."
               />
             </div>
@@ -213,7 +213,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                   type="number"
                   value={formData.basePrice}
                   onChange={(e) => setFormData({ ...formData, basePrice: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all outline-none bg-gray-50/50 font-bold text-purple-600"
+                  className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none bg-gray-50/50 font-bold text-purple-600"
                 />
               </div>
 
@@ -223,7 +223,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                   <select
                     value={formData.categoryId}
                     onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                    className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all outline-none appearance-none bg-gray-50/50 font-bold text-gray-900"
+                    className="w-full px-5 py-4 rounded-2xl border border-gray-100 focus:ring-2 focus:ring-purple-600 focus:border-transparent outline-none appearance-none bg-gray-50/50 font-bold text-gray-900"
                   >
                     <option value="">Select</option>
                     {categories.map((c) => (
@@ -250,7 +250,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
             <button
               type="button"
               onClick={handleAddVariant}
-              className="text-[10px] px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all font-black uppercase tracking-widest shadow-lg shadow-purple-100"
+              className="text-[10px] px-4 py-2 bg-purple-600 text-white rounded-xl font-black uppercase tracking-widest"
             >
               + Add Variant
             </button>
@@ -319,7 +319,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
       </div>
 
       {formError && (
-        <div className="bg-red-50 text-red-600 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest border border-red-100 animate-bounce flex items-center gap-3">
+        <div className="bg-red-50 text-red-600 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest border border-red-100 flex items-center gap-3">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           {formError}
         </div>
@@ -329,14 +329,14 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
         <button
           type="button"
           onClick={onCancel}
-          className="px-8 py-3 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors"
+          className="px-8 py-3 text-xs font-black uppercase tracking-widest text-gray-400"
           disabled={loading}
         >
           Discard
         </button>
         <button
           type="submit"
-          className="px-10 py-4 bg-purple-600 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-purple-700 shadow-2xl shadow-purple-200 transition-all active:scale-95 disabled:opacity-50"
+          className="px-10 py-4 bg-purple-600 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl disabled:opacity-50"
           disabled={loading}
         >
           {loading ? "Processing..." : initialData ? "Confirm Update" : "Launch Product"}

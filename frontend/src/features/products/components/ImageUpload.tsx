@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useToastContext } from "@/components/providers/ToastProvider";
 
 interface ImageUploadProps {
   productId?: string;
@@ -9,8 +10,6 @@ interface ImageUploadProps {
   existingImages?: { id?: string; url: string; order: number }[];
   loading: boolean;
 }
-
-import { useToastContext } from "@/components/providers/ToastProvider";
 
 export default function ImageUpload({ productId, onUpload, onChange, existingImages = [], loading }: ImageUploadProps) {
   const { addToast } = useToastContext();
@@ -69,21 +68,21 @@ export default function ImageUpload({ productId, onUpload, onChange, existingIma
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {/* Existing Images */}
         {existingImages.map((img, idx) => (
-          <div key={idx} className="aspect-square rounded-xl overflow-hidden border-2 border-indigo-100 relative group">
+          <div key={idx} className="aspect-square rounded-xl overflow-hidden border-2 border-neutral-100 relative">
             <img 
                src={img.url} 
                alt="Product" 
                className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-               <span className="text-white text-[10px] font-bold uppercase">Stored</span>
+            <div className="absolute bottom-1 right-1 bg-black/60 px-2 py-0.5 rounded text-white text-[8px] font-bold uppercase">
+               Stored
             </div>
           </div>
         ))}
 
         {/* New Selected Previews */}
         {previews.map((preview, idx) => (
-          <div key={idx} className="aspect-square rounded-xl overflow-hidden border-2 border-indigo-500 relative group animate-pulse">
+          <div key={idx} className="aspect-square rounded-xl overflow-hidden border-2 border-purple-500 relative">
             <img 
               src={preview} 
               alt="Preview" 
@@ -104,7 +103,7 @@ export default function ImageUpload({ productId, onUpload, onChange, existingIma
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="aspect-square rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 hover:border-indigo-400 hover:text-indigo-500 transition-all bg-gray-50"
+            className="aspect-square rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 bg-gray-50"
           >
             <span className="text-2xl mb-1">+</span>
             <span className="text-[10px] font-bold uppercase">Add Photo</span>
@@ -126,7 +125,7 @@ export default function ImageUpload({ productId, onUpload, onChange, existingIma
           type="button"
           onClick={handleUpload}
           disabled={loading || !productId}
-          className="w-full py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition-all shadow-lg disabled:opacity-50"
+          className="w-full py-3 bg-gray-900 text-white font-bold rounded-xl disabled:opacity-50"
         >
           {loading ? "Uploading..." : `Upload ${selectedFiles.length} Image(s)`}
           {!productId && " (Save product first)"}

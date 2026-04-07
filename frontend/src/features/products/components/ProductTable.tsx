@@ -41,7 +41,7 @@ export default function ProductTable({ products, onEdit, onDelete, loading }: Pr
             const isLowStock = totalStock < 10;
             
             return (
-              <tr key={product.id} className="hover:bg-neutral-50/50 transition-colors group">
+              <tr key={product.id}>
                 <td className="px-8 py-6 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="h-14 w-14 flex-shrink-0 bg-neutral-900 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-neutral-200">
@@ -75,16 +75,16 @@ export default function ProductTable({ products, onEdit, onDelete, loading }: Pr
                   )}
                 </td>
                 <td className="px-8 py-6 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex justify-end gap-2">
                     <button
                       onClick={() => onEdit(product)}
-                      className="inline-flex items-center px-4 py-2 bg-black text-white rounded-xl text-xs font-bold hover:bg-neutral-800 transition-all"
+                      className="inline-flex items-center px-4 py-2 bg-black text-white rounded-xl text-xs font-bold"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => onDelete(product)}
-                      className="inline-flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-xl text-xs font-bold hover:bg-red-100 transition-all"
+                      className="inline-flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-xl text-xs font-bold"
                     >
                       Delete
                     </button>

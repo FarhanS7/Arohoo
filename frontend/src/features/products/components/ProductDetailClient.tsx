@@ -46,13 +46,13 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24">
           {/* Image Gallery */}
           <div className="space-y-6">
-            <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden bg-neutral-50 shadow-sm border border-neutral-100">
+            <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden bg-neutral-50 border border-neutral-100">
                <Image 
                  src={mainImage || '/placeholder-product.png'}
                  alt={product.name}
                  fill
                  priority
-                 className="object-cover object-center transition-all duration-700 hover:scale-110"
+                 className="object-cover object-center"
                  sizes="(max-width: 768px) 100vw, 50vw"
                />
             </div>
@@ -62,7 +62,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   <button 
                     key={idx}
                     onClick={() => setMainImage(img.url)}
-                    className={`relative flex-shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 transition-all ${mainImage === img.url ? 'border-primary border-4 shadow-xl scale-95' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                    className={`relative flex-shrink-0 w-20 h-24 rounded-2xl overflow-hidden border-2 ${mainImage === img.url ? 'border-primary border-4' : 'border-transparent opacity-60'}`}
                   >
                     <Image 
                       src={img.url} 
@@ -84,22 +84,22 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 {product.merchant && (
                   <Link 
                     href={`/merchants/${product.merchant.id}`}
-                    className="flex items-center gap-2 group/brand"
+                    className="flex items-center gap-2"
                   >
-                    <div className="relative w-8 h-8 rounded-2xl overflow-hidden bg-black border border-neutral-100 group-hover/brand:border-primary transition-all">
+                    <div className="relative w-8 h-8 rounded-2xl overflow-hidden bg-black border border-neutral-100">
                       {product.merchant.logo ? (
                         <Image src={product.merchant.logo} alt={product.merchant.storeName} fill className="object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-white italic">{product.merchant.storeName.substring(0, 1)}</div>
                       )}
                     </div>
-                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest group-hover/brand:text-primary transition-colors border-b border-transparent group-hover/brand:border-primary/20 pb-0.5">
+                    <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest border-b border-transparent pb-0.5">
                       {product.merchant.storeName}
                     </span>
                   </Link>
                 )}
               </div>
-              <h1 className="text-5xl lg:text-7xl font-black text-neutral-900 tracking-tighter uppercase leading-none mb-6 italic animate-in slide-in-from-bottom-4 duration-700">
+              <h1 className="text-5xl lg:text-7xl font-black text-neutral-900 tracking-tighter uppercase leading-none mb-6 italic">
                 {product.name}
               </h1>
               <p className="text-3xl font-black text-neutral-900 leading-none tracking-tighter italic">
@@ -121,7 +121,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                        <button
                          key={v.id}
                          onClick={() => setSelectedVariant(v)}
-                         className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${selectedVariant?.id === v.id ? 'bg-primary border-primary text-white shadow-2xl -translate-y-1' : 'bg-white border-neutral-100 text-neutral-500 hover:border-neutral-200'}`}
+                         className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 ${selectedVariant?.id === v.id ? 'bg-primary border-primary text-white' : 'bg-white border-neutral-100 text-neutral-500'}`}
                        >
                          {v.size} {v.color && `- ${v.color}`}
                        </button>
@@ -134,7 +134,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 <button 
                   disabled={addingToCart || !selectedVariant || selectedVariant.stock === 0}
                   onClick={handleAddToCart}
-                  className="w-full py-6 bg-primary text-white font-black rounded-[2rem] text-xs uppercase tracking-[0.3em] shadow-2xl shadow-primary/20 hover:bg-black transition-all flex items-center justify-center gap-4 active:scale-95 disabled:opacity-50"
+                  className="w-full py-6 bg-primary text-white font-black rounded-[2rem] text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-4 disabled:opacity-50"
                 >
                   {addingToCart ? "Adding..." : selectedVariant?.stock === 0 ? "Out of Stock" : "Add to Cart"}
                   {!addingToCart && (selectedVariant?.stock ?? 0) !== 0 && (
@@ -148,7 +148,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 {product.merchant && (
                   <Link 
                     href={`/merchants/${product.merchant.id}`}
-                    className="w-full py-5 border-2 border-neutral-100 text-center text-[10px] font-black uppercase tracking-widest text-neutral-400 rounded-2xl hover:bg-neutral-50 hover:border-neutral-200 hover:text-neutral-900 transition-all shadow-sm"
+                    className="w-full py-5 border-2 border-neutral-100 text-center text-[10px] font-black uppercase tracking-widest text-neutral-400 rounded-2xl"
                   >
                     Visit {product.merchant.storeName} Store
                   </Link>
@@ -156,7 +156,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
  
                 <div className="flex items-center justify-center gap-8 text-[10px] uppercase font-black text-neutral-300 tracking-[0.2em] pt-4 italic">
                    <div className="flex items-center gap-2">
-                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
+                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                      In Stock
                    </div>
                    <div className="flex items-center gap-2">
@@ -186,7 +186,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       <div className="bg-neutral-50 py-32 border-t border-neutral-100">
          <div className="responsive-container">
             <h2 className="text-3xl font-black text-neutral-900 uppercase tracking-tighter mb-16 italic underline decoration-primary/20 decoration-8 underline-offset-[12px]">You May Also Like</h2>
-            <div className="responsive-grid grid-cols-2 lg:grid-cols-4 gap-8 opacity-40 grayscale transition-all hover:grayscale-0 hover:opacity-100">
+            <div className="responsive-grid grid-cols-2 lg:grid-cols-4 gap-8">
                {[...Array(4)].map((_, i) => (
                  <div key={i} className="aspect-[4/5] bg-white border border-neutral-100 rounded-[2.5rem]" />
                ))}
