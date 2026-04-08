@@ -2,6 +2,8 @@
 
 import { Order } from "@/lib/api/orders";
 import { useState } from "react";
+import { Eye } from "lucide-react";
+import OrderDetailsModal from "./OrderDetailsModal";
 
 interface OrderFulfillmentTableProps {
   orders: Order[];
@@ -13,6 +15,13 @@ const STATUS_OPTIONS = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED"];
 
 export default function OrderFulfillmentTable({ orders, onStatusChange, loading }: OrderFulfillmentTableProps) {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openDetails = (order: Order) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     setUpdatingId(orderId);
@@ -69,7 +78,11 @@ export default function OrderFulfillmentTable({ orders, onStatusChange, loading 
         </thead>
         <tbody className="divide-y divide-neutral-50">
           {orders.map((order) => (
-            <tr key={order.id} className="hover:bg-neutral-50/30 transition-colors group">
+            <tr 
+              key={order.id} 
+              className="hover:bg-neutral-50/30 transition-colors group cursor-pointer"
+              onClick={() => openDetails(order)}
+            >
               <td className="px-10 py-8 whitespace-nowrap">
                 <div className="flex flex-col">
                   <span className="text-sm font-black text-neutral-900 tracking-tighter">#{order.id.slice(-8).toUpperCase()}</span>
@@ -103,6 +116,7 @@ export default function OrderFulfillmentTable({ orders, onStatusChange, loading 
                   <select
                     disabled={updatingId === order.id}
                     value={order.status}
+                    onClick={(e) => e.stopPropagation()}
                     onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
                     className="bg-transparent text-[10px] font-black text-neutral-900 uppercase tracking-widest cursor-pointer focus:outline-none hover:text-indigo-600 transition-colors disabled:opacity-30"
                   >
@@ -113,14 +127,31 @@ export default function OrderFulfillmentTable({ orders, onStatusChange, loading 
                 </div>
               </td>
               <td className="px-10 py-8 whitespace-nowrap text-right">
-                <span className="text-xs font-bold text-neutral-400 capitalize">
-                  {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                </span>
+                <div className="flex items-center justify-end gap-3">
+                  <span className="text-xs font-bold text-neutral-400 capitalize">
+                    {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                  <button 
+                    className="p-2 text-neutral-300 group-hover:text-neutral-900 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openDetails(order);
+                    }}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      <OrderDetailsModal 
+        isOpen={isModalOpen}
+        order={selectedOrder}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }
