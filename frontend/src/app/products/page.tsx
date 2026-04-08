@@ -4,9 +4,9 @@ import FilterPanel from "@/features/products/components/FilterPanel";
 import ProductCard from "@/features/products/components/ProductCard";
 import ProductCardSkeleton from "@/features/products/components/ProductCardSkeleton";
 import { usePublicProducts } from "@/features/products/hooks/usePublicProducts";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 
-export default function ProductCatalogPage() {
+function ProductCatalogContent() {
   const { 
     products, 
     loading, 
@@ -158,5 +158,13 @@ export default function ProductCatalogPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductCatalogPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-white"><div className="text-xl font-bold italic tracking-tighter uppercase text-gray-300 animate-pulse">Loading Catalog...</div></div>}>
+      <ProductCatalogContent />
+    </Suspense>
   );
 }
