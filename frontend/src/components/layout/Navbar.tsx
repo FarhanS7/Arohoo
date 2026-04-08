@@ -80,6 +80,7 @@ export default function Navbar() {
               type="text" 
               placeholder="Search brands, products..." 
               className="bg-transparent border-none focus:ring-0 text-sm w-full ml-2 outline-none" 
+              suppressHydrationWarning
             />
           </div>
 

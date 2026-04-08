@@ -26,10 +26,10 @@ export default async function TrendingMalls() {
   return (
     <section className="fluid-py bg-muted/30">
       <div className="responsive-container">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-12 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 sm:mb-5 gap-4">
           <div>
-            <h2 className="text-xl sm:text-3xl font-black text-neutral-900 mb-2 tracking-tighter uppercase italic">Trending Malls</h2>
-            <p className="text-neutral-500 text-xs sm:text-base font-medium tracking-tight">Virtual access to the most popular shopping destinations.</p>
+            <h2 className="text-lg sm:text-2xl font-black text-neutral-900 mb-1 tracking-tighter uppercase italic">Trending Malls</h2>
+            <p className="text-neutral-500 text-[10px] sm:text-sm font-medium tracking-tight">Virtual access to the most popular shopping destinations.</p>
           </div>
           <Link href="/malls" className="text-primary font-black text-[10px] uppercase tracking-[0.2em] hover:opacity-70 border-b-2 border-primary/20 pb-1 w-fit hidden sm:block">
             See All Malls

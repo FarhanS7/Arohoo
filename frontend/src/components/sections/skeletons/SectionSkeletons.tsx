@@ -44,10 +44,10 @@ export function TrendingMallsSkeleton() {
   return (
     <section className="fluid-py bg-neutral-50/50">
       <div className="responsive-container">
-        <div className="flex items-end justify-between mb-12">
+        <div className="flex items-end justify-between mb-8">
           <div className="space-y-2">
-            <Skeleton className="h-10 w-48 rounded-xl" />
-            <Skeleton className="h-4 w-64 rounded-lg" />
+            <Skeleton className="h-8 w-48 rounded-xl" />
+            <Skeleton className="h-3 w-64 rounded-lg" />
           </div>
         </div>
         <div className="responsive-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">

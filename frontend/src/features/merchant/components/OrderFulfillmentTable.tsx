@@ -78,15 +78,15 @@ export default function OrderFulfillmentTable({ orders, onStatusChange, loading 
               </td>
               <td className="px-10 py-8">
                 <div className="flex flex-col gap-1 max-w-[250px]">
-                  {order.orderItems.map((item, idx) => (
+                  {(order.orderItems || []).slice(0, 2).map((item, idx) => (
                     <div key={idx} className="flex items-center justify-between gap-4">
-                      <span className="text-xs font-bold text-neutral-700 truncate flex-1">{item.product.name}</span>
+                      <span className="text-xs font-bold text-neutral-700 truncate flex-1">{item.product?.name || "Unknown Product"}</span>
                       <span className="text-[10px] font-black text-neutral-400">x{item.quantity}</span>
                     </div>
                   ))}
-                  {order.orderItems.length > 2 && (
+                  {(order.orderItems?.length || 0) > 2 && (
                     <span className="text-[10px] font-black text-indigo-500 uppercase mt-1">
-                      + {order.orderItems.length - 2} more items
+                      + {(order.orderItems?.length || 0) - 2} more items
                     </span>
                   )}
                 </div>

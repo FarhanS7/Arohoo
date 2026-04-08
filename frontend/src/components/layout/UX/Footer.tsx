@@ -44,7 +44,7 @@ export default function Footer() {
           <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 text-neutral-500">Newsletter</h4>
           <p className="text-neutral-500 text-[10px] font-black uppercase tracking-widest leading-relaxed mb-6">Get updates on trending malls and exclusive offers.</p>
           <div className="flex bg-white/5 rounded-2xl p-1 border border-white/10">
-            <input type="text" placeholder="Email address" className="bg-transparent border-none outline-none text-[10px] font-black uppercase tracking-widest px-4 flex-1 text-white placeholder:text-neutral-700" />
+            <input type="text" placeholder="Email address" className="bg-transparent border-none outline-none text-[10px] font-black uppercase tracking-widest px-4 flex-1 text-white placeholder:text-neutral-700" suppressHydrationWarning />
             <button className="bg-white text-black px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">Join</button>
           </div>
         </div>

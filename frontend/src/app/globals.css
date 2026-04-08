@@ -18,24 +18,24 @@
   --navbar-height: 72px;
   --container-px: 1rem;
   --container-max-width: 1280px;
-  --section-py: 2.5rem; /* py-10 */
-  --grid-gap: 1rem;     /* gap-4 */
+  --section-py: 0.75rem; /* Drastically reduced */
+  --grid-gap: 1rem;      /* gap-4 */
 }
 
 @media (min-width: 640px) {
   :root {
     --navbar-height: 80px;
     --container-px: 1.5rem;
-    --section-py: 4rem;   /* py-16 */
-    --grid-gap: 1.5rem;   /* gap-6 */
+    --section-py: 1rem;    /* Drastically reduced */
+    --grid-gap: 1.5rem;    /* gap-6 */
   }
 }
 
 @media (min-width: 1024px) {
   :root {
     --container-px: 2rem;
-    --section-py: 5rem;   /* py-20 */
-    --grid-gap: 2rem;     /* gap-8 */
+    --section-py: 1.5rem;  /* Drastically reduced */
+    --grid-gap: 2rem;      /* gap-8 */
   }
 }
 

@@ -145,7 +145,13 @@ export class ProductService {
     }
 
     // 3. Save images
-    return await this.repository.addProductImages(productId, images);
+    const result = await this.repository.addProductImages(productId, images);
+
+    // 4. Invalidate specific product detail cache to prevent "placeholder-only" stale views
+    cacheUtil.delete(`product:detail:${productId}`);
+    cacheUtil.delByPrefix('products:search'); // Also invalidate search results for catalog uniformity
+
+    return result;
   }
 
   async getPublicProducts(filters, page = 1, limit = 20) {

@@ -5,7 +5,7 @@ import { Product, ProductVariant } from "@/lib/api/products";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToastContext } from "@/components/providers/ToastProvider";
 
 interface ProductDetailClientProps {
@@ -23,6 +23,19 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const [mainImage, setMainImage] = useState<string | null>(
     product.images.length > 0 ? product.images[0].url : '/placeholder-product.png'
   );
+
+  // Sync state if product prop changes (handles soft navigation and updates)
+  useEffect(() => {
+    if (product.images.length > 0) {
+      setMainImage(product.images[0].url);
+    } else {
+      setMainImage('/placeholder-product.png');
+    }
+    
+    if (product.variants.length > 0) {
+      setSelectedVariant(product.variants[0]);
+    }
+  }, [product.id, product.images]);
 
   const handleAddToCart = async () => {
     if (!selectedVariant) return;
