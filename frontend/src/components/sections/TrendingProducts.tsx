@@ -15,9 +15,14 @@ export default async function TrendingProducts() {
     const res = await getCachedTrendingProducts();
     if (res.success && Array.isArray(res.data)) {
       products = res.data;
+      if (products.length === 0) {
+        console.warn("[TrendingProducts] API returned success but data is an empty array.");
+      }
+    } else {
+      console.error("[TrendingProducts] API returned unsuccessful response:", res);
     }
   } catch (error) {
-    console.error("Failed to fetch trending products on server:", error);
+    console.error("[TrendingProducts] Failed to fetch trending products on server:", error instanceof Error ? error.message : error);
     return null;
   }
 

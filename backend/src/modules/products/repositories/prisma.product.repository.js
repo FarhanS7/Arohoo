@@ -240,7 +240,7 @@ export class PrismaProductRepository {
       orderBy: { createdAt: 'desc' }
     });
 
-    cacheUtil.set(cacheKey, data, 600); // 10 mins
+    cacheUtil.set(cacheKey, data, 300); // 5 mins
     return { data, success: true };
   }
 

@@ -1,5 +1,6 @@
 import { AppError } from '../../common/errors/AppError.js';
 import prisma from '../../infrastructure/database/prisma.js';
+import { cacheUtil } from '../../common/utils/cache.js';
 
 export class AdminService {
   constructor(prismaInstance) {
@@ -51,10 +52,16 @@ export class AdminService {
       throw new AppError('Merchant not found', 404);
     }
 
-    return await this.prisma.merchant.update({
+    const updated = await this.prisma.merchant.update({
       where: { id: merchantId },
       data: { isTrending: !merchant.isTrending },
     });
+
+    // Invalidate trending brands cache (covers public listing and specific trending key)
+    cacheUtil.delByPrefix('merchants:public');
+    cacheUtil.delByPrefix('merchants:trending');
+    
+    return updated;
   }
 
   /**
@@ -71,10 +78,16 @@ export class AdminService {
       throw new AppError('Product not found', 404);
     }
 
-    return await this.prisma.product.update({
+    const updated = await this.prisma.product.update({
       where: { id: productId },
       data: { isTrending: !product.isTrending },
     });
+
+    // Invalidate trending products cache (covers search and specific trending key)
+    cacheUtil.delByPrefix('products:trending');
+    cacheUtil.delByPrefix('products:search');
+    
+    return updated;
   }
 
 
