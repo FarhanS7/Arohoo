@@ -36,29 +36,29 @@ export default async function TrendingBrands() {
           </Link>
         </div>
 
-        <div className="responsive-grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="flex sm:grid flex-nowrap sm:flex-wrap overflow-x-auto sm:overflow-x-visible pb-4 sm:pb-0 gap-3 sm:gap-6 no-scrollbar grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 snap-x snap-mandatory">
           {brands.map((brand: any) => (
             <Link
               href={`/merchants/${brand.id}`}
               key={brand.id}
-              className="relative aspect-square sm:aspect-[4/5] lg:aspect-square flex flex-col items-center justify-center p-4 sm:p-6 bg-white border border-neutral-100 rounded-3xl sm:rounded-[2.5rem] shadow-sm hover:shadow-xl hover:shadow-primary/5 hover:border-primary/10 transition-all duration-500 group"
+              className="relative flex-shrink-0 min-w-[120px] sm:min-w-0 aspect-square sm:aspect-[4/5] lg:aspect-square flex flex-col items-center justify-center p-3 sm:p-6 bg-white border border-neutral-100 rounded-2xl sm:rounded-[2.5rem] shadow-sm hover:shadow-xl hover:shadow-primary/5 hover:border-primary/10 transition-all duration-500 group snap-start"
             >
-              <div className="relative w-full h-12 sm:h-16 mb-2 sm:mb-4 transition-all duration-700 group-hover:scale-110">
+              <div className="relative w-full h-10 sm:h-16 mb-1.5 sm:mb-4 transition-all duration-700 group-hover:scale-110">
                 {brand.logo ? (
                   <Image
                     src={brand.logo}
                     alt={brand.storeName}
                     fill
                     className="object-contain"
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                    sizes="(max-width: 640px) 120px, (max-width: 1024px) 33vw, 16vw"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center font-black text-neutral-300 text-lg sm:text-xl tracking-tighter italic">
+                  <div className="w-full h-full flex items-center justify-center font-black text-neutral-300 text-xs sm:text-xl tracking-tighter italic">
                     {brand.storeName.substring(0, 2).toUpperCase()}
                   </div>
                 )}
               </div>
-              <span className="text-[8px] sm:text-[10px] font-black text-neutral-900 uppercase tracking-[0.1em] sm:tracking-[0.2em] text-center truncate w-full px-2 group-hover:text-primary transition-colors">
+              <span className="text-[7px] sm:text-[10px] font-black text-neutral-900 uppercase tracking-[0.1em] sm:tracking-[0.2em] text-center truncate w-full px-1 group-hover:text-primary transition-colors">
                 {brand.storeName}
               </span>
             </Link>
