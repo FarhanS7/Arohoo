@@ -72,8 +72,8 @@ export default async function TrendingMalls() {
           ))}
         </div>
         
-        <div className="mt-8 text-center sm:hidden">
-            <Link href="/malls" className="text-[10px] font-black uppercase tracking-[0.2em] bg-neutral-900 text-white py-5 px-8 rounded-2xl block shadow-xl shadow-neutral-200">See All Malls</Link>
+        <div className="mt-4 flex justify-center sm:hidden">
+            <Link href="/malls" className="text-[8px] font-black uppercase tracking-[0.2em] bg-neutral-900 text-white py-3 px-6 rounded-full inline-block shadow-lg shadow-neutral-200">See All Malls</Link>
         </div>
       </div>
     </section>
