@@ -43,17 +43,17 @@ export default async function TrendingBrands() {
               key={brand.id}
               className="relative flex-shrink-0 min-w-[120px] sm:min-w-0 aspect-square sm:aspect-[4/5] lg:aspect-square flex flex-col items-center justify-center p-3 sm:p-6 bg-white border border-neutral-100 rounded-2xl sm:rounded-[2.5rem] shadow-sm hover:shadow-xl hover:shadow-primary/5 hover:border-primary/10 transition-all duration-500 group snap-start"
             >
-              <div className="relative w-full h-10 sm:h-16 mb-1.5 sm:mb-4 transition-all duration-700 group-hover:scale-110">
+              <div className="relative w-full h-20 sm:h-32 mb-1.5 sm:mb-4 transition-all duration-700 group-hover:scale-110">
                 {brand.logo ? (
                   <Image
                     src={brand.logo}
                     alt={brand.storeName}
                     fill
-                    className="object-contain"
+                    className="object-contain drop-shadow-sm"
                     sizes="(max-width: 640px) 120px, (max-width: 1024px) 33vw, 16vw"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center font-black text-neutral-300 text-xs sm:text-xl tracking-tighter italic">
+                  <div className="w-full h-full flex items-center justify-center font-black text-neutral-300 text-2xl sm:text-4xl tracking-tighter italic">
                     {brand.storeName.substring(0, 2).toUpperCase()}
                   </div>
                 )}

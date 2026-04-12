@@ -3,6 +3,7 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { LayoutDashboard, Package, ShoppingBag, Settings, Truck } from "lucide-react";
 import ProtectedRoute from "@/components/auth/protected-route";
+import { usePathname } from "next/navigation";
 
 const MERCHANT_NAV_ITEMS = [
   { href: "/merchant", label: "Overview", icon: LayoutDashboard },
@@ -12,6 +13,12 @@ const MERCHANT_NAV_ITEMS = [
 ];
 
 export default function MerchantLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  if (pathname === "/merchant/signup") {
+    return <>{children}</>;
+  }
+
   return (
     <ProtectedRoute allowedRoles={["MERCHANT"]}>
       <DashboardLayout navItems={MERCHANT_NAV_ITEMS} title="Merchant Hub">

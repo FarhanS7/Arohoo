@@ -92,9 +92,9 @@ export default function LoginPage() {
 
             <div className="text-center mt-10">
               <p className="text-xs font-bold text-zinc-500">
-                Don't have an account?{" "}
-                <Link href="/register" className="text-zinc-900 dark:text-zinc-50 hover:underline underline-offset-4">
-                  Create one now
+                Don't have a merchant account?{" "}
+                <Link href="/merchant/signup" className="text-zinc-900 dark:text-zinc-50 hover:underline underline-offset-4">
+                  Apply to become a merchant
                 </Link>
               </p>
             </div>

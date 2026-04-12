@@ -52,13 +52,23 @@ export class AuthService {
   async registerMerchant(merchantData) {
     const { email, password, name, storeName, address, phone, categoryIds } = merchantData;
 
-    // 1. Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    // 1. Check if user already exists (by email or phone)
+    const existingUserByEmail = await prisma.user.findUnique({
       where: { email },
     });
 
-    if (existingUser) {
+    if (existingUserByEmail) {
       throw new AppError('Email already in use', 400);
+    }
+
+    if (phone) {
+      const existingUserByPhone = await prisma.user.findUnique({
+        where: { phone },
+      });
+
+      if (existingUserByPhone) {
+        throw new AppError('Phone number already in use', 400);
+      }
     }
 
     // 2. Hash password

@@ -32,7 +32,7 @@ export default function MerchantCTA() {
             <ArrowRight className="w-5 h-5" />
           </Link>
           <Link 
-            href="/merchant/login"
+            href="/login"
             className="w-full sm:w-auto px-10 py-5 bg-white text-neutral-900 rounded-2xl font-black text-xs uppercase tracking-[0.2em] border-2 border-neutral-100 flex items-center justify-center"
           >
           Merchant Login 

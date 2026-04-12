@@ -20,8 +20,8 @@ const createLimiter = (windowMs, limit, message = 'Too many requests') => {
   });
 };
 
-// Strict limiter for authentication (5 requests per 15 minutes)
-export const authLimiter = createLimiter(15 * 60 * 1000, 5, 'Too many login attempts. Please try again in 15 minutes.');
+// Relaxed limiter for authentication (100 requests per 15 minutes for dev/testing)
+export const authLimiter = createLimiter(15 * 60 * 1000, 100, 'Too many login attempts. Please try again in 15 minutes.');
 
 // Limiter for checkout/payment (10 requests per 15 minutes)
 export const checkoutLimiter = createLimiter(15 * 60 * 1000, 10, 'Too many checkout attempts. Please try again in 15 minutes.');
