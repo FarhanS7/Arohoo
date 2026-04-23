@@ -247,10 +247,50 @@ export class PrismaProductRepository {
   async updateProduct(id, merchantId, data) {
     const { variants, images, ...rest } = data;
 
-    return await prisma.product.update({
-      where: { id },
-      data: rest,
-      include: this.includeDetails
+    return await prisma.$transaction(async (tx) => {
+      // 1. Update basic product fields
+      await tx.product.update({
+        where: { id },
+        data: rest,
+      });
+
+      // 2. Sync variants if provided
+      if (variants && Array.isArray(variants)) {
+        const existingVariants = await tx.productVariant.findMany({ where: { productId: id } });
+        const incomingIds = variants.map(v => v.id).filter(Boolean);
+
+        // Delete variants that were removed from the UI (only if not restricted by Order FKs)
+        const variantsToRemove = existingVariants.filter(ev => !incomingIds.includes(ev.id));
+        if (variantsToRemove.length > 0) {
+           await tx.productVariant.deleteMany({
+              where: { id: { in: variantsToRemove.map(v => v.id) } }
+           });
+        }
+
+        // Upsert incoming variants
+        for (const variant of variants) {
+          const { id: varId, ...variantData } = variant;
+          if (varId) {
+             await tx.productVariant.update({
+               where: { id: varId },
+               data: variantData
+             });
+          } else {
+             await tx.productVariant.create({
+               data: {
+                 ...variantData,
+                 productId: id
+               }
+             });
+          }
+        }
+      }
+      
+      // Return fully hydrated updated product
+      return await tx.product.findUnique({
+        where: { id },
+        include: this.includeDetails
+      });
     });
   }
 

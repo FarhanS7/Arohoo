@@ -183,4 +183,18 @@ body {
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
+
+  .subtle-scrollbar::-webkit-scrollbar {
+    height: 3px;
+  }
+  .subtle-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .subtle-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(83, 0, 183, 0.1);
+    border-radius: 10px;
+  }
+  .subtle-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgba(83, 0, 183, 0.2);
+  }
 }

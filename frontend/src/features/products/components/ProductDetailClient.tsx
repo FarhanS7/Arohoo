@@ -17,9 +17,20 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const { addItem } = useCart();
   const { addToast } = useToastContext();
   const [addingToCart, setAddingToCart] = useState(false);
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
-    product.variants.length > 0 ? product.variants[0] : null
-  );
+  const allColors = Array.from(new Set(product.variants.map(v => v.color).filter(Boolean))) as string[];
+  const allSizes = Array.from(new Set(product.variants.map(v => v.size).filter(Boolean))) as string[];
+
+  const [selectedColor, setSelectedColor] = useState<string | null>(allColors.length > 0 ? allColors[0] : null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(() => {
+    const defaultColor = allColors.length > 0 ? allColors[0] : null;
+    const sizesForColor = defaultColor 
+      ? product.variants.filter(v => v.color === defaultColor).map(v => v.size).filter(Boolean)
+      : allSizes;
+    return sizesForColor.length > 0 ? (sizesForColor[0] as string) : null;
+  });
+
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+
   const [mainImage, setMainImage] = useState<string | null>(
     product.images.length > 0 ? product.images[0].url : '/placeholder-product.png'
   );
@@ -32,10 +43,44 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       setMainImage('/placeholder-product.png');
     }
     
-    if (product.variants.length > 0) {
-      setSelectedVariant(product.variants[0]);
+    const newColors = Array.from(new Set(product.variants.map(v => v.color).filter(Boolean))) as string[];
+    const newSizes = Array.from(new Set(product.variants.map(v => v.size).filter(Boolean))) as string[];
+    
+    const dColor = newColors.length > 0 ? newColors[0] : null;
+    setSelectedColor(dColor);
+    
+    const dSizesForColor = dColor 
+      ? product.variants.filter(v => v.color === dColor).map(v => v.size).filter(Boolean)
+      : newSizes;
+      
+    setSelectedSize(dSizesForColor.length > 0 ? (dSizesForColor[0] as string) : null);
+  }, [product.id, product.images, product.variants]);
+
+  // Sync selected size if color changes
+  useEffect(() => {
+    const sizes = selectedColor 
+      ? product.variants.filter(v => v.color === selectedColor).map(v => v.size).filter(Boolean)
+      : allSizes;
+      
+    if (selectedSize && !sizes.includes(selectedSize) && sizes.length > 0) {
+      setSelectedSize(sizes[0] as string);
     }
-  }, [product.id, product.images]);
+  }, [selectedColor, product.variants, allSizes, selectedSize]);
+
+  // Update selected variant based on color and size
+  useEffect(() => {
+    let matchingVariant = null;
+    if (allColors.length > 0 && allSizes.length > 0) {
+        matchingVariant = product.variants.find(v => v.color === selectedColor && v.size === selectedSize);
+    } else if (allColors.length > 0) {
+        matchingVariant = product.variants.find(v => v.color === selectedColor);
+    } else if (allSizes.length > 0) {
+        matchingVariant = product.variants.find(v => v.size === selectedSize);
+    } else {
+        matchingVariant = product.variants[0] || null;
+    }
+    setSelectedVariant(matchingVariant || null);
+  }, [selectedColor, selectedSize, product.variants, allColors.length, allSizes.length]);
 
   const handleAddToCart = async () => {
     if (!selectedVariant) return;
@@ -132,27 +177,55 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           </div>
 
           {/* Selectors */}
-          <div className="space-y-4 mb-5">
-            <div>
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Variant</h3>
-                <button className="text-xs font-medium text-primary underline underline-offset-4 decoration-secondary-fixed">Size Guide</button>
+          <div className="space-y-6 mb-8">
+            {allColors.length > 0 && (
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">Color</h3>
+                <div className="flex flex-wrap gap-2">
+                  {allColors.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setSelectedColor(c)}
+                      className={`px-6 py-3 border rounded-xl text-sm font-medium transition-all ${selectedColor === c ? 'border-2 border-primary text-primary font-bold bg-primary/5' : 'border-surface-container-high hover:border-primary hover:text-primary text-on-surface'}`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {product.variants.map((v) => (
-                  <button
-                    key={v.id}
-                    onClick={() => setSelectedVariant(v)}
-                    className={`h-12 border rounded-lg flex items-center justify-center text-sm font-medium transition-all ${selectedVariant?.id === v.id ? 'border-2 border-primary text-primary font-bold bg-primary/5' : 'border-surface-container-high hover:border-primary hover:text-primary text-on-surface'}`}
-                  >
-                    {v.color ? `${v.color} ${v.size ? `(${v.size})` : ''}` : v.size}
-                  </button>
-                ))}
+            )}
+
+            {allSizes.length > 0 && (
+              <div>
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Size</h3>
+                  <button className="text-xs font-medium text-primary underline underline-offset-4 decoration-secondary-fixed">Size Guide</button>
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {allSizes.map((s) => {
+                    // Check if this size is available for the currently selected color
+                    const isAvailable = selectedColor 
+                      ? product.variants.some(v => v.color === selectedColor && v.size === s)
+                      : true;
+                    
+                    return (
+                      <button
+                        key={s}
+                        onClick={() => { if(isAvailable) setSelectedSize(s); }}
+                        disabled={!isAvailable}
+                        className={`h-12 border rounded-xl flex items-center justify-center text-sm font-medium transition-all ${selectedSize === s ? 'border-2 border-primary text-primary font-bold bg-primary/5' : !isAvailable ? 'border-surface-container-low text-on-surface-variant/30 bg-surface-container-lowest cursor-not-allowed' : 'border-surface-container-high hover:border-primary hover:text-primary text-on-surface'}`}
+                      >
+                        {s}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              {selectedVariant?.stock === 0 && (
-                <p className="text-error text-xs font-bold mt-2">Currently out of stock.</p>
-              )}
-            </div>
+            )}
+            
+            {selectedVariant?.stock === 0 && (
+              <p className="text-error text-sm font-bold bg-error/5 p-3 rounded-xl inline-block mt-2">Currently out of stock.</p>
+            )}
           </div>
 
           {/* CTAs */}

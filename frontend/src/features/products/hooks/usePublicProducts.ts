@@ -52,7 +52,7 @@ export function usePublicProducts(initialParams: ProductSearchParams = {}) {
       if (!response.success) throw new Error("Failed to fetch products");
       return response;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes cache for listing views
+    staleTime: 0, // 0 to ensure frontend catalog always fetches latest data
   });
 
   const updateParams = useCallback((newParams: Partial<ProductSearchParams>) => {

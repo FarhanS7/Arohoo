@@ -21,15 +21,16 @@ interface ProductFormProps {
 type ProductMode = "simple" | "multi-color";
 
 // Types for our internal simplified state
-interface SimpleInventory {
+interface SimpleVariant {
+  id?: string;
+  sku?: string;
   size: string;
-  color: string;
-  stock: number;
+  stock: number | string;
 }
 
 interface ColorVariation {
   colorName: string;
-  sizes: { sizeLabel: string; stock: number }[];
+  sizes: { id?: string; sku?: string; sizeLabel: string; stock: number }[];
 }
 
 export default function ProductForm({ initialData, onSubmit, onUpload, onCancel, loading }: ProductFormProps) {
@@ -45,21 +46,30 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
   });
 
   // Simple Inventory state
-  const [simpleInventory, setSimpleInventory] = useState<SimpleInventory>({
-    size: initialData?.variants?.[0]?.size || "",
-    color: initialData?.variants?.[0]?.color || "",
-    stock: initialData?.variants?.[0]?.stock || 0,
+  const [simpleColor, setSimpleColor] = useState(initialData?.variants?.[0]?.color || "");
+  const [simpleVariants, setSimpleVariants] = useState<SimpleVariant[]>(() => {
+    if (!initialData || initialData.variants.length === 0) return [{ size: "", stock: "", price: "" }];
+    return initialData.variants.map(v => ({
+      id: v.id,
+      sku: v.sku,
+      size: v.size || "",
+      price: v.price || "",
+      stock: v.stock === -1 ? "" : (v.stock !== undefined && v.stock !== null ? v.stock : "")
+    }));
   });
+
+  const selectedCategoryName = useMemo(() => categories.find(c => c.id === baseData.categoryId)?.name, [categories, baseData.categoryId]);
+  const isPerfume = selectedCategoryName?.toLowerCase().includes("perfume") || false;
 
   // Multi-color state: Group existing variants by color if editing
   const initialVariations = useMemo(() => {
     if (!initialData || initialData.variants.length === 0) return [];
     
-    const colorGroups: Record<string, { sizeLabel: string; stock: number }[]> = {};
+    const colorGroups: Record<string, { id?: string; sku?: string; sizeLabel: string; stock: number }[]> = {};
     initialData.variants.forEach(v => {
       const color = v.color || "Default";
       if (!colorGroups[color]) colorGroups[color] = [];
-      colorGroups[color].push({ sizeLabel: v.size || "", stock: v.stock });
+      colorGroups[color].push({ id: v.id, sku: v.sku, sizeLabel: v.size || "", stock: v.stock });
     });
 
     return Object.entries(colorGroups).map(([colorName, sizes]) => ({
@@ -79,12 +89,23 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
   useEffect(() => {
     if (initialData && initialData.variants.length > 1) {
       // Check if they have different colors
-      const colors = new Set(initialData.variants.map(v => v.color));
-      if (colors.size > 1 || (colors.size === 1 && initialData.variants.length > 1)) {
+      const colors = new Set(initialData.variants.map(v => v.color).filter(Boolean));
+      if (colors.size > 1) {
         setProductMode("multi-color");
       }
     }
   }, [initialData]);
+
+  // Simple Variants Handlers
+  const addSimpleVariant = () => setSimpleVariants(prev => [...prev, { size: "", stock: "" }]);
+  const removeSimpleVariant = (idx: number) => setSimpleVariants(prev => prev.filter((_, i) => i !== idx));
+  const updateSimpleVariant = (idx: number, field: keyof SimpleVariant, value: any) => {
+    setSimpleVariants(prev => {
+      const next = [...prev];
+      next[idx] = { ...next[idx], [field]: value } as any;
+      return next;
+    });
+  };
 
   // Color management
   const addColor = () => {
@@ -144,21 +165,25 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
     let variants: any[] = [];
 
     if (productMode === "simple") {
-       variants.push({
-          sku: `SKU-${Date.now()}-0`,
-          price: baseData.basePrice,
-          stock: Number(simpleInventory.stock) || 0,
-          size: simpleInventory.size,
-          color: simpleInventory.color
+       simpleVariants.forEach((sv, idx) => {
+         variants.push({
+            id: sv.id,
+            sku: sv.sku || `SKU-${Date.now()}-0-${idx}`,
+            price: sv.price !== undefined && sv.price !== "" ? Number(sv.price) : baseData.basePrice,
+            stock: sv.stock === "" ? -1 : Number(sv.stock),
+            size: sv.size,
+            color: simpleColor
+         });
        });
     } else {
        // Multi-color mapping
        colorVariations.forEach((cv, cIdx) => {
           cv.sizes.forEach((s, sIdx) => {
              variants.push({
-                sku: `SKU-${Date.now()}-${cIdx}-${sIdx}`,
+                id: s.id,
+                sku: s.sku || `SKU-${Date.now()}-${cIdx}-${sIdx}`,
                 price: baseData.basePrice, // Using base price for simplicity per "plain" request
-                stock: Number(s.stock) || 0,
+                stock: s.stock === undefined || String(s.stock) === "" ? -1 : Number(s.stock),
                 size: s.sizeLabel,
                 color: cv.colorName
              });
@@ -300,35 +325,79 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
 
             {productMode === "simple" ? (
                /* SIMPLE MODE UI */
-               <div className="bg-neutral-50 p-10 rounded-[3rem] border border-neutral-100 grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="space-y-2">
-                     <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest px-4 block">Stock Units</label>
-                     <input
-                       type="number"
-                       value={simpleInventory.stock}
-                       onChange={(e) => setSimpleInventory({ ...simpleInventory, stock: parseInt(e.target.value) || 0 })}
-                       className="w-full px-6 py-4 rounded-2xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-bold text-neutral-900 bg-white"
-                     />
-                  </div>
-                  <div className="space-y-2">
-                     <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest px-4 block">Sizing (Optional)</label>
-                     <input
-                       type="text"
-                       value={simpleInventory.size}
-                       onChange={(e) => setSimpleInventory({ ...simpleInventory, size: e.target.value })}
-                       className="w-full px-6 py-4 rounded-2xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-bold text-neutral-900 bg-white"
-                       placeholder="M, 42, 100ml..."
-                     />
-                  </div>
-                  <div className="space-y-2">
+               <div className="bg-neutral-50 p-10 rounded-[3rem] border border-neutral-100 space-y-6">
+                  <div className="space-y-2 max-w-sm">
                      <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest px-4 block">Color (Optional)</label>
                      <input
                        type="text"
-                       value={simpleInventory.color}
-                       onChange={(e) => setSimpleInventory({ ...simpleInventory, color: e.target.value })}
+                       value={simpleColor}
+                       onChange={(e) => setSimpleColor(e.target.value)}
                        className="w-full px-6 py-4 rounded-2xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-bold text-neutral-900 bg-white"
-                       placeholder="Obsidian, Ruby..."
+                       placeholder="Obsidian, Ruby, etc."
                      />
+                  </div>
+
+                  <div className="space-y-4">
+                     <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-black text-neutral-900 uppercase tracking-widest">
+                           {isPerfume ? "Volumes & Pricing" : "Sizes & Inventory (Optional)"}
+                        </label>
+                        <button
+                          type="button"
+                          onClick={addSimpleVariant}
+                          className="text-[9px] font-black text-neutral-400 hover:text-black uppercase tracking-widest flex items-center gap-1 transition-colors"
+                        >
+                          <Plus className="w-3 h-3" />
+                          {isPerfume ? "Add Volume" : "Add Size"}
+                        </button>
+                     </div>
+
+                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {simpleVariants.map((sv, idx) => (
+                           <div key={idx} className="bg-white p-4 rounded-2xl border border-neutral-200 flex items-center gap-4 group/size">
+                              <div className="flex-1 space-y-2">
+                                 <input
+                                    type="text"
+                                    value={sv.size}
+                                    onChange={(e) => updateSimpleVariant(idx, "size", e.target.value)}
+                                    className="w-full border-none focus:ring-0 p-0 text-xs font-black text-neutral-900 placeholder:text-neutral-200 uppercase"
+                                    placeholder={isPerfume ? "Volume (e.g. 3ml)" : "SIZE (e.g. 42, L)"}
+                                 />
+                                 {isPerfume && (
+                                   <div className="flex items-center gap-2">
+                                      <span className="text-[10px] font-medium text-neutral-300 uppercase tracking-widest">Price Override:</span>
+                                      <input
+                                        type="number"
+                                        value={sv.price}
+                                        onChange={(e) => updateSimpleVariant(idx, "price", e.target.value === "" ? "" : parseFloat(e.target.value))}
+                                        placeholder={baseData.basePrice.toString()}
+                                        className="w-full border-none focus:ring-0 p-0 text-[10px] font-black text-neutral-900 placeholder:text-neutral-200"
+                                      />
+                                   </div>
+                                 )}
+                                 <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-medium text-neutral-300 uppercase tracking-widest">Stock:</span>
+                                    <input
+                                      type="number"
+                                      value={sv.stock}
+                                      onChange={(e) => updateSimpleVariant(idx, "stock", e.target.value === "" ? "" : parseInt(e.target.value))}
+                                      placeholder="Unlimited"
+                                      className="w-full border-none focus:ring-0 p-0 text-[10px] font-black text-neutral-900 placeholder:text-neutral-200"
+                                    />
+                                 </div>
+                              </div>
+                              {simpleVariants.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeSimpleVariant(idx)}
+                                  className="text-neutral-300 hover:text-rose-500 transition-colors"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                           </div>
+                        ))}
+                     </div>
                   </div>
                </div>
             ) : (

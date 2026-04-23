@@ -4,6 +4,9 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import PageLayout from "@/components/layout/UX/PageLayout";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
