@@ -26,6 +26,7 @@ interface SimpleVariant {
   sku?: string;
   size: string;
   stock: number | string;
+  price?: number | string;
 }
 
 interface ColorVariation {
@@ -97,7 +98,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
   }, [initialData]);
 
   // Simple Variants Handlers
-  const addSimpleVariant = () => setSimpleVariants(prev => [...prev, { size: "", stock: "" }]);
+  const addSimpleVariant = () => setSimpleVariants(prev => [...prev, { size: "", stock: "", price: "" }]);
   const removeSimpleVariant = (idx: number) => setSimpleVariants(prev => prev.filter((_, i) => i !== idx));
   const updateSimpleVariant = (idx: number, field: keyof SimpleVariant, value: any) => {
     setSimpleVariants(prev => {
