@@ -1,7 +1,6 @@
 "use client";
-
+import { Mic, Search } from "lucide-react";
 import Image from "next/image";
-import { Search, Mic } from "lucide-react";
 
 export default function Hero() {
   return (
@@ -10,55 +9,69 @@ export default function Hero() {
         Shop the Mall from your home – Discover leading brands in one place
       </h1>
 
-      {/* ── Full-bleed banner ───────────────────────────────── */}
+      {/* ── Banner Container (Half-height) ─────────────────── */}
       <div 
-        className="relative w-full aspect-[2.5/1] sm:aspect-auto sm:h-[35vh] md:h-[40vh] lg:h-[45vh] xl:max-h-[420px] overflow-hidden"
-        style={{ 
-          background: "transparent" 
-        }}
+        className="relative w-full h-[35vh] min-h-[260px] max-h-[420px] sm:h-[40vh] lg:h-[45vh] overflow-hidden"
       >
         {/* Background image */}
         <Image
-          src="/images/new-hero-banner - Copy.png"
+          src="/images/new-hero-banner.png"
           alt="Arohoo Hero – Shop the Mall from your home"
           fill
-          className="object-cover object-center"
+          className="object-cover object-right-top sm:object-center"
           priority
           sizes="100vw"
         />
 
-        {/* Gradient overlays for depth & text readability */}
+        {/* Left-side gradient so text is readable over the bright area */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(83,0,183,0.15) 0%, transparent 40%, transparent 60%, rgba(83,0,183,0.25) 100%)",
+              "linear-gradient(to right, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.7) 35%, rgba(255,255,255,0.1) 60%, transparent 100%)",
+          }}
+        />
+        {/* Bottom fade for search bar overlap */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to top, rgba(255,255,255,0.9) 0%, transparent 30%)",
           }}
         />
 
-        {/* ── Hero content overlay ──────────────────────────── */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-8">
-          {/* Tagline */}
-          <div className="text-center animate-[fadeSlideUp_0.8s_ease-out_both]">
-            <p className="text-[8px] sm:text-xs font-black uppercase tracking-[0.25em] text-neutral-500 mb-0.5 sm:mb-3">
-              Your favourite mall, now online
-            </p>
-            <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-neutral-900 leading-[1.1]">
-              Shop <span className="italic">Smarter</span>,{" "}
-              <br className="hidden sm:block" />
-              Live <span className="italic">Better</span>
-            </h2>
+        {/* ── Hero content — left-aligned ──────────────────── */}
+        <div className="absolute inset-0 flex items-center px-6 sm:px-10 lg:px-16">
+          <div className="responsive-container w-full">
+            <div className="max-w-xl animate-[fadeSlideUp_0.8s_ease-out_both] space-y-3 sm:space-y-4">
+              {/* Tagline */}
+              <p className="text-[9px] sm:text-xs font-black uppercase tracking-[0.3em] text-primary/70">
+                Your favourite mall, now online
+              </p>
+              
+              {/* Main Heading */}
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-neutral-900 leading-[1.05]">
+                Shop <span className="italic text-primary">Smarter</span>,
+                <br />
+                Live <span className="italic text-primary">Better</span>
+              </h2>
+              
+              {/* Subtext */}
+              <p className="text-xs sm:text-sm font-medium text-neutral-500 max-w-sm leading-relaxed">
+                Discover curated brands &amp; seamless delivery — all from one place.
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ── Floating search bar (sits below hero edge) ─────────── */}
-      <div className="relative -mt-6 sm:-mt-8 px-4 sm:px-8 z-30 flex justify-center">
+      {/* ── Floating search bar ─────────────────────────────── */}
+      <div className="relative -mt-6 sm:-mt-7 px-4 sm:px-8 z-30 flex justify-center">
         <div
-          className="flex items-center rounded-2xl sm:rounded-full p-3 md:p-4 w-full max-w-2xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-neutral-100 transition-all duration-300 hover:shadow-[0_12px_40px_rgb(0,0,0,0.16)]"
+          className="flex items-center rounded-full p-2 sm:p-3 w-full max-w-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] border border-neutral-100 transition-all duration-300 hover:shadow-[0_12px_40px_rgba(83,0,183,0.12)]"
         >
-          <div className="pl-2 pr-3 text-neutral-900">
-            <Search className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />
+          <div className="pl-3 pr-3 text-primary">
+            <Search className="w-5 h-5" strokeWidth={2.5} />
           </div>
           <input
             type="text"
@@ -66,12 +79,12 @@ export default function Hero() {
             className="flex-1 bg-transparent border-none outline-none text-neutral-900 text-sm sm:text-base font-medium placeholder:text-neutral-400"
             suppressHydrationWarning
           />
-          <div className="h-6 w-px bg-neutral-200 mx-3 sm:mx-5" />
+          <div className="h-6 w-px bg-neutral-200 mx-2 sm:mx-4" />
           <button
-            className="p-1 text-primary transition-colors hover:scale-110"
+            className="p-2 text-primary transition-colors hover:scale-110"
             aria-label="Voice search"
           >
-            <Mic className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" />
+            <Mic className="w-5 h-5" fill="currentColor" />
           </button>
         </div>
       </div>
@@ -81,7 +94,7 @@ export default function Hero() {
         @keyframes fadeSlideUp {
           from {
             opacity: 0;
-            transform: translateY(24px);
+            transform: translateY(20px);
           }
           to {
             opacity: 1;

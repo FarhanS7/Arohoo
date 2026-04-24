@@ -1,7 +1,9 @@
 import { Suspense } from "react";
 import Hero from "@/components/sections/Hero";
 import TrendingBrands from "@/components/sections/TrendingBrands";
+import SkincareBento from "@/components/sections/SkincareBento";
 import TrendingMalls from "@/components/sections/TrendingMalls";
+import FashionBento from "@/components/sections/FashionBento";
 import TrendingProducts from "@/components/sections/TrendingProducts";
 import MerchantCTA from "@/components/sections/MerchantCTA";
 import PageLayout from "@/components/layout/UX/PageLayout";
@@ -30,10 +32,16 @@ export default function Home() {
         <TrendingBrands />
       </Suspense>
 
+      {/* Skincare Bento Grid */}
+      <SkincareBento />
+
       {/* Trending Malls - Streamed */}
       <Suspense fallback={<TrendingMallsSkeleton />}>
         <TrendingMalls />
       </Suspense>
+
+      {/* Fashion Bento Grid */}
+      <FashionBento />
 
       {/* Trending Products - Streamed */}
       <Suspense fallback={<TrendingProductsSkeleton />}>
