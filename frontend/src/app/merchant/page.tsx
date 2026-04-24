@@ -18,10 +18,10 @@ const MerchantDashboardPage = () => {
 
   return (
     <ProtectedRoute allowedRoles={['MERCHANT', 'ADMIN']}>
-      <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-white py-6 sm:py-8 lg:py-12 px-0">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-neutral-100 pb-12">
+          <header className="mb-8 sm:mb-12 lg:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6 sm:gap-8 border-b border-neutral-100 pb-8 sm:pb-12">
             <div>
               <nav className="flex mb-6 text-xs font-bold text-neutral-400 uppercase tracking-[0.2em] gap-3">
                 <span className="hover:text-black cursor-pointer transition-colors">Merchant Portal</span>
@@ -29,7 +29,7 @@ const MerchantDashboardPage = () => {
                 <span className="text-black">Dashboard</span>
               </nav>
               <div className="flex items-center gap-4">
-                <h1 className="text-5xl font-black text-neutral-900 tracking-tighter sm:text-6xl">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-neutral-900 tracking-tighter sm:text-6xl">
                   Store Overview
                 </h1>
                 {user?.merchantId && (
@@ -47,16 +47,16 @@ const MerchantDashboardPage = () => {
                 Monitor your business performance with real-time analytics and inventory health tracking.
               </p>
             </div>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-3 sm:gap-4">
               <Link 
                 href="/merchant/settings"
-                className="inline-flex items-center px-8 py-4 border-2 border-neutral-200 text-black text-sm font-bold rounded-2xl hover:bg-neutral-50 transition-all"
+                className="inline-flex items-center px-5 sm:px-8 py-3 sm:py-4 border-2 border-neutral-200 text-black text-xs sm:text-sm font-bold rounded-2xl hover:bg-neutral-50 transition-all"
               >
                 Store Branding
               </Link>
               <Link 
                 href="/merchant/products"
-                className="inline-flex items-center px-8 py-4 bg-black text-white text-sm font-bold rounded-2xl hover:bg-neutral-800 transition-all shadow-xl shadow-neutral-200"
+                className="inline-flex items-center px-5 sm:px-8 py-3 sm:py-4 bg-black text-white text-xs sm:text-sm font-bold rounded-2xl hover:bg-neutral-800 transition-all shadow-xl shadow-neutral-200"
               >
                 Manage Inventory
               </Link>
@@ -86,27 +86,6 @@ const MerchantDashboardPage = () => {
             <StatsGrid stats={stats} loading={isLoading} />
           )}
 
-          {/* Quick Actions / Future Sections */}
-          {!isLoading && !isError && (
-            <section className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="p-10 rounded-[2.5rem] bg-neutral-900 text-white overflow-hidden relative group">
-                <div className="relative z-10">
-                  <h3 className="text-2xl font-bold mb-2">Campaign Performance</h3>
-                  <p className="text-neutral-400 text-sm mb-8 max-w-xs">Track how your latest marketing efforts are impacting sales.</p>
-                  <button className="text-sm font-bold border-b-2 border-white pb-1 group-hover:pr-4 transition-all">View report →</button>
-                </div>
-                <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl" />
-              </div>
-              <div className="p-10 rounded-[2.5rem] bg-indigo-600 text-white overflow-hidden relative group">
-                <div className="relative z-10">
-                  <h3 className="text-2xl font-bold mb-2">Inventory Health</h3>
-                  <p className="text-indigo-200 text-sm mb-8 max-w-xs">AI-powered insights on when to restock your best sellers.</p>
-                  <button className="text-sm font-bold border-b-2 border-white pb-1 group-hover:pr-4 transition-all">Optimize stock →</button>
-                </div>
-                <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-black/20 rounded-full blur-3xl" />
-              </div>
-            </section>
-          )}
         </div>
       </div>
     </ProtectedRoute>

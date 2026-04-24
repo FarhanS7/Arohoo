@@ -4,7 +4,8 @@ import ProtectedRoute from "@/components/auth/protected-route";
 import DashboardSkeleton from "@/components/ui/DashboardSkeleton";
 import { useAdmin } from "@/features/admin/hooks/useAdmin";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const MerchantApprovals = dynamic(() => import("@/features/admin/components/MerchantApprovals"), {
   loading: () => <div className="h-96 w-full bg-gray-50 animate-pulse rounded-2xl" />,
@@ -39,7 +40,23 @@ export default function AdminDashboardPage() {
     fetchMerchantDetails, updateMerchantProduct, updateMerchantOrderItemStatus,
     selectedMerchant, loadingDetails, clearSelectedMerchant
   } = useAdmin();
-  const [activeTab, setActiveTab] = useState<"approvals" | "categories" | "malls" | "merchants" | "products">("approvals");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const tabParam = searchParams.get("tab") as "approvals" | "categories" | "malls" | "merchants" | "products" | null;
+  const [activeTab, setActiveTab] = useState<"approvals" | "categories" | "malls" | "merchants" | "products">(tabParam || "approvals");
+
+  // Sync state when URL changes
+  useEffect(() => {
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
+
+  // Update URL when tab changes internally
+  const handleTabChange = (tab: typeof activeTab) => {
+    setActiveTab(tab);
+    router.push(`/admin?tab=${tab}`);
+  };
 
 
   if (loading && !stats) {
@@ -60,66 +77,66 @@ export default function AdminDashboardPage() {
             <span className="text-neutral-200">/</span>
             <span className="text-blackCondensed">Overview</span>
           </nav>
-          <h1 className="text-6xl font-black text-neutral-900 tracking-tighter uppercase italic">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-neutral-900 tracking-tighter uppercase italic break-words">
             Platform Ops
           </h1>
-          <p className="mt-4 text-xl text-neutral-500 font-medium max-w-2xl">
+          <p className="mt-3 sm:mt-4 text-sm sm:text-lg lg:text-xl text-neutral-500 font-medium max-w-2xl">
             Scale the ecosystem by curating top-tier merchants and maintaining a premium product hierarchy.
           </p>
         </div>
 
         {/* Holistic Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 mb-16">
-          <div className="bg-black p-10 rounded-[2.5rem] text-white shadow-2xl shadow-neutral-300">
-            <h3 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Platform Revenue</h3>
-            <p className="text-4xl font-black leading-none">৳{stats?.totalRevenue.toLocaleString() || '0'}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-10 sm:mb-16">
+          <div className="bg-black p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] text-white shadow-xl shadow-neutral-300">
+            <h3 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-2">Platform Revenue</h3>
+            <p className="text-3xl sm:text-4xl font-black leading-none">৳{stats?.totalRevenue.toLocaleString() || '0'}</p>
           </div>
-          <div className="bg-neutral-50 p-10 rounded-[2.5rem] border border-neutral-100">
-            <h3 className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Active Merchants</h3>
-            <p className="text-4xl font-black text-neutral-900 leading-none">{stats?.totalMerchants || '0'}</p>
+          <div className="bg-neutral-50 p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] border border-neutral-100">
+            <h3 className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2">Active Merchants</h3>
+            <p className="text-3xl sm:text-4xl font-black text-neutral-900 leading-none">{stats?.totalMerchants || '0'}</p>
           </div>
-          <div className="bg-neutral-50 p-10 rounded-[2.5rem] border border-neutral-100">
-            <h3 className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Total Users</h3>
-            <p className="text-4xl font-black text-neutral-900 leading-none">{stats?.totalUsers || '0'}</p>
+          <div className="bg-neutral-50 p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] border border-neutral-100">
+            <h3 className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2">Total Users</h3>
+            <p className="text-3xl sm:text-4xl font-black text-neutral-900 leading-none">{stats?.totalUsers || '0'}</p>
           </div>
-          <div className={`p-10 rounded-[2.5rem] border transition-all ${merchants.length > 0 ? 'bg-amber-50 border-amber-100 animate-pulse' : 'bg-neutral-50 border-neutral-100'}`}>
-            <h3 className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${merchants.length > 0 ? 'text-amber-600' : 'text-neutral-400'}`}>Approvals Queue</h3>
-            <p className={`text-4xl font-black leading-none ${merchants.length > 0 ? 'text-amber-600' : 'text-neutral-900'}`}>{merchants.length}</p>
+          <div className={`p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] border transition-all ${merchants.length > 0 ? 'bg-amber-50 border-amber-100 animate-pulse' : 'bg-neutral-50 border-neutral-100'}`}>
+            <h3 className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${merchants.length > 0 ? 'text-amber-600' : 'text-neutral-400'}`}>Approvals Queue</h3>
+            <p className={`text-3xl sm:text-4xl font-black leading-none ${merchants.length > 0 ? 'text-amber-600' : 'text-neutral-900'}`}>{merchants.length}</p>
           </div>
         </div>
 
         {/* Tab Selection */}
-        <div className="flex gap-12 border-b border-neutral-100 mb-12">
+        <div className="flex gap-4 sm:gap-12 border-b border-neutral-100 mb-8 sm:mb-12 overflow-x-auto no-scrollbar">
           <button
-            onClick={() => setActiveTab("approvals")}
+            onClick={() => handleTabChange("approvals")}
             className={`pb-6 text-xs font-black uppercase tracking-widest relative transition-colors ${activeTab === "approvals" ? "text-black" : "text-neutral-400 hover:text-neutral-600"}`}
           >
             Merchant Approvals
             {activeTab === "approvals" && <div className="absolute bottom-0 left-0 w-full h-1 bg-black rounded-full" />}
           </button>
           <button
-            onClick={() => setActiveTab("categories")}
+            onClick={() => handleTabChange("categories")}
             className={`pb-6 text-xs font-black uppercase tracking-widest relative transition-colors ${activeTab === "categories" ? "text-black" : "text-neutral-400 hover:text-neutral-600"}`}
           >
             Category Manager
             {activeTab === "categories" && <div className="absolute bottom-0 left-0 w-full h-1 bg-black rounded-full" />}
           </button>
           <button
-            onClick={() => setActiveTab("malls")}
+            onClick={() => handleTabChange("malls")}
             className={`pb-6 text-xs font-black uppercase tracking-widest relative transition-colors ${activeTab === "malls" ? "text-black" : "text-neutral-400 hover:text-neutral-600"}`}
           >
             Mall Management
             {activeTab === "malls" && <div className="absolute bottom-0 left-0 w-full h-1 bg-black rounded-full" />}
           </button>
           <button
-            onClick={() => setActiveTab("merchants")}
+            onClick={() => handleTabChange("merchants")}
             className={`pb-6 text-xs font-black uppercase tracking-widest relative transition-colors ${activeTab === "merchants" ? "text-black" : "text-neutral-400 hover:text-neutral-600"}`}
           >
             All Merchants
             {activeTab === "merchants" && <div className="absolute bottom-0 left-0 w-full h-1 bg-black rounded-full" />}
           </button>
           <button
-            onClick={() => setActiveTab("products")}
+            onClick={() => handleTabChange("products")}
             className={`pb-6 text-xs font-black uppercase tracking-widest relative transition-colors ${activeTab === "products" ? "text-black" : "text-neutral-400 hover:text-neutral-600"}`}
           >
             Product Curation

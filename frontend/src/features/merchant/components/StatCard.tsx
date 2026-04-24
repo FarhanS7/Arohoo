@@ -28,7 +28,7 @@ const StatCard: React.FC<StatCardProps> = ({
 }) => {
   if (loading) {
     return (
-      <div className={cn("bg-white rounded-3xl border border-neutral-100 p-8 shadow-sm flex flex-col justify-between h-full", className)}>
+      <div className={cn("bg-white rounded-2xl sm:rounded-3xl border border-neutral-100 p-4 sm:p-8 shadow-sm flex flex-col justify-between h-full", className)}>
         <div>
           <Skeleton className="h-12 w-12 rounded-2xl mb-6" />
           <Skeleton className="h-4 w-24 rounded-full mb-2" />
@@ -40,10 +40,10 @@ const StatCard: React.FC<StatCardProps> = ({
   }
 
   return (
-    <div className={`bg-white rounded-3xl border border-neutral-100 p-8 shadow-sm flex flex-col justify-between h-full ${className}`}>
+    <div className={`bg-white rounded-2xl sm:rounded-3xl border border-neutral-100 p-4 sm:p-8 shadow-sm flex flex-col justify-between h-full ${className}`}>
       <div>
-        <div className="flex items-start justify-between mb-8">
-          <div className="p-4 rounded-2xl bg-neutral-50 text-neutral-900 shadow-sm border border-neutral-100">
+        <div className="flex items-start justify-between mb-4 sm:mb-8">
+          <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-neutral-50 text-neutral-900 shadow-sm border border-neutral-100">
             {icon}
           </div>
           {trend && (
@@ -53,10 +53,10 @@ const StatCard: React.FC<StatCardProps> = ({
           )}
         </div>
         <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-1">{title}</h3>
-        <p className="text-3xl font-extrabold text-neutral-900 tracking-tight">{value}</p>
+        <p className="text-xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight">{value}</p>
       </div>
       {description && (
-        <p className="mt-8 text-sm text-neutral-500 font-medium">
+        <p className="mt-4 sm:mt-8 text-xs sm:text-sm text-neutral-500 font-medium">
           {description}
         </p>
       )}

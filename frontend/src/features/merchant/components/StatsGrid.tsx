@@ -19,15 +19,14 @@ const StatsGrid: React.FC<StatsGridProps> = ({ stats, loading }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
       {/* Revenue - Featured Bento Card */}
-      <div className="md:col-span-2 lg:col-span-2">
+      <div className="col-span-2">
         <StatCard
           title="Total Revenue"
           value={loading ? 0 : formatCurrency(stats?.totalRevenue || 0)}
-          description="Net sales performance across all products and categories."
+          description="Net sales performance across all products."
           loading={loading}
-          trend={{ value: 12.5, isUp: true }}
           className="bg-neutral-50/50 border-neutral-200"
           icon={
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,9 +41,8 @@ const StatsGrid: React.FC<StatsGridProps> = ({ stats, loading }) => {
       <StatCard
         title="Total Sales"
         value={loading ? 0 : (stats?.totalSales || 0).toLocaleString()}
-        description="Total orders processed safely."
+        description="Total orders processed."
         loading={loading}
-        trend={{ value: 8.2, isUp: true }}
         icon={
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 12H4l1-12z" />

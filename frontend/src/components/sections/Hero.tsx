@@ -28,7 +28,7 @@ export default function Hero() {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "linear-gradient(to right, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.7) 35%, rgba(255,255,255,0.1) 60%, transparent 100%)",
+              "linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 35%, rgba(255,255,255,0.1) 60%, transparent 100%)",
           }}
         />
         {/* Bottom fade for search bar overlap */}
@@ -41,7 +41,7 @@ export default function Hero() {
         />
 
         {/* ── Hero content — left-aligned ──────────────────── */}
-        <div className="absolute inset-0 flex items-center px-6 sm:px-10 lg:px-16">
+        <div className="absolute inset-0 flex items-center">
           <div className="responsive-container w-full">
             <div className="max-w-xl animate-[fadeSlideUp_0.8s_ease-out_both] space-y-3 sm:space-y-4">
               {/* Tagline */}
@@ -50,7 +50,7 @@ export default function Hero() {
               </p>
               
               {/* Main Heading */}
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-neutral-900 leading-[1.05]">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-neutral-900 leading-[1.05]">
                 Shop <span className="italic text-primary">Smarter</span>,
                 <br />
                 Live <span className="italic text-primary">Better</span>
@@ -68,7 +68,7 @@ export default function Hero() {
       {/* ── Floating search bar ─────────────────────────────── */}
       <div className="relative -mt-6 sm:-mt-7 px-4 sm:px-8 z-30 flex justify-center">
         <div
-          className="flex items-center rounded-full p-2 sm:p-3 w-full max-w-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] border border-neutral-100 transition-all duration-300 hover:shadow-[0_12px_40px_rgba(83,0,183,0.12)]"
+          className="flex items-center rounded-full p-2 sm:p-3 w-full max-w-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] border-2 border-neutral-200 transition-all duration-300 hover:border-primary/30 hover:shadow-[0_12px_40px_rgba(83,0,183,0.12)]"
         >
           <div className="pl-3 pr-3 text-primary">
             <Search className="w-5 h-5" strokeWidth={2.5} />

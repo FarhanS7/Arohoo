@@ -32,11 +32,11 @@ export default function MallDetailPage({ params }: { params: Promise<{ id: strin
   if (loading) {
     return (
       <PageLayout>
-        <Skeleton className="h-[60vh] w-full" />
-        <div className="responsive-container py-20">
-          <Skeleton className="h-10 w-96 mb-6" />
-          <div className="responsive-grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-64 w-full rounded-2xl" />)}
+        <Skeleton className="h-[25vh] w-full" />
+        <div className="responsive-container py-10 sm:py-16">
+          <Skeleton className="h-8 w-64 mb-4" />
+          <div className="responsive-grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-48 w-full rounded-2xl" />)}
           </div>
         </div>
       </PageLayout>
@@ -57,7 +57,7 @@ export default function MallDetailPage({ params }: { params: Promise<{ id: strin
   return (
     <PageLayout showBackButton={true}>
       {/* Mall Hero */}
-      <section className="relative h-[65vh] min-h-[500px] overflow-hidden">
+      <section className="relative h-[28vh] sm:h-[35vh] min-h-[200px] sm:min-h-[280px] overflow-hidden">
         {mall.coverImage ? (
           <Image
             src={mall.coverImage}
@@ -74,22 +74,19 @@ export default function MallDetailPage({ params }: { params: Promise<{ id: strin
         <div className="absolute inset-0 bg-gradient-to-t from-[#1a0b2e] via-[#1a0b2e]/40 to-transparent" />
         
         {/* Content */}
-        <div className="absolute inset-0 flex flex-col justify-end pb-20">
+        <div className="absolute inset-0 flex flex-col justify-end pb-6 sm:pb-10">
           <div className="responsive-container w-full">
-            {/* Space Placeholder */}
-            <div className="mb-8 h-4" />
-            
             <div className="max-w-3xl">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center border border-white/20 shadow-xl shadow-primary/20">
-                  <MapPin className="w-4 h-4 text-white" />
+              <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary flex items-center justify-center border border-white/20 shadow-lg shadow-primary/20">
+                  <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
                 </div>
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-white/90">{mall.location}</span>
+                <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-white/90">{mall.location}</span>
               </div>
-              <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tighter leading-none italic uppercase">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-2 sm:mb-3 tracking-tighter leading-none italic uppercase">
                 {mall.name}
               </h1>
-              <p className="text-white/60 text-lg font-medium leading-relaxed italic">
+              <p className="text-white/60 text-xs sm:text-sm font-medium leading-relaxed italic line-clamp-2">
                 "{mall.description || `Experience exclusive shopping at ${mall.name}, perfectly situated in ${mall.location}.`}"
               </p>
             </div>
@@ -100,9 +97,9 @@ export default function MallDetailPage({ params }: { params: Promise<{ id: strin
       {/* Stores Section - Standardized Grid */}
       <main className="fluid-py bg-white">
         <div className="responsive-container">
-          <div className="mb-20">
-            <h2 className="text-4xl lg:text-5xl font-black text-neutral-900 tracking-tighter uppercase italic underline decoration-primary/20 decoration-8 underline-offset-[12px]">Available Stores</h2>
-            <p className="text-neutral-400 font-black mt-8 uppercase tracking-[0.3em] text-[10px]">Curated retailers at this destination</p>
+          <div className="mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-neutral-900 tracking-tighter uppercase italic underline decoration-primary/20 decoration-4 sm:decoration-6 underline-offset-[8px]">Available Stores</h2>
+            <p className="text-neutral-400 font-black mt-3 sm:mt-4 uppercase tracking-[0.3em] text-[9px] sm:text-[10px]">Curated retailers at this destination</p>
           </div>
 
           {mall.merchants && mall.merchants.length > 0 ? (
@@ -111,9 +108,9 @@ export default function MallDetailPage({ params }: { params: Promise<{ id: strin
                 <Link
                   key={merchant.id}
                   href={`/merchants/${merchant.id}`}
-                  className="group bg-white rounded-3xl p-6 shadow-xl shadow-gray-200/50 hover:shadow-primary/5 border border-neutral-100 hover:border-primary/10 transition-all duration-500 flex flex-col"
+                  className="group bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg shadow-gray-200/50 hover:shadow-primary/5 border border-neutral-100 hover:border-primary/10 transition-all duration-500 flex flex-col"
                 >
-                  <div className="relative aspect-square w-full mb-6 overflow-hidden rounded-2xl bg-neutral-50 border border-neutral-100 flex items-center justify-center">
+                  <div className="relative aspect-square w-full mb-4 overflow-hidden rounded-xl sm:rounded-2xl bg-neutral-50 border border-neutral-100 flex items-center justify-center">
                     {merchant.logo ? (
                       <Image
                         src={merchant.logo}
@@ -133,14 +130,14 @@ export default function MallDetailPage({ params }: { params: Promise<{ id: strin
                     </div>
                   </div>
 
-                  <h3 className="text-xl font-black text-gray-900 mb-2 truncate group-hover:text-primary transition-colors uppercase italic tracking-tighter">
+                  <h3 className="text-sm sm:text-base font-black text-gray-900 mb-1 truncate group-hover:text-primary transition-colors uppercase italic tracking-tighter">
                     {merchant.storeName}
                   </h3>
-                  <p className="text-gray-400 text-xs font-medium leading-relaxed line-clamp-2 mb-6 italic">
+                  <p className="text-gray-400 text-[10px] sm:text-xs font-medium leading-relaxed line-clamp-2 mb-4 italic">
                     {merchant.description || "Discover the latest styles and exclusive collections."}
                   </p>
 
-                  <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
+                  <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase tracking-widest text-primary">View Store</span>
                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                   </div>
@@ -148,12 +145,12 @@ export default function MallDetailPage({ params }: { params: Promise<{ id: strin
               ))}
             </div>
           ) : (
-            <div className="text-center py-32 bg-neutral-50 rounded-[3rem] border border-neutral-100">
-              <h3 className="text-xl font-black text-neutral-300 uppercase italic">No stores linked yet.</h3>
-              <p className="text-neutral-400 mt-2 italic font-medium">Digital doors are opening soon!</p>
+            <div className="text-center py-16 sm:py-24 bg-neutral-50 rounded-2xl sm:rounded-[2rem] border border-neutral-100">
+              <h3 className="text-lg sm:text-xl font-black text-neutral-300 uppercase italic">No stores linked yet.</h3>
+              <p className="text-neutral-400 mt-2 italic font-medium text-sm">Digital doors are opening soon!</p>
               <Link 
                 href="/merchant/signup" 
-                className="mt-8 inline-block bg-primary text-white px-10 py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-primary/20 active:scale-95"
+                className="mt-6 inline-block bg-primary text-white px-6 sm:px-10 py-3 sm:py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-primary/20 active:scale-95"
               >
                 Partner with Us
               </Link>

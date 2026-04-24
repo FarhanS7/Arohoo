@@ -6,10 +6,10 @@ import ProtectedRoute from "@/components/auth/protected-route";
 
 const ADMIN_NAV_ITEMS = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
-  { href: "/admin/merchants", label: "Merchants", icon: Users },
-  { href: "/admin/categories", label: "Categories", icon: FolderTree },
-  { href: "/admin/malls", label: "Malls", icon: Landmark },
-  { href: "/admin/products", label: "Global Products", icon: Package },
+  { href: "/admin?tab=merchants", label: "Merchants", icon: Users },
+  { href: "/admin?tab=categories", label: "Categories", icon: FolderTree },
+  { href: "/admin?tab=malls", label: "Malls", icon: Landmark },
+  { href: "/admin?tab=products", label: "Global Products", icon: Package },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
