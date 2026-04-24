@@ -41,13 +41,15 @@ export default function Navbar() {
     <nav className="fixed top-0 w-full z-50 bg-white border-b border-neutral-100 h-[var(--navbar-height)] flex items-center">
       <div className="responsive-container flex items-center justify-between h-full">
         <div className="flex items-center gap-4 lg:gap-8">
-          <button 
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="p-2 -ml-2 lg:hidden text-neutral-900 z-50"
-            aria-label="Toggle Menu"
-          >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {!user && (
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 -ml-2 lg:hidden text-neutral-900 z-50"
+              aria-label="Toggle Menu"
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          )}
 
           <Link href="/" className="flex items-center z-50">
             <Image 
@@ -60,77 +62,77 @@ export default function Navbar() {
             />
           </Link>
 
-          <div className="hidden lg:flex gap-6 text-[10px] uppercase font-black tracking-widest text-neutral-400">
-            {navLinks.map(link => (
-              <Link 
-                key={link.href} 
-                href={link.href} 
-                className={pathname === link.href ? 'text-primary' : ''}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
+          {!user && (
+            <div className="hidden lg:flex gap-6 text-[10px] uppercase font-black tracking-widest text-neutral-400">
+              {navLinks.map(link => (
+                <Link 
+                  key={link.href} 
+                  href={link.href} 
+                  className={pathname === link.href ? 'text-primary' : ''}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
         
         <div className="flex items-center gap-2 sm:gap-6">
-          <div className="hidden lg:flex items-center bg-neutral-50 rounded-full px-4 py-2 w-64 border border-transparent focus-within:border-primary/20 focus-within:bg-white transition-colors">
-            <Search className="w-4 h-4 text-neutral-400" />
-            <input 
-              type="text" 
-              placeholder="Search brands, products..." 
-              className="bg-transparent border-none focus:ring-0 text-sm w-full ml-2 outline-none" 
-              suppressHydrationWarning
-            />
-          </div>
+          {!user && (
+            <>
+              <div className="hidden lg:flex items-center bg-neutral-50 rounded-full px-4 py-2 w-64 border border-transparent focus-within:border-primary/20 focus-within:bg-white transition-colors">
+                <Search className="w-4 h-4 text-neutral-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search brands, products..." 
+                  className="bg-transparent border-none focus:ring-0 text-sm w-full ml-2 outline-none" 
+                  suppressHydrationWarning
+                />
+              </div>
 
-          <button 
-            onClick={() => {
-               setIsSearchOpen(!isSearchOpen);
-               if (isMenuOpen) setIsMenuOpen(false);
-            }}
-            className="lg:hidden p-2 text-neutral-900"
-          >
-            <Search className="w-5 h-5" />
-          </button>
-          
-          <div className="flex items-center gap-1 sm:gap-4">
-             <Link href="/cart" className="p-2 text-neutral-900 relative">
-                <ShoppingCart className="w-5 h-5" />
-                {itemCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-primary text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                    {itemCount}
-                  </span>
-                )}
-             </Link>
-
-            {user && (user.role === 'ADMIN' || user.role === 'MERCHANT') && (
-              <Link 
-                href={user.role === 'ADMIN' ? '/admin' : '/merchant'} 
-                className="hidden md:flex items-center gap-2 bg-neutral-900 text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest"
+              <button 
+                onClick={() => {
+                   setIsSearchOpen(!isSearchOpen);
+                   if (isMenuOpen) setIsMenuOpen(false);
+                }}
+                className="lg:hidden p-2 text-neutral-900"
               >
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                Dashboard
+                <Search className="w-5 h-5" />
+              </button>
+              
+              <Link href="/cart" className="p-2 text-neutral-900 relative">
+                  <ShoppingCart className="w-5 h-5" />
+                  {itemCount > 0 && (
+                    <span className="absolute top-1 right-1 bg-primary text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                      {itemCount}
+                    </span>
+                  )}
               </Link>
-            )}
+            </>
+          )}
 
-            {user ? (
-              <div className="flex items-center gap-1 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
+            {user && (
+              <>
                 <Link 
-                   href={user.role === 'MERCHANT' ? '/merchant/dashboard' : '/profile'} 
-                   className="p-2 text-neutral-900"
+                  href={user.role === 'ADMIN' ? '/admin' : user.role === 'MERCHANT' ? '/merchant' : '/profile'} 
+                  className="flex items-center gap-2 bg-neutral-900 text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest"
                 >
-                  <User className="w-5 h-5" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  {user.role === 'ADMIN' ? 'Admin Dashboard' : user.role === 'MERCHANT' ? 'Merchant Dashboard' : 'Dashboard'}
                 </Link>
+                
                 <button 
                   onClick={logoutUser}
-                  className="p-2 text-neutral-900 tooltip"
-                  title="Logout"
+                  className="flex items-center gap-2 bg-neutral-100 text-neutral-900 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-neutral-200 transition-colors"
                 >
-                  <LogOut className="w-5 h-5" />
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Logout</span>
                 </button>
-              </div>
-            ) : (
+              </>
+            )}
+
+            {!user && (
               <Link 
                 href="/login" 
                 className="bg-primary text-white px-4 sm:px-6 py-2 rounded-full text-xs sm:text-sm font-bold"
@@ -147,7 +149,7 @@ export default function Navbar() {
         <div className="fixed inset-0 top-0 bg-white z-[40] lg:hidden animate-in fade-in duration-200">
           <div className="pt-[var(--navbar-height)] px-6 h-full flex flex-col justify-between pb-10">
             <div className="flex flex-col gap-6 pt-10">
-              {navLinks.map(link => (
+              {!user && navLinks.map(link => (
                 <Link 
                   key={link.href} 
                   href={link.href} 
@@ -175,13 +177,15 @@ export default function Navbar() {
                     Member Login
                  </Link>
                )}
-               <Link 
-                  href="/merchant/signup" 
-                  onClick={() => setIsMenuOpen(false)}
-                  className="block w-full bg-neutral-900 text-white text-center py-5 rounded-2xl font-black uppercase tracking-widest text-xs"
-               >
-                  Become a Merchant
-               </Link>
+               {!user && (
+                 <Link 
+                    href="/merchant/signup" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block w-full bg-neutral-900 text-white text-center py-5 rounded-2xl font-black uppercase tracking-widest text-xs"
+                 >
+                    Become a Merchant
+                 </Link>
+               )}
             </div>
           </div>
         </div>
