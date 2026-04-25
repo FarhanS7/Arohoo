@@ -38,8 +38,8 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-white border-b border-neutral-100 h-[var(--navbar-height)] flex items-center">
-      <div className="responsive-container flex items-center justify-between h-full">
+    <nav className="absolute top-0 w-full z-50 bg-transparent h-[var(--navbar-height)] flex items-center">
+      <div className="w-full px-4 sm:px-8 lg:px-12 flex items-center justify-between h-full">
         <div className="flex items-center gap-4 lg:gap-8">
           {!user && (
             <button 
@@ -63,12 +63,12 @@ export default function Navbar() {
           </Link>
 
           {!user && (
-            <div className="hidden lg:flex gap-6 text-[10px] uppercase font-black tracking-widest text-neutral-400">
+            <div className="hidden lg:flex gap-6 text-[10px] uppercase font-black tracking-widest text-neutral-600">
               {navLinks.map(link => (
                 <Link 
                   key={link.href} 
                   href={link.href} 
-                  className={pathname === link.href ? 'text-primary' : ''}
+                  className={pathname === link.href ? 'text-primary' : 'hover:text-neutral-900 transition-colors'}
                 >
                   {link.label}
                 </Link>
@@ -80,7 +80,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2 sm:gap-6">
           {!user && (
             <>
-              <div className="hidden lg:flex items-center bg-neutral-50 rounded-full px-4 py-2 w-64 border border-transparent focus-within:border-primary/20 focus-within:bg-white transition-colors">
+              <div className="hidden lg:flex items-center bg-white/60 backdrop-blur-md rounded-full px-4 py-2 w-64 border border-transparent focus-within:border-primary/20 focus-within:bg-white transition-colors">
                 <Search className="w-4 h-4 text-neutral-400" />
                 <input 
                   type="text" 
@@ -116,15 +116,18 @@ export default function Navbar() {
               <>
                 <Link 
                   href={user.role === 'ADMIN' ? '/admin' : user.role === 'MERCHANT' ? '/merchant' : '/profile'} 
-                  className="flex items-center gap-2 bg-neutral-900 text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest"
+                  className="flex items-center gap-1.5 sm:gap-2 bg-neutral-900 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest"
                 >
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  {user.role === 'ADMIN' ? 'Admin Dashboard' : user.role === 'MERCHANT' ? 'Merchant Dashboard' : 'Dashboard'}
+                  <span className="hidden sm:inline">
+                    {user.role === 'ADMIN' ? 'Admin Dashboard' : user.role === 'MERCHANT' ? 'Merchant Dashboard' : 'Dashboard'}
+                  </span>
+                  <span className="sm:hidden">Dashboard</span>
                 </Link>
                 
                 <button 
                   onClick={logoutUser}
-                  className="flex items-center gap-2 bg-neutral-100 text-neutral-900 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-neutral-200 transition-colors"
+                  className="flex items-center gap-1.5 sm:gap-2 bg-white/60 backdrop-blur-md text-neutral-900 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-white transition-colors"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Logout</span>
@@ -135,7 +138,7 @@ export default function Navbar() {
             {!user && (
               <Link 
                 href="/login" 
-                className="bg-primary text-white px-4 sm:px-6 py-2 rounded-full text-xs sm:text-sm font-bold"
+                className="bg-primary text-white px-4 sm:px-6 py-2 rounded-full text-xs sm:text-sm font-bold shadow-sm"
               >
                 Login
               </Link>
