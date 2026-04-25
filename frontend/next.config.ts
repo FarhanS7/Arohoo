@@ -24,7 +24,7 @@ const nextConfig: NextConfig = {
         hostname: 'www.facebook.com',
         pathname: '/**',
       },
-      {
+       {
         protocol: 'https',
         hostname: 'i.imghippo.com',
         pathname: '/**',
@@ -32,6 +32,16 @@ const nextConfig: NextConfig = {
        {
         protocol: 'https',
         hostname: 'i.ibb.co',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'image.pollinations.ai',
         pathname: '/**',
       },
     ],

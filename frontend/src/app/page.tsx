@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Hero from "@/components/sections/Hero";
+import CategoryShowcase from "@/components/sections/CategoryShowcase";
 import TrendingBrands from "@/components/sections/TrendingBrands";
 import SkincareBento from "@/components/sections/SkincareBento";
 import TrendingMalls from "@/components/sections/TrendingMalls";
@@ -26,6 +27,9 @@ export default function Home() {
     <PageLayout>
       {/* Hero Section - Static/Pre-rendered */}
       <Hero />
+
+      {/* Category Grid - Added per user request */}
+      <CategoryShowcase />
 
       {/* Trending Brands - Streamed */}
       <Suspense fallback={<TrendingBrandsSkeleton />}>
