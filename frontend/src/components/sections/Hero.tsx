@@ -4,92 +4,70 @@ import Image from "next/image";
 
 export default function Hero() {
   return (
-    <section className="relative w-full mb-8 sm:mb-10" id="hero-section">
+    <section className="relative w-full mb-8 sm:mb-12" id="hero-section">
       <h1 className="sr-only">
-        Shop the Mall from your home – Discover leading brands in one place
+        Discover curated brands & seamless delivery — all from one place.
       </h1>
 
-      {/* ── Banner Container (Half-height) ─────────────────── */}
+      {/* ── Banner Container ─────────────────── */}
       <div 
-        className="relative w-full h-[35vh] min-h-[260px] max-h-[420px] sm:h-[40vh] lg:h-[45vh] overflow-hidden"
+        className="relative w-full h-[45vh] min-h-[400px] max-h-[600px] sm:h-[55vh] lg:h-[65vh] overflow-hidden sm:rounded-b-[3rem] bg-purple-50"
       >
-        {/* Background image */}
         <Image
-          src="/images/new-hero-banner.png"
-          alt="Arohoo Hero – Shop the Mall from your home"
+          src="/images/new-hero-banner-2.png"
+          alt="Arohoo Hero"
           fill
-          className="object-cover object-right-top sm:object-center"
+          className="object-cover object-center opacity-85"
           priority
           sizes="100vw"
         />
 
-        {/* Left-side gradient so text is readable over the bright area */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 35%, rgba(255,255,255,0.1) 60%, transparent 100%)",
-          }}
-        />
-        {/* Bottom fade for search bar overlap */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(to top, rgba(255,255,255,0.9) 0%, transparent 30%)",
-          }}
-        />
+        {/* Theme color overlay to subtly tint the image to Arohoo primary purple */}
+        <div className="absolute inset-0 bg-primary mix-blend-color opacity-15 pointer-events-none" />
 
-        {/* ── Hero content — left-aligned ──────────────────── */}
-        <div className="absolute inset-0 flex items-center">
-          <div className="responsive-container w-full">
-            <div className="max-w-xl animate-[fadeSlideUp_0.8s_ease-out_both] space-y-3 sm:space-y-4">
-              {/* Tagline */}
-              <p className="text-[9px] sm:text-xs font-black uppercase tracking-[0.3em] text-primary/70">
-                Your favourite mall, now online
+        {/* ── Hero content — Central Clean White Card ──────────────────── */}
+        {/* This perfectly frames the empty center of the image without covering the side illustrations */}
+        <div className="absolute inset-0 flex items-center justify-center px-4">
+          <div className="bg-white/70 backdrop-blur-2xl p-8 sm:p-12 rounded-[2.5rem] shadow-[0_8px_32px_rgba(0,0,0,0.15)] max-w-2xl w-full text-center animate-[fadeSlideUp_0.8s_ease-out_both] border border-white/60">
+            
+            <div className="inline-block px-4 py-1.5 bg-neutral-100 rounded-full mb-6">
+              <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-neutral-900">
+                Welcome to Arohoo
               </p>
-              
-              {/* Main Heading */}
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-neutral-900 leading-[1.05]">
-                Shop <span className="italic text-primary">Smarter</span>,
-                <br />
-                Live <span className="italic text-primary">Better</span>
-              </h2>
-              
-              {/* Subtext */}
-              <p className="text-xs sm:text-sm font-medium text-neutral-500 max-w-sm leading-relaxed">
-                Discover curated brands &amp; seamless delivery — all from one place.
-              </p>
+            </div>
+            
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-neutral-900 leading-[1.15] mb-4">
+              Your Premium <br />
+              <span className="text-primary">Lifestyle</span> Destination
+            </h2>
+            
+            <p className="text-xs sm:text-sm font-medium text-neutral-500 mb-8 max-w-sm mx-auto leading-relaxed">
+              Shop curated brands, beauty essentials, and fashion statements seamlessly.
+            </p>
+
+            {/* ── Integrated Search Bar ─────────────────────────────── */}
+            <div className="flex items-center rounded-2xl p-2 w-full bg-neutral-50 border border-neutral-200 transition-all duration-300 focus-within:border-primary/40 focus-within:bg-white focus-within:shadow-[0_8px_30px_rgba(83,0,183,0.08)] hover:border-primary/20">
+              <div className="pl-3 pr-2 text-primary">
+                <Search className="w-5 h-5" strokeWidth={2.5} />
+              </div>
+              <input
+                type="text"
+                placeholder="Search brands, products..."
+                className="flex-1 bg-transparent border-none outline-none text-neutral-900 text-sm font-bold placeholder:text-neutral-400 placeholder:font-medium"
+                suppressHydrationWarning
+              />
+              <div className="h-6 w-px bg-neutral-200 mx-2" />
+              <button
+                className="p-2 text-primary transition-colors hover:scale-110"
+                aria-label="Voice search"
+              >
+                <Mic className="w-5 h-5" fill="currentColor" />
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Floating search bar ─────────────────────────────── */}
-      <div className="relative -mt-6 sm:-mt-7 px-4 sm:px-8 z-30 flex justify-center">
-        <div
-          className="flex items-center rounded-full p-2 sm:p-3 w-full max-w-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] border-2 border-neutral-200 transition-all duration-300 hover:border-primary/30 hover:shadow-[0_12px_40px_rgba(83,0,183,0.12)]"
-        >
-          <div className="pl-3 pr-3 text-primary">
-            <Search className="w-5 h-5" strokeWidth={2.5} />
-          </div>
-          <input
-            type="text"
-            placeholder="Search for brands & products..."
-            className="flex-1 bg-transparent border-none outline-none text-neutral-900 text-sm sm:text-base font-medium placeholder:text-neutral-400"
-            suppressHydrationWarning
-          />
-          <div className="h-6 w-px bg-neutral-200 mx-2 sm:mx-4" />
-          <button
-            className="p-2 text-primary transition-colors hover:scale-110"
-            aria-label="Voice search"
-          >
-            <Mic className="w-5 h-5" fill="currentColor" />
-          </button>
-        </div>
-      </div>
-
-      {/* ── Keyframe animations (scoped) ─────────────────── */}
       <style jsx>{`
         @keyframes fadeSlideUp {
           from {
