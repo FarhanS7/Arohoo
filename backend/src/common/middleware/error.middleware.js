@@ -14,6 +14,13 @@ export const globalErrorHandler = (err, req, res, next) => {
     err.message = 'Validation Error: ' + err.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
   }
 
+  // Handle Prisma Connection Errors
+  if (err.code === 'P1001' || err.code === 'P1003' || err.code === 'P1017') {
+    err.statusCode = 503;
+    err.status = 'error';
+    err.message = 'Database connection failed. Please ensure the database server is reachable and credentials are correct.';
+  }
+
   if (process.env.NODE_ENV === 'development') {
     return res.status(err.statusCode).json({
       status: err.status,
