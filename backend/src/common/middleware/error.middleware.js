@@ -14,11 +14,23 @@ export const globalErrorHandler = (err, req, res, next) => {
     err.message = 'Validation Error: ' + err.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
   }
 
-  // Handle Prisma Connection Errors
-  if (err.code === 'P1001' || err.code === 'P1003' || err.code === 'P1017') {
+  // Handle Prisma Connection/Timeout Errors
+  const prismaConnectionCodes = ['P1001', 'P1002', 'P1003', 'P1008', 'P1011', 'P1017'];
+  if (prismaConnectionCodes.includes(err.code)) {
     err.statusCode = 503;
     err.status = 'error';
-    err.message = 'Database connection failed. Please ensure the database server is reachable and credentials are correct.';
+    err.isOperational = true;
+    err.message = 'Database is currently unreachable. Please try again in a few minutes.';
+  }
+
+  // Handle other Prisma Known Request Errors
+  if (err.name === 'PrismaClientKnownRequestError') {
+    err.isOperational = true;
+    // P2002: Unique constraint failed
+    if (err.code === 'P2002') {
+      err.statusCode = 400;
+      err.message = `Duplicate value for field: ${err.meta?.target || 'unknown'}`;
+    }
   }
 
   if (process.env.NODE_ENV === 'development') {
