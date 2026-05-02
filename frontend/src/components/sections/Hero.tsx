@@ -11,7 +11,7 @@ export default function Hero() {
 
       {/* ── Banner Container ─────────────────── */}
       <div 
-        className="relative w-full h-[35vh] min-h-[320px] max-h-[450px] sm:h-[45vh] lg:h-[50vh] overflow-hidden sm:rounded-b-[2.5rem] bg-purple-50"
+        className="relative w-full h-[32vh] min-h-[280px] max-h-[450px] sm:h-[45vh] lg:h-[50vh] overflow-hidden sm:rounded-b-[2.5rem] bg-purple-50"
       >
         <Image
           src="/images/new-hero-banner-2.png"

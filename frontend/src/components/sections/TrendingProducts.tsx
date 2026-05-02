@@ -36,7 +36,7 @@ export default async function TrendingProducts() {
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-4 px-2 sm:px-4">
+        <div className="grid grid-cols-5 sm:grid-cols-7 gap-1.5 sm:gap-3 px-2 sm:px-4">
           {products.map((product, index) => (
             <Link 
               href={`/products/${product.id}`}
@@ -59,11 +59,11 @@ export default async function TrendingProducts() {
                   </div>
                 )}
               </div>
-              <div className="p-2 sm:p-4 flex flex-col bg-white">
+              <div className="p-1.5 sm:p-2.5 flex flex-col bg-white">
                 <h3 className="font-bold text-neutral-800 mb-1 text-[8px] sm:text-xs line-clamp-2 group-hover:text-primary transition-colors tracking-tight uppercase font-sans leading-[1.3]">
                   {product.name}
                 </h3>
-                <span className="text-[10px] sm:text-sm font-black text-primary font-sans">
+                <span className="text-[10px] sm:text-[13px] font-black text-primary font-sans">
                   ৳{Number(product.basePrice).toLocaleString()}
                 </span>
               </div>
