@@ -44,6 +44,7 @@ export class MallService {
           select: {
             id: true,
             storeName: true,
+            slug: true,
             logo: true,
             description: true,
           },

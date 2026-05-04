@@ -9,6 +9,12 @@ export interface AuthUser {
   id: string;
   role: "CUSTOMER" | "MERCHANT" | "ADMIN";
   merchantId?: string;
+  merchant?: {
+    id: string;
+    storeName: string;
+    slug: string;
+    isApproved: boolean;
+  };
 }
 
 export interface AuthResponse {

@@ -13,7 +13,13 @@ export class AdminService {
    */
   async getAllMerchants() {
     const merchants = await this.prisma.merchant.findMany({
-      include: {
+      select: {
+        id: true,
+        storeName: true,
+        slug: true,
+        isApproved: true,
+        isTrending: true,
+        createdAt: true,
         user: {
           select: {
             email: true,
@@ -30,6 +36,7 @@ export class AdminService {
     return merchants.map((m) => ({
       id: m.id,
       businessName: m.storeName,
+      slug: m.slug,
       ownerName: m.user.name,
       email: m.user.email,
       isApproved: m.isApproved,
@@ -120,17 +127,18 @@ export class AdminService {
       },
     });
 
-    return merchants.map((m) => ({
-      id: m.id,
-      businessName: m.storeName,
-      ownerName: m.user.name,
-      email: m.user.email,
-      phone: m.user.phone,
-      address: m.address,
-      categories: m.categories,
-      status: m.status,
-      createdAt: m.createdAt,
-    }));
+      return merchants.map((m) => ({
+        id: m.id,
+        businessName: m.storeName,
+        slug: m.slug,
+        ownerName: m.user.name,
+        email: m.user.email,
+        phone: m.user.phone,
+        address: m.address,
+        categories: m.categories,
+        status: m.status,
+        createdAt: m.createdAt,
+      }));
   }
 
   /**
@@ -289,7 +297,8 @@ export class AdminService {
         merchant: {
           select: {
             id: true,
-            storeName: true
+            storeName: true,
+            slug: true
           }
         },
         category: {

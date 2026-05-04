@@ -3,6 +3,7 @@ import { generateToken } from '../../common/utils/jwt.js';
 import { hashPassword, verifyPassword } from '../../common/utils/password.js';
 import prisma from '../../infrastructure/database/prisma.js';
 import { cacheUtil } from '../../common/utils/cache.js';
+import { generateUniqueMerchantSlug } from '../../common/utils/slugify.js';
 
 export class AuthService {
   /**
@@ -75,6 +76,7 @@ export class AuthService {
     const hashedPassword = await hashPassword(password);
 
     // 3. Create User and Merchant in a transaction
+    const slug = await generateUniqueMerchantSlug(storeName, prisma);
     const result = await prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({
         data: {
@@ -89,6 +91,7 @@ export class AuthService {
       const newMerchant = await tx.merchant.create({
         data: {
           storeName,
+          slug,
           address,
           userId: newUser.id,
           isApproved: false,
@@ -180,6 +183,7 @@ export class AuthService {
           select: {
             id: true,
             storeName: true,
+            slug: true,
             isApproved: true,
           }
         }
