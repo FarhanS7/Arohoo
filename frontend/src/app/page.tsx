@@ -2,8 +2,7 @@ import { Suspense } from "react";
 import Hero from "@/components/sections/Hero";
 import CategoryShowcase from "@/components/sections/CategoryShowcase";
 import TrendingBrands from "@/components/sections/TrendingBrands";
-import SkincareBento from "@/components/sections/SkincareBento";
-import FashionBento from "@/components/sections/FashionBento";
+import FeaturedCollections from "@/components/sections/FeaturedCollections";
 import TrendingProducts from "@/components/sections/TrendingProducts";
 import MerchantCTA from "@/components/sections/MerchantCTA";
 import PageLayout from "@/components/layout/UX/PageLayout";
@@ -27,16 +26,13 @@ export default function Home() {
       {/* Category Grid - Added per user request */}
       <CategoryShowcase />
 
-      {/* Skincare Bento Grid */}
-      <SkincareBento />
+      {/* Featured Collections Slider - Unified Section */}
+      <FeaturedCollections />
 
       {/* Trending Products - Streamed */}
       <Suspense fallback={<TrendingProductsSkeleton />}>
         <TrendingProducts />
       </Suspense>
-
-      {/* Fashion Bento Grid */}
-      <FashionBento />
 
       {/* Trending Brands - Streamed */}
       <Suspense fallback={<TrendingBrandsSkeleton />}>
