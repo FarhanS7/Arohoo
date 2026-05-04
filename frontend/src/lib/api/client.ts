@@ -25,8 +25,21 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
+      const currentPath = window.location.pathname;
+      console.log("[DEBUG] 401 Error on path:", currentPath);
+      // Don't redirect if already on login page (prevents loop)
+      // Don't redirect from order success pages (let the page handle it)
+      const skipRedirectPaths = ["/login", "/register"];
+      const isOrderSuccess = currentPath.includes("/success");
+      console.log("[DEBUG] isOrderSuccess:", isOrderSuccess);
+      
+      if (!skipRedirectPaths.includes(currentPath) && !isOrderSuccess) {
+        console.log("[DEBUG] Redirecting to /login");
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      } else {
+        console.log("[DEBUG] Skipping redirect due to path rules");
+      }
     }
     return Promise.reject(error);
   }
