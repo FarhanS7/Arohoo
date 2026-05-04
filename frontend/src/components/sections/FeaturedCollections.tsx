@@ -125,13 +125,7 @@ export default function FeaturedCollections() {
                 />
                 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent flex flex-col justify-end p-4 sm:p-10">
-                  {/* Explore Bar */}
-                  <div className="relative w-[90%] sm:w-[80%] h-[40px] sm:h-[46px] rounded-full overflow-hidden border border-white/20 bg-black/20 backdrop-blur-md group/btn cursor-pointer transition-all hover:bg-black/40">
-                    <div className="absolute inset-0 flex items-center px-5 sm:px-6">
-                      <span className="text-[9px] sm:text-[10px] font-black text-white uppercase tracking-widest mr-3">Explore</span>
-                      <MoveRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white group-hover/btn:translate-x-2 transition-transform" />
-                    </div>
-                  </div>
+                  {/* Banner content removed per user request */}
                 </div>
               </div>
             ))}
