@@ -141,8 +141,8 @@ export const uploadBanner = asyncHandler(async (req, res, next) => {
  * Controller to get public merchant profile.
  */
 export const getPublicProfile = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const merchant = await merchantService.getPublicMerchantById(id);
+  const { slug } = req.params;
+  const merchant = await merchantService.getPublicMerchantBySlug(slug);
 
   res.status(200).json({
     success: true,
