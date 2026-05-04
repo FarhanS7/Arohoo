@@ -234,41 +234,41 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
   };
 
   return (
-    <form onSubmit={handleSubmit} className="font-sans space-y-12 bg-white pb-12 rounded-[2.5rem] max-w-5xl mx-auto overflow-hidden">
+    <form onSubmit={handleSubmit} className="font-sans space-y-8 sm:space-y-12 bg-white pb-6 sm:pb-12 rounded-[1.5rem] sm:rounded-[2.5rem] max-w-5xl mx-auto overflow-hidden">
       {/* 1. HEADER SECTION (Always Modern & Clean) */}
-      <div className="bg-neutral-50 px-10 py-12 rounded-b-[3rem] border-b border-neutral-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="bg-neutral-50 px-5 sm:px-10 py-8 sm:py-12 rounded-b-[2rem] sm:rounded-b-[3rem] border-b border-neutral-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
            <div className="flex items-center gap-2 mb-2">
-             <span className="px-3 py-1 bg-black text-white text-[10px] font-black rounded-full uppercase tracking-widest">Editor</span>
+             <span className="px-3 py-1 bg-black text-white text-[9px] sm:text-[10px] font-black rounded-full uppercase tracking-widest">Editor</span>
              <span className="text-neutral-300">/</span>
-             <span className="text-neutral-400 text-[10px] font-bold uppercase tracking-widest">Inventory Management</span>
+             <span className="text-neutral-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest">Inventory</span>
            </div>
-           <h2 className="text-4xl font-black text-neutral-900 tracking-tighter">Product Refiner</h2>
-           <p className="text-neutral-500 font-medium mt-1">Refining the edges of your digital storefront.</p>
+           <h2 className="text-2xl sm:text-4xl font-black text-neutral-900 tracking-tighter">Product Refiner</h2>
+           <p className="text-neutral-500 text-sm font-medium mt-1">Refining the edges of your digital storefront.</p>
         </div>
 
         {/* Mode Switcher */}
-        <div className="flex bg-neutral-200/50 p-1.5 rounded-2xl border border-neutral-200">
+        <div className="flex bg-neutral-200/50 p-1 rounded-xl sm:rounded-2xl border border-neutral-200 w-full md:w-auto">
            <button
              type="button"
              onClick={() => setProductMode("simple")}
-             className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${productMode === "simple" ? "bg-white text-black shadow-lg shadow-neutral-200/50" : "text-neutral-400 hover:text-neutral-600"}`}
+             className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${productMode === "simple" ? "bg-white text-black shadow-lg shadow-neutral-200/50" : "text-neutral-400 hover:text-neutral-600"}`}
            >
-             <Package className="w-4 h-4" />
+             <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
              Simple
            </button>
            <button
              type="button"
              onClick={() => setProductMode("multi-color")}
-             className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${productMode === "multi-color" ? "bg-white text-black shadow-lg shadow-neutral-200/50" : "text-neutral-400 hover:text-neutral-600"}`}
+             className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${productMode === "multi-color" ? "bg-white text-black shadow-lg shadow-neutral-200/50" : "text-neutral-400 hover:text-neutral-600"}`}
            >
-             <Layers className="w-4 h-4" />
+             <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
              Variations
            </button>
         </div>
       </div>
 
-      <div className="px-10 space-y-12">
+      <div className="px-5 sm:px-10 space-y-10 sm:space-y-12">
         {/* 2. CORE DETAILS */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div className="md:col-span-12">
@@ -280,22 +280,22 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
 
             <div className="md:col-span-8 space-y-6">
                 <div className="relative group">
-                  <label className="absolute left-6 -top-2.5 px-2 bg-white text-[10px] font-black text-neutral-400 uppercase tracking-widest">Product Name <span className="text-rose-500">*</span></label>
+                  <label className="absolute left-6 -top-2.5 px-2 bg-white text-[9px] sm:text-[10px] font-black text-neutral-400 uppercase tracking-widest">Product Name <span className="text-rose-500">*</span></label>
                   <input
                     type="text"
                     value={baseData.name}
                     onChange={(e) => setBaseData({ ...baseData, name: e.target.value })}
-                    className="w-full px-8 py-5 rounded-3xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-bold text-neutral-900 text-lg transition-all placeholder:text-neutral-200"
+                    className="w-full px-6 sm:px-8 py-4 sm:py-5 rounded-2xl sm:rounded-3xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-bold text-neutral-900 text-base sm:text-lg transition-all placeholder:text-neutral-200"
                     placeholder="e.g. Ethereal Silk Scarf"
                   />
                 </div>
 
                 <div className="relative group">
-                   <label className="absolute left-6 -top-2.5 px-2 bg-white text-[10px] font-black text-neutral-400 uppercase tracking-widest">Aura / Description</label>
+                   <label className="absolute left-6 -top-2.5 px-2 bg-white text-[9px] sm:text-[10px] font-black text-neutral-400 uppercase tracking-widest">Aura / Description</label>
                    <textarea
                      value={baseData.description}
                      onChange={(e) => setBaseData({ ...baseData, description: e.target.value })}
-                     className="w-full px-8 py-5 rounded-3xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-medium text-neutral-600 text-sm h-40 transition-all placeholder:text-neutral-200"
+                     className="w-full px-6 sm:px-8 py-4 sm:py-5 rounded-2xl sm:rounded-3xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-medium text-neutral-600 text-sm h-32 sm:h-40 transition-all placeholder:text-neutral-200"
                      placeholder="Describe the essence of this creation..."
                    />
                 </div>
@@ -303,21 +303,21 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
 
             <div className="md:col-span-4 space-y-6">
                 <div className="relative group">
-                   <label className="absolute left-6 -top-2.5 px-2 bg-white text-[10px] font-black text-neutral-400 uppercase tracking-widest">Base Price (৳)</label>
+                   <label className="absolute left-6 -top-2.5 px-2 bg-white text-[9px] sm:text-[10px] font-black text-neutral-400 uppercase tracking-widest">Base Price (৳)</label>
                    <input
                      type="number"
                      value={baseData.basePrice}
                      onChange={(e) => setBaseData({ ...baseData, basePrice: parseFloat(e.target.value) || 0 })}
-                     className="w-full px-8 py-5 rounded-3xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-black text-neutral-900 text-2xl transition-all"
+                     className="w-full px-6 sm:px-8 py-4 sm:py-5 rounded-2xl sm:rounded-3xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-black text-neutral-900 text-xl sm:text-2xl transition-all"
                    />
                 </div>
 
                 <div className="relative group">
-                  <label className="absolute left-6 -top-2.5 px-2 bg-white text-[10px] font-black text-neutral-400 uppercase tracking-widest">Category <span className="text-rose-500">*</span></label>
+                  <label className="absolute left-6 -top-2.5 px-2 bg-white text-[9px] sm:text-[10px] font-black text-neutral-400 uppercase tracking-widest">Category <span className="text-rose-500">*</span></label>
                   <select
                     value={baseData.categoryId}
                     onChange={(e) => setBaseData({ ...baseData, categoryId: e.target.value })}
-                    className="w-full px-8 py-5 rounded-3xl border border-neutral-200 focus:border-black focus:ring-0 outline-none appearance-none font-bold text-neutral-900 text-sm bg-neutral-50/50 transition-all"
+                    className="w-full px-6 sm:px-8 py-4 sm:py-5 rounded-2xl sm:rounded-3xl border border-neutral-200 focus:border-black focus:ring-0 outline-none appearance-none font-bold text-neutral-900 text-sm bg-neutral-50/50 transition-all"
                   >
                     <option value="">Choose Path</option>
                     {categories.map((c) => (
@@ -350,14 +350,14 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
 
             {productMode === "simple" ? (
                /* SIMPLE MODE UI */
-               <div className="bg-neutral-50 p-10 rounded-[3rem] border border-neutral-100 space-y-6">
+               <div className="bg-neutral-50 p-5 sm:p-10 rounded-[2rem] sm:rounded-[3rem] border border-neutral-100 space-y-6">
                   <div className="space-y-2 max-w-sm">
                      <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest px-4 block">Color (Optional)</label>
                      <input
                        type="text"
                        value={simpleColor}
                        onChange={(e) => setSimpleColor(e.target.value)}
-                       className="w-full px-6 py-4 rounded-2xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-bold text-neutral-900 bg-white"
+                       className="w-full px-6 py-4 rounded-xl sm:rounded-2xl border border-neutral-200 focus:border-black focus:ring-0 outline-none font-bold text-neutral-900 bg-white"
                        placeholder="Obsidian, Ruby, etc."
                      />
                   </div>
@@ -379,7 +379,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
 
                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {simpleVariants.map((sv, idx) => (
-                           <div key={idx} className="bg-white p-4 rounded-2xl border border-neutral-200 flex items-center gap-4 group/size">
+                           <div key={idx} className="bg-white p-4 rounded-xl sm:rounded-2xl border border-neutral-200 flex items-center gap-4 group/size">
                               <div className="flex-1 space-y-2">
                                  <input
                                     type="text"
@@ -390,7 +390,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                                  />
                                  {isPerfume && (
                                    <div className="flex items-center gap-2">
-                                      <span className="text-[10px] font-medium text-neutral-300 uppercase tracking-widest">Price Override:</span>
+                                      <span className="text-[9px] font-medium text-neutral-300 uppercase tracking-widest">Price:</span>
                                       <input
                                         type="number"
                                         value={sv.price}
@@ -401,7 +401,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                                    </div>
                                  )}
                                  <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-medium text-neutral-300 uppercase tracking-widest">Stock:</span>
+                                    <span className="text-[9px] font-medium text-neutral-300 uppercase tracking-widest">Stock:</span>
                                     <input
                                       type="number"
                                       value={sv.stock}
@@ -415,9 +415,9 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                                 <button
                                   type="button"
                                   onClick={() => removeSimpleVariant(idx)}
-                                  className="text-neutral-300 hover:text-rose-500 transition-colors"
+                                  className="text-neutral-300 hover:text-rose-500 transition-colors p-2"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <Trash2 className="w-4 h-4" />
                                 </button>
                               )}
                            </div>
@@ -436,29 +436,29 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                     </div>
                   )}
                   {colorVariations.map((cv, cIdx) => (
-                    <div key={cIdx} className="bg-neutral-50 p-8 rounded-[3rem] border border-neutral-100 relative group animate-in fade-in slide-in-from-bottom-4">
+                    <div key={cIdx} className="bg-neutral-50 p-6 sm:p-8 rounded-[2rem] sm:rounded-[3rem] border border-neutral-100 relative group animate-in fade-in slide-in-from-bottom-4">
                        <button
                          type="button"
                          onClick={() => removeColor(cIdx)}
-                         className="absolute -top-3 -right-3 w-10 h-10 bg-white border border-neutral-100 flex items-center justify-center text-rose-500 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
+                         className="absolute -top-3 -right-3 w-9 h-9 sm:w-10 sm:h-10 bg-white border border-neutral-100 flex items-center justify-center text-rose-500 rounded-full shadow-lg opacity-100 lg:opacity-0 group-hover:opacity-100 transition-all hover:scale-110 z-10"
                        >
-                         <Trash2 className="w-4 h-4" />
+                         <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                        </button>
 
-                       <div className="flex flex-col lg:flex-row gap-10">
+                       <div className="flex flex-col lg:flex-row gap-8 sm:gap-10">
                           {/* Color Sidebar */}
-                          <div className="lg:w-48 flex flex-col gap-4">
-                             <div className="space-y-2">
-                                <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest px-2 block text-center lg:text-left">Color Identity</label>
+                          <div className="lg:w-48 flex flex-col sm:flex-row lg:flex-col gap-6 sm:gap-8 lg:gap-4">
+                             <div className="flex-1 space-y-2">
+                                <label className="text-[9px] font-black text-neutral-400 uppercase tracking-widest px-2 block">Color Identity</label>
                                 <input
                                   type="text"
                                   value={cv.colorName}
                                   onChange={(e) => updateColorName(cIdx, e.target.value)}
-                                  className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-black outline-none font-black text-xs text-neutral-900 bg-white uppercase text-center lg:text-left"
+                                  className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-black outline-none font-black text-xs text-neutral-900 bg-white uppercase"
                                   placeholder="e.g. Cobalt"
                                 />
                              </div>
-                             <div className="aspect-square w-full rounded-2xl bg-neutral-200 flex flex-col items-center justify-center overflow-hidden border border-neutral-100 relative group/photo">
+                             <div className="aspect-square w-full sm:w-32 lg:w-full rounded-2xl bg-neutral-200 flex flex-col items-center justify-center overflow-hidden border border-neutral-100 relative group/photo">
                                 {uploadingColorIdx === cIdx ? (
                                   <div className="animate-pulse w-full h-full bg-neutral-300" />
                                 ) : cv.imageUrl ? (
@@ -495,9 +495,9 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                                 </button>
                              </div>
                              
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                 {cv.sizes.map((s, sIdx) => (
-                                   <div key={sIdx} className="bg-white p-4 rounded-2xl border border-neutral-200 flex items-center gap-4 group/size">
+                                   <div key={sIdx} className="bg-white p-4 rounded-xl sm:rounded-2xl border border-neutral-200 flex items-center gap-4 group/size">
                                       <div className="flex-1 space-y-1">
                                          <input
                                             type="text"
@@ -507,7 +507,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                                             placeholder="SIZE (e.g. XL)"
                                          />
                                          <div className="flex items-center gap-2">
-                                            <span className="text-[10px] font-medium text-neutral-300 uppercase tracking-widest">Stock:</span>
+                                            <span className="text-[9px] font-medium text-neutral-300 uppercase tracking-widest">Stock:</span>
                                             <input
                                               type="number"
                                               value={s.stock}
@@ -519,9 +519,9 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                                       <button
                                         type="button"
                                         onClick={() => removeSizeFromColor(cIdx, sIdx)}
-                                        className="text-neutral-300 hover:text-rose-500 transition-colors"
+                                        className="text-neutral-300 hover:text-rose-500 transition-colors p-1"
                                       >
-                                        <Trash2 className="w-3.5 h-3.5" />
+                                        <Trash2 className="w-4 h-4" />
                                       </button>
                                    </div>
                                 ))}
@@ -541,7 +541,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
               <h3 className="text-xs font-black text-neutral-900 uppercase tracking-[0.2em]">Visual Gallery</h3>
             </div>
             
-            <div className="bg-neutral-50 p-8 rounded-[3rem] border border-neutral-100">
+            <div className="bg-neutral-50 p-5 sm:p-8 rounded-[2rem] sm:rounded-[3rem] border border-neutral-100">
                <ImageUpload 
                  productId={initialData?.id}
                  existingImages={initialData?.images}
@@ -561,18 +561,18 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
         )}
 
         {/* ACTIONS */}
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-6 pt-12 border-t border-neutral-50">
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-4 sm:gap-6 pt-8 sm:pt-12 border-t border-neutral-50">
            <button
              type="button"
              onClick={onCancel}
-             className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-300 hover:text-black transition-colors"
+             className="w-full sm:w-auto px-8 py-4 sm:py-0 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 hover:text-black transition-colors"
              disabled={loading}
            >
              Abandon Changes
            </button>
            <button
              type="submit"
-             className="w-full sm:w-auto px-16 py-6 bg-black text-white text-[11px] font-black uppercase tracking-[0.4em] rounded-full shadow-2xl shadow-neutral-400 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+             className="w-full sm:w-auto px-10 sm:px-16 py-5 sm:py-6 bg-black text-white text-[10px] sm:text-[11px] font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] rounded-2xl sm:rounded-full shadow-2xl shadow-neutral-400 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
              disabled={loading}
            >
              {loading ? "Processing..." : initialData ? "Synchronize" : "Project to Marketplace"}

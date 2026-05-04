@@ -26,24 +26,24 @@ const ProductModal: React.FC<ProductModalProps> = ({
       />
       
       {/* Modal Content */}
-      <div className="relative bg-white rounded-[2.5rem] shadow-2xl border border-neutral-100 max-w-5xl w-full max-h-[90vh] overflow-y-auto">
-        <header className="sticky top-0 z-10 bg-white px-10 py-8 border-b border-neutral-50 flex items-center justify-between">
+      <div className="relative bg-white rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl border border-neutral-100 max-w-5xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+        <header className="sticky top-0 z-10 bg-white px-6 sm:px-10 py-5 sm:py-8 border-b border-neutral-50 flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-black text-neutral-900 tracking-tighter">
+            <h2 className="text-xl sm:text-3xl font-black text-neutral-900 tracking-tighter">
               {title}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="h-12 w-12 rounded-2xl flex items-center justify-center text-neutral-400"
+            className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl flex items-center justify-center text-neutral-400 hover:bg-neutral-50 transition-colors"
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </header>
 
-        <div className="p-10">
+        <div className="p-4 sm:p-10">
           {children}
         </div>
       </div>
