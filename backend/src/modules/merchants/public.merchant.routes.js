@@ -11,10 +11,10 @@ const router = express.Router();
 router.get('/', merchantController.listPublic);
 
 /**
- * @route   GET /api/v1/public/merchants/:id
+ * @route   GET /api/v1/public/merchants/:slug
  * @desc    Get public merchant profile
  * @access  Public
  */
-router.get('/:id', merchantController.getPublicProfile);
+router.get('/:slug', merchantController.getPublicProfile);
 
 export default router;

@@ -137,7 +137,7 @@ export class OrderService {
               quantity: true,
               product: { select: { id: true, name: true } },
               productVariant: {
-                select: { id: true, price: true }
+                select: { id: true, price: true, imageUrl: true }
               },
               merchant: {
                 select: { id: true, storeName: true }
@@ -160,17 +160,18 @@ export class OrderService {
       createdAt: order.createdAt,
       orderItems: order.orderItems.map(item => ({
         quantity: item.quantity,
+        product: {
+          id: item.product.id,
+          name: item.product.name
+        },
         productVariant: {
           id: item.productVariant.id,
           price: Number(item.productVariant.price),
-          product: {
-            id: item.product.id,
-            name: item.product.name
-          },
-          merchant: {
-            id: item.merchant.id,
-            storeName: item.merchant.storeName
-          }
+          imageUrl: item.productVariant.imageUrl
+        },
+        merchant: {
+          id: item.merchant.id,
+          storeName: item.merchant.storeName
         }
       }))
     }));
@@ -193,7 +194,7 @@ export class OrderService {
           include: {
             product: { select: { name: true } },
             productVariant: {
-              select: { size: true, color: true, price: true }
+              select: { size: true, color: true, price: true, imageUrl: true }
             },
             merchant: {
               select: { id: true, storeName: true }
@@ -405,11 +406,25 @@ export class OrderService {
               quantity: true,
               price: true,
               subtotal: true,
+              status: true,
               productVariant: {
                 select: {
                   id: true,
                   sku: true,
-                  product: { select: { id: true, name: true } }
+                  size: true,
+                  color: true,
+                  imageUrl: true,
+                  product: { 
+                    select: { 
+                      id: true, 
+                      name: true,
+                      images: {
+                        select: { url: true },
+                        take: 1,
+                        orderBy: { order: 'asc' }
+                      }
+                    } 
+                  }
                 }
               }
             }
@@ -444,18 +459,23 @@ export class OrderService {
       shippingDistrict: order.shippingDistrict,
       shippingCost: Number(order.shippingCost),
       totalAmount: Number(order.totalAmount),
-      items: order.orderItems.map(item => ({
+      orderItems: order.orderItems.map(item => ({
         id: item.id,
         quantity: item.quantity,
         price: Number(item.price),
         subtotal: Number(item.subtotal),
+        status: item.status,
+        product: {
+          id: item.productVariant.product.id,
+          name: item.productVariant.product.name,
+          images: item.productVariant.product.images
+        },
         productVariant: {
           id: item.productVariant.id,
           sku: item.productVariant.sku,
-          product: {
-            id: item.productVariant.product.id,
-            name: item.productVariant.product.name
-          }
+          size: item.productVariant.size,
+          color: item.productVariant.color,
+          imageUrl: item.productVariant.imageUrl
         }
       }))
     }));
@@ -494,7 +514,7 @@ export class OrderService {
               status: true,
               product: { select: { id: true, name: true } },
               productVariant: {
-                select: { id: true, size: true, color: true, price: true }
+                select: { id: true, size: true, color: true, price: true, imageUrl: true }
               },
               merchant: {
                 select: { id: true, storeName: true }
@@ -523,17 +543,20 @@ export class OrderService {
         quantity: item.quantity,
         price: Number(item.price),
         status: item.status,
+        product: {
+          id: item.product.id,
+          name: item.product.name
+        },
         productVariant: {
           id: item.productVariant.id,
           price: Number(item.productVariant.price),
-          product: {
-            id: item.product.id,
-            name: item.product.name
-          },
-          merchant: {
-            id: item.merchant.id,
-            storeName: item.merchant.storeName
-          }
+          size: item.productVariant.size,
+          color: item.productVariant.color,
+          imageUrl: item.productVariant.imageUrl
+        },
+        merchant: {
+          id: item.merchant.id,
+          storeName: item.merchant.storeName
         }
       }))
     }));

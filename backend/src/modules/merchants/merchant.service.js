@@ -187,6 +187,7 @@ export class MerchantService {
         select: {
           id: true,
           storeName: true,
+          slug: true,
           description: true,
           logo: true,
           bannerUrl: true,
@@ -209,22 +210,23 @@ export class MerchantService {
   }
 
   /**
-   * Retrieves a specific public merchant by ID with product summary.
-   * @param {string} id - Merchant ID.
+   * Retrieves a specific public merchant by slug with product summary.
+   * @param {string} slug - Merchant Slug.
    * @returns {Promise<Object>} Merchant details and products.
    */
-  async getPublicMerchantById(id) {
-    if (!id) throw new AppError('Merchant ID is required', 400);
+  async getPublicMerchantBySlug(slug) {
+    if (!slug) throw new AppError('Merchant slug is required', 400);
 
-    const cacheKey = `merchant:public:${id}`;
+    const cacheKey = `merchant:public:${slug}`;
     const cached = cacheUtil.get(cacheKey);
     if (cached) return cached;
 
     const merchant = await this.prisma.merchant.findUnique({
-      where: { id, isApproved: true },
+      where: { slug, isApproved: true },
       select: {
         id: true,
         storeName: true,
+        slug: true,
         description: true,
         logo: true,
         bannerUrl: true,
