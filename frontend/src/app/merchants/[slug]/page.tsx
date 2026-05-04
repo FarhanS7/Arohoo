@@ -11,10 +11,10 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { MapPin, ShoppingBag, Info, Star } from "lucide-react";
 
 export default function MerchantProfilePage() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const { data: merchant, isLoading, error } = useQuery({
-    queryKey: ["public-merchant", id],
-    queryFn: () => getPublicMerchantProfile(id as string),
+    queryKey: ["public-merchant", slug],
+    queryFn: () => getPublicMerchantProfile(slug as string),
   });
 
   if (isLoading) {

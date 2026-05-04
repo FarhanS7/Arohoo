@@ -52,8 +52,8 @@ export const uploadMerchantBanner = async (file: File): Promise<any> => {
   return data.data;
 };
 
-export const getPublicMerchantProfile = cache(async (id: string): Promise<any> => {
-  const { data } = await api.get(`/public/merchants/${id}`);
+export const getPublicMerchantProfile = cache(async (slug: string): Promise<any> => {
+  const { data } = await api.get(`/public/merchants/${slug}`);
   return data.data;
 });
 
