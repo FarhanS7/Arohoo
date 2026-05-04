@@ -8,6 +8,7 @@ export interface ProductVariant {
   stock: number;
   size: string | null;
   color: string | null;
+  imageUrl?: string | null;
 }
 
 export interface ProductImage {
@@ -26,6 +27,7 @@ export interface Product {
   merchant?: {
     id: string;
     storeName: string;
+    slug: string;
     logo?: string;
   };
   isTrending?: boolean;
@@ -120,6 +122,26 @@ export const productService = {
         },
         // Important: this allows Axios to correctly handle FormData boundaries
         transformRequest: [(data) => data], 
+      }
+    );
+    return res.data;
+  },
+
+  /**
+   * Upload a temporary image (e.g. for variations)
+   */
+  async uploadTempImage(file: File): Promise<{ success: boolean; data: { url: string } }> {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const res = await api.post<{ success: boolean; data: { url: string } }>(
+      "/merchant/products/upload-image",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        transformRequest: [(data) => data],
       }
     );
     return res.data;

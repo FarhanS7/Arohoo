@@ -34,7 +34,8 @@ export class PrismaProductRepository {
         select: {
           id: true,
           storeName: true,
-          logo: true
+          logo: true,
+          slug: true
         }
       },
       variants: {
@@ -45,7 +46,8 @@ export class PrismaProductRepository {
           price: true,
           stock: true,
           size: true,
-          color: true
+          color: true,
+          imageUrl: true
         }
       }
     };
@@ -86,10 +88,10 @@ export class PrismaProductRepository {
         select: { id: true, url: true, order: true }
       },
       variants: {
-        select: { id: true, sku: true, size: true, color: true, price: true, stock: true }
+        select: { id: true, sku: true, size: true, color: true, price: true, stock: true, imageUrl: true }
       },
       merchant: {
-        select: { id: true, storeName: true, logo: true }
+        select: { id: true, storeName: true, logo: true, slug: true }
       }
     };
   }

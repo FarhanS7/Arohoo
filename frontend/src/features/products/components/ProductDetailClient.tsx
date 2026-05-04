@@ -169,7 +169,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             </div>
             <div>
               <p className="text-xs text-on-surface-variant uppercase tracking-tighter">Sold by</p>
-              <Link href={`/merchants/${product.merchantId}`} className="text-sm font-bold text-on-surface hover:underline underline-offset-4 decoration-primary/50">
+              <Link href={`/merchants/${product.merchant?.slug}`} className="text-sm font-bold text-on-surface hover:underline underline-offset-4 decoration-primary/50">
                 {product.merchant?.storeName || 'Verified Merchant'}
               </Link>
             </div>

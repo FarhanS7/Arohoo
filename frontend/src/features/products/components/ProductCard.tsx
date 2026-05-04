@@ -34,7 +34,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           </div>
         {product.merchant && (
           <Link 
-            href={`/merchants/${product.merchant.id}`}
+            href={`/merchants/${product.merchant.slug}`}
             onClick={(e) => e.stopPropagation()}
             className="absolute top-4 left-4 flex items-center gap-2 bg-white p-1.5 pr-4 rounded-full shadow-lg border border-white"
           >

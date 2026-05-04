@@ -11,7 +11,8 @@ export const createProductSchema = z.object({
       price: z.number().min(0, 'Variant price cannot be negative').optional(),
       stock: z.number().int().min(0, 'Stock cannot be negative').optional(),
       size: z.string().optional().or(z.literal('')),
-      color: z.string().optional().or(z.literal(''))
+      color: z.string().optional().or(z.literal('')),
+      imageUrl: z.string().url().optional().or(z.literal(''))
     })).optional()
   })
 });

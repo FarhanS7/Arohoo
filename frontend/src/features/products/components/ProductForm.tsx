@@ -31,12 +31,16 @@ interface SimpleVariant {
 
 interface ColorVariation {
   colorName: string;
+  imageUrl?: string;
   sizes: { id?: string; sku?: string; sizeLabel: string; stock: number }[];
 }
+
+import { productService } from "@/lib/api/products";
 
 export default function ProductForm({ initialData, onSubmit, onUpload, onCancel, loading }: ProductFormProps) {
   const { categories } = useCategories();
   const [productMode, setProductMode] = useState<ProductMode>("simple");
+  const [uploadingColorIdx, setUploadingColorIdx] = useState<number | null>(null);
   
   // Base product fields
   const [baseData, setBaseData] = useState({
@@ -66,16 +70,17 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
   const initialVariations = useMemo(() => {
     if (!initialData || initialData.variants.length === 0) return [];
     
-    const colorGroups: Record<string, { id?: string; sku?: string; sizeLabel: string; stock: number }[]> = {};
+    const colorGroups: Record<string, { imageUrl?: string; sizes: { id?: string; sku?: string; sizeLabel: string; stock: number }[] }> = {};
     initialData.variants.forEach(v => {
       const color = v.color || "Default";
-      if (!colorGroups[color]) colorGroups[color] = [];
-      colorGroups[color].push({ id: v.id, sku: v.sku, sizeLabel: v.size || "", stock: v.stock });
+      if (!colorGroups[color]) colorGroups[color] = { imageUrl: v.imageUrl || undefined, sizes: [] };
+      colorGroups[color].sizes.push({ id: v.id, sku: v.sku, sizeLabel: v.size || "", stock: v.stock });
     });
 
-    return Object.entries(colorGroups).map(([colorName, sizes]) => ({
+    return Object.entries(colorGroups).map(([colorName, data]) => ({
       colorName,
-      sizes
+      imageUrl: data.imageUrl,
+      sizes: data.sizes
     }));
   }, [initialData]);
 
@@ -111,6 +116,24 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
   // Color management
   const addColor = () => {
     setColorVariations(prev => [...prev, { colorName: "", sizes: [{ sizeLabel: "", stock: 10 }] }]);
+  };
+
+  const handleUploadColorImage = async (idx: number, file: File) => {
+    try {
+      setUploadingColorIdx(idx);
+      const res = await productService.uploadTempImage(file);
+      if (res.success) {
+        setColorVariations(prev => {
+          const next = [...prev];
+          next[idx].imageUrl = res.data.url;
+          return next;
+        });
+      }
+    } catch (err: any) {
+      setFormError(err.message || "Failed to upload variation image");
+    } finally {
+      setUploadingColorIdx(null);
+    }
   };
 
   const removeColor = (idx: number) => {
@@ -186,7 +209,8 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                 price: baseData.basePrice, // Using base price for simplicity per "plain" request
                 stock: s.stock === undefined || String(s.stock) === "" ? -1 : Number(s.stock),
                 size: s.sizeLabel,
-                color: cv.colorName
+                color: cv.colorName,
+                imageUrl: cv.imageUrl
              });
           });
        });
@@ -434,8 +458,26 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                                   placeholder="e.g. Cobalt"
                                 />
                              </div>
-                             <div className="aspect-square w-full rounded-2xl bg-neutral-200 flex items-center justify-center overflow-hidden border border-neutral-100">
-                                <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Color Photo</span>
+                             <div className="aspect-square w-full rounded-2xl bg-neutral-200 flex flex-col items-center justify-center overflow-hidden border border-neutral-100 relative group/photo">
+                                {uploadingColorIdx === cIdx ? (
+                                  <div className="animate-pulse w-full h-full bg-neutral-300" />
+                                ) : cv.imageUrl ? (
+                                  <img src={cv.imageUrl} alt="Color variation" className="w-full h-full object-cover" />
+                                ) : (
+                                  <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Color Photo</span>
+                                )}
+                                <label className="absolute inset-0 bg-black/50 opacity-0 group-hover/photo:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                                  <span className="text-white text-[10px] font-black uppercase tracking-widest">{cv.imageUrl ? "Change" : "Upload"}</span>
+                                  <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    className="hidden" 
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) handleUploadColorImage(cIdx, file);
+                                    }} 
+                                  />
+                                </label>
                              </div>
                           </div>
 

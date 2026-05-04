@@ -86,6 +86,20 @@ export const uploadProductImages = asyncHandler(async (req, res) => {
   });
 });
 
+export const uploadTempImage = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw new AppError('Please provide an image file', 400);
+  }
+
+  const url = await uploadToCloudinary(req.file.buffer, 'arohoo/products/variants');
+
+  res.status(200).json({
+    success: true,
+    data: { url },
+    error: null
+  });
+});
+
 export const deleteProduct = asyncHandler(async (req, res) => {
   const merchantId = req.user.merchantId;
   await productService.deleteProduct(req.params.id, merchantId);
