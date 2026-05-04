@@ -83,7 +83,7 @@ export default function MerchantDetailView({
         </button>
         <div className="flex items-center gap-4">
           <a 
-            href={`/merchants/${profile.id}`} 
+            href={`/merchants/${profile.slug}`} 
             target="_blank" 
             className="flex items-center gap-2 px-6 py-3 bg-neutral-100 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-neutral-200 transition-all text-neutral-600"
           >

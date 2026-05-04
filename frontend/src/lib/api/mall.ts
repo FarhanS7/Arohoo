@@ -4,6 +4,7 @@ import { cache } from "react";
 export interface Merchant {
   id: string;
   storeName: string;
+  slug: string;
   logo?: string;
   description?: string;
   bannerUrl?: string;

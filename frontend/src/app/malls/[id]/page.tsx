@@ -107,7 +107,7 @@ export default function MallDetailPage({ params }: { params: Promise<{ id: strin
               {mall.merchants.map((merchant) => (
                 <Link
                   key={merchant.id}
-                  href={`/merchants/${merchant.id}`}
+                  href={`/merchants/${merchant.slug}`}
                   className="group bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg shadow-gray-200/50 hover:shadow-primary/5 border border-neutral-100 hover:border-primary/10 transition-all duration-500 flex flex-col"
                 >
                   <div className="relative aspect-square w-full mb-4 overflow-hidden rounded-xl sm:rounded-2xl bg-neutral-50 border border-neutral-100 flex items-center justify-center">

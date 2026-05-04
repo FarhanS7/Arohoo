@@ -12,6 +12,7 @@ export interface PlatformStats {
 export interface MerchantApplication {
   id: string;
   businessName: string;
+  slug: string;
   ownerName: string;
   email: string;
   phone?: string;

@@ -37,7 +37,7 @@ export default async function TrendingBrands() {
         <div className="flex overflow-x-auto subtle-scrollbar gap-2 sm:gap-4 pb-6 snap-x snap-mandatory px-4">
           {brands.map((brand: any) => (
             <Link
-              href={`/merchants/${brand.id}`}
+              href={`/merchants/${brand.slug}`}
               key={brand.id}
               className="relative flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-500 group snap-center"
             >

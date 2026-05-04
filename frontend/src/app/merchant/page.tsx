@@ -32,9 +32,9 @@ const MerchantDashboardPage = () => {
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-neutral-900 tracking-tighter sm:text-6xl">
                   Store Overview
                 </h1>
-                {user?.merchantId && (
+                {user?.merchant?.slug && (
                   <Link 
-                    href={`/merchants/${user.merchantId}`}
+                    href={`/merchants/${user.merchant.slug}`}
                     target="_blank"
                     className="p-2 rounded-full border border-neutral-100 text-neutral-400 hover:text-black hover:bg-neutral-50 transition-all group"
                     title="View Public Profile"
