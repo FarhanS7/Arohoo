@@ -52,7 +52,7 @@ export default function MerchantProfilePage() {
   return (
     <PageLayout showBackButton={true}>
       {/* Hero / Banner Section */}
-      <section className="relative h-[22vh] sm:h-[28vh] min-h-[180px] sm:min-h-[240px] bg-neutral-900 overflow-hidden">
+      <section className="relative h-[12vh] sm:h-[28vh] min-h-[120px] sm:min-h-[240px] bg-neutral-900 overflow-hidden">
         {merchant.bannerUrl ? (
           <Image 
             src={merchant.bannerUrl} 
@@ -65,8 +65,8 @@ export default function MerchantProfilePage() {
           <div className="absolute inset-0 bg-gradient-to-br from-neutral-800 to-neutral-950 opacity-50" />
         )}
         
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-          <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[1.5rem] bg-white border border-neutral-100 shadow-xl overflow-hidden mb-3 sm:mb-4 animate-in zoom-in duration-700">
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 pt-4 sm:pt-0">
+          <div className="relative w-12 h-12 sm:w-20 sm:h-20 rounded-xl sm:rounded-[1.5rem] bg-white border border-neutral-100 shadow-xl overflow-hidden mb-2 sm:mb-4 animate-in zoom-in duration-700">
             {merchant.logo ? (
               <Image 
                 src={merchant.logo} 
@@ -80,21 +80,21 @@ export default function MerchantProfilePage() {
               </div>
             )}
           </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tighter uppercase italic drop-shadow-2xl animate-in slide-in-from-bottom-4 duration-700">
+          <h1 className="text-xl sm:text-3xl md:text-4xl font-black text-white tracking-tighter uppercase italic drop-shadow-2xl animate-in slide-in-from-bottom-4 duration-700">
             {merchant.storeName}
           </h1>
           {merchant.isTrending && (
-            <div className="mt-3 flex items-center gap-1.5 bg-primary text-white text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] px-4 py-1.5 sm:px-5 sm:py-2 rounded-full shadow-xl shadow-primary/40 animate-pulse">
-              <Star className="w-2.5 h-2.5 fill-current" /> Trending Brand
+            <div className="mt-2 sm:mt-3 flex items-center gap-1 bg-primary text-white text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 sm:px-5 sm:py-2 rounded-full shadow-xl shadow-primary/40 animate-pulse">
+              <Star className="w-2 h-2 sm:w-2.5 sm:h-2.5 fill-current" /> Trending
             </div>
           )}
         </div>
       </section>
 
-      <div className="responsive-container py-8 sm:py-12 lg:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12">
-          {/* Sidebar / Info */}
-          <aside className="lg:col-span-1 space-y-6 sm:space-y-8">
+      <div className="responsive-container py-6 sm:py-12 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-10 lg:gap-12">
+          {/* Sidebar / Info - Hidden on mobile per user request */}
+          <aside className="hidden lg:block lg:col-span-1 space-y-6 sm:space-y-8">
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-neutral-100 flex items-center justify-center">
@@ -136,21 +136,14 @@ export default function MerchantProfilePage() {
 
           {/* Main Content / Products */}
           <main className="lg:col-span-3">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-8 border-b border-neutral-100 pb-6 sm:pb-8 gap-4">
+            <div className="flex items-end justify-between mb-6 sm:mb-8 border-b border-neutral-100 pb-4 sm:pb-8">
               <div>
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-neutral-900 tracking-tighter uppercase italic leading-none underline decoration-primary/20 decoration-4 sm:decoration-6 underline-offset-[8px]">Catalog</h2>
-                <p className="text-neutral-400 font-black mt-3 sm:mt-4 uppercase tracking-[0.3em] text-[9px] sm:text-[10px]">
-                    Displaying limited selection
-                </p>
-              </div>
-              <div className="flex items-center gap-3 bg-neutral-50 px-4 py-2 rounded-xl border border-neutral-100">
-                <span className="text-[9px] sm:text-[10px] font-black text-neutral-400 uppercase tracking-widest border-r border-neutral-200 pr-3">Curation</span>
-                <span className="text-[10px] sm:text-xs font-black text-black tracking-widest uppercase italic">A-Z SELECTION</span>
+                <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-neutral-900 tracking-tighter uppercase italic leading-none underline decoration-primary/20 decoration-2 sm:decoration-6 underline-offset-[6px] sm:underline-offset-[8px]">Catalog</h2>
               </div>
             </div>
 
             {merchant.products && merchant.products.length > 0 ? (
-              <div className="responsive-grid grid-cols-2 lg:grid-cols-3">
+              <div className="responsive-grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
                 {merchant.products.map((product: any) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

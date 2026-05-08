@@ -64,7 +64,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
   });
 
   const selectedCategoryName = useMemo(() => categories.find(c => c.id === baseData.categoryId)?.name, [categories, baseData.categoryId]);
-  const isPerfume = selectedCategoryName?.toLowerCase().includes("perfume") || false;
+  const isVolumeBased = selectedCategoryName?.toLowerCase().includes("perfume") || selectedCategoryName?.toLowerCase().includes("skincare");
 
   // Multi-color state: Group existing variants by color if editing
   const initialVariations = useMemo(() => {
@@ -365,7 +365,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                   <div className="space-y-4">
                      <div className="flex items-center justify-between">
                         <label className="text-[10px] font-black text-neutral-900 uppercase tracking-widest">
-                           {isPerfume ? "Volumes & Pricing" : "Sizes & Inventory (Optional)"}
+                           {isVolumeBased ? "Volumes & Pricing" : "Sizes & Inventory (Optional)"}
                         </label>
                         <button
                           type="button"
@@ -373,7 +373,7 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                           className="text-[9px] font-black text-neutral-400 hover:text-black uppercase tracking-widest flex items-center gap-1 transition-colors"
                         >
                           <Plus className="w-3 h-3" />
-                          {isPerfume ? "Add Volume" : "Add Size"}
+                          {isVolumeBased ? "Add Volume" : "Add Size"}
                         </button>
                      </div>
 
@@ -386,9 +386,9 @@ export default function ProductForm({ initialData, onSubmit, onUpload, onCancel,
                                     value={sv.size}
                                     onChange={(e) => updateSimpleVariant(idx, "size", e.target.value)}
                                     className="w-full border-none focus:ring-0 p-0 text-xs font-black text-neutral-900 placeholder:text-neutral-200 uppercase"
-                                    placeholder={isPerfume ? "Volume (e.g. 3ml)" : "SIZE (e.g. 42, L)"}
+                                    placeholder={isVolumeBased ? "Volume (e.g. 50ml)" : "SIZE (e.g. 42, L)"}
                                  />
-                                 {isPerfume && (
+                                 {isVolumeBased && (
                                    <div className="flex items-center gap-2">
                                       <span className="text-[9px] font-medium text-neutral-300 uppercase tracking-widest">Price:</span>
                                       <input

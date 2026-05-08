@@ -1,13 +1,16 @@
 "use client";
 
 import { useCart } from "@/features/cart/hooks/useCart";
-import { Product, ProductVariant } from "@/lib/api/products";
+import { Product, ProductVariant, productService } from "@/lib/api/products";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useToastContext } from "@/components/providers/ToastProvider";
-import { X } from "lucide-react";
+import { X, ShoppingBag, Heart } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import ProductCard from "./ProductCard";
+import ProductCardSkeleton from "./ProductCardSkeleton";
 
 interface ProductDetailClientProps {
   product: Product;
@@ -18,6 +21,16 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const { addItem } = useCart();
   const { addToast } = useToastContext();
   const [addingToCart, setAddingToCart] = useState(false);
+
+  // Fetch similar products
+  const { data: similarProductsData, isLoading: loadingSimilar } = useQuery({
+    queryKey: ["similar-products", product.categoryId, product.id],
+    queryFn: () => productService.getPublicProducts({ categoryId: product.categoryId, limit: 10 }),
+  });
+
+  const similarProducts = similarProductsData?.data
+    ?.filter(p => p.id !== product.id)
+    ?.slice(0, 4) || [];
   const allColors = Array.from(new Set(product.variants.map(v => v.color).filter(Boolean))) as string[];
   const allSizes = Array.from(new Set(product.variants.map(v => v.size).filter(Boolean))) as string[];
 
@@ -300,25 +313,27 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         </div>
       </div>
 
-      {/* You May Also Like (Mock) */}
-      <section className="mt-32 border-t border-surface-container-high pt-16">
-        <div className="flex justify-between items-end mb-12">
+      {/* Products You May Like */}
+      <section className="mt-20 lg:mt-32 border-t border-surface-container-high pt-12 lg:pt-16">
+        <div className="flex justify-between items-end mb-10 lg:mb-12">
           <div>
-            <h2 className="text-3xl font-extrabold text-on-surface font-headline">Featured Collection</h2>
-            <p className="text-on-surface-variant mt-2 font-body">Curated selections from trending merchants.</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-on-surface font-headline uppercase tracking-tight">Products you may like</h2>
           </div>
-          <Link href="/products" className="text-primary font-bold text-sm tracking-widest uppercase hover:underline underline-offset-8">Explore All</Link>
+          <Link href={`/products?categoryId=${product.categoryId}`} className="text-primary font-black text-[10px] tracking-widest uppercase hover:underline underline-offset-8">Explore Category</Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-           {[1,2,3,4].map((i) => (
-             <div key={i} className="group cursor-pointer">
-               <div className="aspect-[3/4] bg-surface-container-low rounded-xl overflow-hidden mb-4 relative flex items-center justify-center">
-                  <span className="material-symbols-outlined text-4xl text-on-surface-variant opacity-20">inventory_2</span>
-               </div>
-               <div className="h-4 w-3/4 bg-surface-container-high rounded mb-2"></div>
-               <div className="h-3 w-1/4 bg-surface-container-low rounded"></div>
+        
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+           {loadingSimilar ? (
+             [1, 2, 3, 4].map((i) => <ProductCardSkeleton key={i} />)
+           ) : similarProducts.length > 0 ? (
+             similarProducts.map((p) => (
+               <ProductCard key={p.id} product={p} />
+             ))
+           ) : (
+             <div className="col-span-full py-20 text-center bg-surface-container-lowest rounded-3xl border border-dashed border-surface-container-high">
+                <p className="text-on-surface-variant font-black uppercase tracking-widest text-xs">No similar products found.</p>
              </div>
-           ))}
+           )}
         </div>
       </section>
     </main>
