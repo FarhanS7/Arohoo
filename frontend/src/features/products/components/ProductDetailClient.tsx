@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useToastContext } from "@/components/providers/ToastProvider";
+import { X } from "lucide-react";
 
 interface ProductDetailClientProps {
   product: Product;
@@ -34,6 +35,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const [mainImage, setMainImage] = useState<string | null>(
     product.images.length > 0 ? product.images[0].url : '/placeholder-product.png'
   );
+
+  const [showSizeChart, setShowSizeChart] = useState(false);
 
   // Sync state if product prop changes (handles soft navigation and updates)
   useEffect(() => {
@@ -157,7 +160,15 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           </div>
 
           <h1 className="text-3xl font-extrabold text-on-surface leading-tight mb-1 font-headline">{product.name}</h1>
-          <p className="text-2xl font-light text-primary mb-4">৳{(selectedVariant?.price || product.basePrice).toLocaleString()}</p>
+          <div className="flex items-center gap-4 mb-4">
+            <p className="text-2xl font-light text-primary">৳{(selectedVariant?.price || product.basePrice).toLocaleString()}</p>
+            {selectedVariant && selectedVariant.stock > 0 && (
+              <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 ${selectedVariant.stock <= 5 ? 'bg-red-50 text-red-600 border border-red-100 animate-pulse' : 'bg-green-50 text-green-600 border border-green-100'}`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${selectedVariant.stock <= 5 ? 'bg-red-600' : 'bg-green-600'}`} />
+                {selectedVariant.stock <= 5 ? `Only ${selectedVariant.stock} left!` : `${selectedVariant.stock} in stock`}
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center p-3 bg-surface-container-low rounded-xl mb-4">
             <div className="relative w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center mr-3 overflow-hidden">
@@ -199,7 +210,15 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               <div>
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Size</h3>
-                  <button className="text-xs font-medium text-primary underline underline-offset-4 decoration-secondary-fixed">Size Guide</button>
+                  {product.merchant?.sizeChartUrl && (
+                    <button 
+                      onClick={() => setShowSizeChart(true)}
+                      className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary-hover transition-colors flex items-center gap-1.5 px-3 py-1 bg-primary/5 rounded-lg border border-primary/10"
+                    >
+                      <span className="material-symbols-outlined text-sm">ruler</span>
+                      Size Guide
+                    </button>
+                  )}
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {allSizes.map((s) => {
@@ -244,23 +263,40 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             </button>
           </div>
 
-          {/* Editorial Description */}
-          <div className="border-t border-surface-container-high pt-8 space-y-6">
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">The Narrative</h3>
-              <div className="text-on-surface-variant leading-relaxed font-body">
-                {product.description || "Meticulously crafted from premium materials, this piece redefines effortless sophistication. Featuring a contemporary silhouette, it strikes the perfect balance between uncompromising luxury and relaxed seasonal wear."}
+          {/* Size Chart Modal */}
+          {showSizeChart && product.merchant?.sizeChartUrl && (
+            <div 
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300"
+              onClick={() => setShowSizeChart(false)}
+            >
+              <div 
+                className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between p-6 border-b border-neutral-100">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary">ruler</span>
+                    <span className="text-xs font-black uppercase tracking-widest text-neutral-900">Official Size Guide</span>
+                  </div>
+                  <button 
+                    onClick={() => setShowSizeChart(false)}
+                    className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
+                  >
+                    <X className="w-5 h-5 text-neutral-500" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-neutral-50/50">
+                  <Image 
+                    src={product.merchant.sizeChartUrl} 
+                    alt="Size Chart"
+                    width={1200}
+                    height={1600}
+                    className="max-w-full h-auto object-contain rounded-xl shadow-lg"
+                  />
+                </div>
               </div>
             </div>
-
-            <div className="flex items-start gap-3 p-4 bg-primary/5 rounded-xl border-l-4 border-primary">
-              <span className="material-symbols-outlined text-primary mt-0.5">local_shipping</span>
-              <div>
-                <p className="text-sm font-bold text-on-surface">Protected Transaction</p>
-                <p className="text-xs text-on-surface-variant">Your order is secured by the Ethereal Marketplace zero-liability guarantee policy.</p>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
