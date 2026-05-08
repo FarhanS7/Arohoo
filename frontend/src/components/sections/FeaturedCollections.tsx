@@ -1,15 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, MoveRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 
 const SLIDES = [
   {
-    src: '/images/1775707614680.png',
+    src: '/images/IMG_3697.jpeg',
     mobileWidth: 92,
     desktopWidth: 65,
+  },
+  {
+    src: '/images/1775843609598~2.png',
+    mobileWidth: 92,
+    desktopWidth: 65,
+  },
+  {
+    src: '/images/1775707614680.png',
+    mobileWidth: 92,
+    desktopWidth: 60,
   },
   {
     src: '/images/1775816238922~2.png',
@@ -68,33 +78,36 @@ export default function FeaturedCollections() {
     for (let i = 1; i < index; i++) {
       offsetPercent += SLIDES[i][widthKey];
     }
-    const gapPx = index * 10;
+    const gapPx = index * 12;
     return `calc(-${offsetPercent}% - ${gapPx}px)`;
   };
 
   return (
-    <section className="py-4 sm:py-10 bg-white overflow-hidden select-none">
+    <section className="py-6 sm:py-14 bg-white overflow-hidden select-none">
       <div className="pl-[4vw] lg:pl-[max(2rem,calc((100vw-1200px)/2))]">
         
         {/* Header */}
-        <div className="flex items-center justify-between mb-4 pr-[4vw] lg:pr-[max(2rem,calc((100vw-1200px)/2))]">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">
-            Featured Collections
-          </span>
+        <div className="flex items-center justify-between mb-6 sm:mb-8 pr-[4vw] lg:pr-[max(2rem,calc((100vw-1200px)/2))]">
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-6 bg-primary rounded-full" />
+            <h2 className="text-xs sm:text-sm font-black uppercase tracking-[0.15em] text-neutral-800">
+              Featured Collections
+            </h2>
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrev}
               disabled={currentIndex === 0}
-              className="w-9 h-9 rounded-full border border-neutral-100 flex items-center justify-center hover:bg-neutral-50 disabled:opacity-10 transition-all shadow-sm"
+              className="w-10 h-10 rounded-full bg-white border border-neutral-200 flex items-center justify-center hover:bg-neutral-900 hover:text-white hover:border-neutral-900 disabled:opacity-20 disabled:hover:bg-white disabled:hover:text-neutral-900 disabled:hover:border-neutral-200 transition-all"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={handleNext}
               disabled={currentIndex === SLIDES.length - 1}
-              className="w-9 h-9 rounded-full border border-neutral-100 flex items-center justify-center hover:bg-neutral-50 disabled:opacity-10 transition-all shadow-sm"
+              className="w-10 h-10 rounded-full bg-white border border-neutral-200 flex items-center justify-center hover:bg-neutral-900 hover:text-white hover:border-neutral-900 disabled:opacity-20 disabled:hover:bg-white disabled:hover:text-neutral-900 disabled:hover:border-neutral-200 transition-all"
             >
-              <ArrowRight className="w-4 h-4" />
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -102,7 +115,7 @@ export default function FeaturedCollections() {
         {/* Track Wrap */}
         <div className="relative overflow-visible">
           <motion.div
-            className="flex gap-[10px]"
+            className="flex gap-3"
             animate={{ x: getXOffset(currentIndex) }}
             transition={{ type: "spring", stiffness: 200, damping: 30 }}
           >
@@ -110,8 +123,8 @@ export default function FeaturedCollections() {
               <div
                 key={idx}
                 className={`
-                  relative flex-shrink-0 overflow-hidden rounded-[16px] sm:rounded-[24px] group/slide
-                  aspect-[1.8/1] sm:h-[350px] transition-all duration-700
+                  relative flex-shrink-0 overflow-hidden rounded-2xl sm:rounded-3xl group/slide cursor-pointer
+                  aspect-[1.8/1] sm:h-[380px] lg:h-[400px]
                 `}
                 style={{ width: isMobile ? `${slide.mobileWidth}%` : `${slide.desktopWidth}%` }}
               >
@@ -119,28 +132,29 @@ export default function FeaturedCollections() {
                   src={slide.src}
                   alt="Collection Banner"
                   fill
-                  className="object-cover transition-transform duration-1000 group-hover/slide:scale-105"
-                  priority={idx === 0}
-                  sizes="(max-width: 768px) 100vw, 65vw"
+                  className="object-cover transition-transform duration-700 group-hover/slide:scale-[1.03]"
+                  priority={idx < 2}
+                  sizes="(max-width: 768px) 92vw, 65vw"
                 />
                 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent flex flex-col justify-end p-4 sm:p-10">
-                  {/* Banner content removed per user request */}
-                </div>
+                {/* Subtle vignette overlay for depth */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
               </div>
             ))}
           </motion.div>
         </div>
 
         {/* Nav Dots */}
-        <div className="flex justify-center gap-2 mt-6 pr-[4vw] lg:pr-[max(2rem,calc((100vw-1200px)/2))]">
+        <div className="flex justify-center items-center gap-1.5 mt-8 pr-[4vw] lg:pr-[max(2rem,calc((100vw-1200px)/2))]">
           {SLIDES.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
               className={`
-                h-1.5 rounded-full transition-all duration-500
-                ${currentIndex === idx ? 'w-8 bg-[#e91e8c]' : 'w-1.5 bg-neutral-200'}
+                rounded-full transition-all duration-500
+                ${currentIndex === idx 
+                  ? 'w-8 h-2 bg-primary' 
+                  : 'w-2 h-2 bg-neutral-200 hover:bg-neutral-400'}
               `}
             />
           ))}
