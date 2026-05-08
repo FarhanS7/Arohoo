@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { useCart } from "@/features/cart/hooks/useCart";
 
 import { useState, useEffect } from "react";
+import GlobalSearchBar from "./GlobalSearchBar";
 
 export default function Navbar() {
   const { user, logoutUser } = useAuth();
@@ -80,14 +81,8 @@ export default function Navbar() {
         <div className="flex items-center gap-2 sm:gap-6">
           {!user && (
             <>
-              <div className="hidden lg:flex items-center bg-white/60 backdrop-blur-md rounded-full px-4 py-2 w-64 border border-transparent focus-within:border-primary/20 focus-within:bg-white transition-colors">
-                <Search className="w-4 h-4 text-neutral-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search brands, products..." 
-                  className="bg-transparent border-none focus:ring-0 text-sm w-full ml-2 outline-none" 
-                  suppressHydrationWarning
-                />
+              <div className="hidden lg:block w-[400px]">
+                <GlobalSearchBar />
               </div>
 
               <button 
@@ -197,17 +192,8 @@ export default function Navbar() {
       {/* Mobile Search Overlay */}
       {isSearchOpen && (
         <div className="fixed inset-x-0 top-[var(--navbar-height)] bg-white border-b border-neutral-100 z-40 p-4 lg:hidden">
-          <div className="flex items-center bg-neutral-50 rounded-xl px-4 py-4 border border-primary/10">
-            <Search className="w-5 h-5 text-neutral-400" />
-            <input 
-              type="text" 
-              placeholder="Search brands, products..." 
-              className="bg-transparent border-none focus:ring-0 text-base w-full ml-3 outline-none font-bold" 
-              autoFocus
-            />
-            <button onClick={() => setIsSearchOpen(false)} className="text-neutral-400">
-               <X className="w-5 h-5" />
-            </button>
+          <div className="w-full">
+            <GlobalSearchBar />
           </div>
         </div>
       )}

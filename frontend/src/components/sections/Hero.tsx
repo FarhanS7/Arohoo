@@ -1,6 +1,7 @@
 "use client";
 import { Mic, Search } from "lucide-react";
 import Image from "next/image";
+import GlobalSearchBar from "../layout/GlobalSearchBar";
 
 export default function Hero() {
   return (
@@ -46,23 +47,12 @@ export default function Hero() {
             </p>
 
             {/* ── Integrated Search Bar ─────────────────────────────── */}
-            <div className="flex items-center rounded-full p-1.5 h-12 max-w-2xl mx-auto w-full bg-white/90 border border-neutral-200 shadow-sm transition-all duration-300 focus-within:border-primary/40 focus-within:bg-white focus-within:shadow-[0_8px_30px_rgba(83,0,183,0.12)] hover:border-primary/30">
-              <div className="pl-4 pr-3 text-primary">
-                <Search className="w-4 h-4" strokeWidth={2.5} />
-              </div>
-              <input
-                type="text"
-                placeholder="Search brands, products..."
-                className="flex-1 bg-transparent border-none outline-none text-neutral-900 text-sm font-bold placeholder:text-neutral-400 placeholder:font-medium h-full w-full"
-                suppressHydrationWarning
+            <div className="max-w-2xl mx-auto w-full">
+              <GlobalSearchBar 
+                containerClassName="mx-0"
+                className="h-12 py-0 text-base"
+                placeholder="Search perfumes, skincare, and more..."
               />
-              <div className="h-5 w-[2px] bg-neutral-100 mx-2" />
-              <button
-                className="p-1.5 mr-1 rounded-full bg-neutral-50 text-primary transition-all hover:bg-primary/10 hover:scale-105"
-                aria-label="Voice search"
-              >
-                <Mic className="w-4 h-4" fill="currentColor" />
-              </button>
             </div>
           </div>
         </div>
