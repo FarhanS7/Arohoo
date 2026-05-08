@@ -149,17 +149,82 @@ export class PrismaProductRepository {
 
   async searchProducts({ query, categoryId, minPrice, maxPrice, variants, isTrending, cursor }, { page, limit }) {
     const { skip, take, meta } = getPagination(page, limit);
+    const sort = arguments[0].sort || 'newest';
 
+    // 1. ADVANCED FTS SEARCH (If query provided)
+    if (query && query.trim().length > 0) {
+      const cacheKey = cacheUtil.generateKey('products:fts_search_v2', { ...arguments[0], ...arguments[1] });
+      const cached = cacheUtil.get(cacheKey);
+      if (cached) return cached;
+
+      // PostgreSQL Full-Text Search + Trigram Fuzzy Matching
+      // We prioritize Name (Weight A) over Category (Weight B) and Description (Weight C)
+      const rawResults = await prisma.$queryRaw`
+        SELECT p.id,
+               ts_rank_cd(
+                 setweight(to_tsvector('english', COALESCE(p.name, '')), 'A') ||
+                 setweight(to_tsvector('english', COALESCE(c.name, '')), 'B') ||
+                 setweight(to_tsvector('english', COALESCE(p.description, '')), 'C'),
+                 websearch_to_tsquery('english', ${query})
+               ) AS rank,
+               similarity(p.name, ${query}) AS similarity
+        FROM products p
+        LEFT JOIN categories c ON p."categoryId" = c.id
+        WHERE 
+          (
+            (setweight(to_tsvector('english', COALESCE(p.name, '')), 'A') ||
+             setweight(to_tsvector('english', COALESCE(c.name, '')), 'B') ||
+             setweight(to_tsvector('english', COALESCE(p.description, '')), 'C'))
+            @@ websearch_to_tsquery('english', ${query})
+          )
+          OR similarity(p.name, ${query}) > 0.2
+          OR similarity(c.name, ${query}) > 0.4
+        ORDER BY rank DESC, similarity DESC
+        LIMIT ${take} OFFSET ${skip}
+      `;
+
+      const productIds = rawResults.map(r => r.id);
+      
+      // Get total count
+      const countResult = await prisma.$queryRaw`
+        SELECT COUNT(*)::int as total
+        FROM products p
+        LEFT JOIN categories c ON p."categoryId" = c.id
+        WHERE 
+          (
+            (setweight(to_tsvector('english', COALESCE(p.name, '')), 'A') ||
+             setweight(to_tsvector('english', COALESCE(c.name, '')), 'B') ||
+             setweight(to_tsvector('english', COALESCE(p.description, '')), 'C'))
+            @@ websearch_to_tsquery('english', ${query})
+          )
+          OR similarity(p.name, ${query}) > 0.2
+          OR similarity(c.name, ${query}) > 0.4
+      `;
+      const total = countResult[0]?.total || 0;
+
+      // Hydrate
+      const products = await prisma.product.findMany({
+        where: { id: { in: productIds } },
+        select: this.summarySelect
+      });
+
+      const data = productIds
+        .map(id => products.find(p => p.id === id))
+        .filter(Boolean);
+
+      const result = {
+        data,
+        meta: { ...meta, total, nextCursor: null }
+      };
+
+      cacheUtil.set(cacheKey, result, 300);
+      return result;
+    }
+
+    // 2. STANDARD FILTERED LISTING (Fallback or when no query)
     const where = {
       ...(categoryId && { categoryId }),
       ...(isTrending !== undefined && { isTrending: isTrending === 'true' || isTrending === true }),
-      ...(query && {
-        OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { description: { contains: query, mode: 'insensitive' } }
-        ]
-      }),
-      // Ensure products have variants and apply variant-level filters
       variants: {
         some: {
           ...(minPrice !== undefined && { price: { gte: parseFloat(minPrice) } }),
@@ -170,64 +235,48 @@ export class PrismaProductRepository {
       }
     };
 
-    const cacheKey = cacheUtil.generateKey('products:search', { ...arguments[0], ...arguments[1] });
+    const cacheKey = cacheUtil.generateKey('products:list', { ...arguments[0], ...arguments[1] });
     const countCacheKey = cacheUtil.generateKey('products:count', { where });
     
     const cachedResult = cacheUtil.get(cacheKey);
     if (cachedResult) return cachedResult;
 
-    // Optimization: Cursor-based pagination is more stable for large datasets
-    const sort = arguments[0].sort || 'newest';
     let orderBy = { createdAt: 'desc' };
-    
     if (sort === 'price_asc') {
       orderBy = { basePrice: 'asc' };
     } else if (sort === 'price_desc') {
       orderBy = { basePrice: 'desc' };
     }
 
-    // Optimization: Cursor-based pagination is more stable for large datasets
     const queryOptions = {
       where,
       take,
       select: this.summarySelect,
-      orderBy
+      orderBy,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : { skip })
     };
 
-    if (cursor) {
-      queryOptions.cursor = { id: cursor };
-      queryOptions.skip = 1; // Skip the item identified by the cursor
-    } else {
-      queryOptions.skip = skip;
-    }
-
-    // Try to get total count from cache
     let total = cacheUtil.get(countCacheKey);
     let data;
 
-    if (total !== null && total !== undefined) {
-      data = await prisma.product.findMany(queryOptions);
-    } else {
+    if (total === null || total === undefined) {
       [total, data] = await Promise.all([
         prisma.product.count({ where }),
         prisma.product.findMany(queryOptions)
       ]);
-      // Cache total count for 5 minutes (reduced DB load for repeat filter queries)
       cacheUtil.set(countCacheKey, total, 300);
+    } else {
+      data = await prisma.product.findMany(queryOptions);
     }
 
     const nextCursor = data.length === take ? data[data.length - 1].id : null;
 
     const result = { 
       data, 
-      meta: { 
-        ...meta, 
-        total,
-        nextCursor 
-      } 
+      meta: { ...meta, total, nextCursor } 
     };
 
-    cacheUtil.set(cacheKey, result, 300); // 5 mins
+    cacheUtil.set(cacheKey, result, 300);
     return result;
   }
 
