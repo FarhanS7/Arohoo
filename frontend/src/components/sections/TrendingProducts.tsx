@@ -36,36 +36,43 @@ export default async function TrendingProducts() {
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-5 sm:grid-cols-7 gap-1.5 sm:gap-3 px-2 sm:px-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-4 sm:gap-6 px-4">
           {products.map((product, index) => (
             <Link 
               href={`/products/${product.id}`}
               key={product.id} 
-              className="group relative flex flex-col bg-white rounded-lg sm:rounded-xl shadow-sm hover:shadow-md transition-all duration-500 overflow-hidden"
+              className="group relative flex flex-col bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-neutral-100"
             >
-              <div className="relative aspect-square w-full overflow-hidden bg-neutral-50/50">
+              <div className="relative aspect-[4/5] w-full overflow-hidden bg-neutral-50/50">
                 {product.images?.[0] ? (
                   <Image
                     src={product.images[0].url}
                     alt={product.name}
                     fill
-                    priority={index === 0}
-                    className="object-contain p-2 group-hover:scale-105 transition-transform duration-700"
-                    sizes="(max-width: 640px) 25vw, 20vw"
+                    priority={index < 4}
+                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 15vw"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-neutral-200 font-bold text-[10px] sm:text-xl italic uppercase font-sans">
+                  <div className="w-full h-full flex items-center justify-center text-neutral-200 font-bold text-xl italic uppercase font-sans">
                     AROHOO
                   </div>
                 )}
+                {/* Visual Accent */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <div className="p-1.5 sm:p-2.5 flex flex-col bg-white">
-                <h3 className="font-bold text-neutral-800 mb-1 text-[8px] sm:text-xs line-clamp-2 group-hover:text-primary transition-colors tracking-tight uppercase font-sans leading-[1.3]">
+              <div className="p-4 flex flex-col bg-white">
+                <h3 className="font-bold text-neutral-800 mb-1.5 text-xs sm:text-sm line-clamp-2 group-hover:text-primary transition-colors tracking-tight uppercase font-sans leading-tight">
                   {product.name}
                 </h3>
-                <span className="text-[10px] sm:text-[13px] font-black text-primary font-sans">
-                  ৳{Number(product.basePrice).toLocaleString()}
-                </span>
+                <div className="flex items-center justify-between mt-auto">
+                  <span className="text-sm sm:text-base font-black text-primary font-sans">
+                    ৳{Number(product.basePrice).toLocaleString()}
+                  </span>
+                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary scale-0 group-hover:scale-100 transition-transform">
+                    <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                  </div>
+                </div>
               </div>
             </Link>
           ))}

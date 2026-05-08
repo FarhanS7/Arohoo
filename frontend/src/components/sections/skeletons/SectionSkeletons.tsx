@@ -10,9 +10,9 @@ export function TrendingProductsSkeleton() {
             <Skeleton className="h-4 w-64 rounded-lg" />
           </div>
         </div>
-        <div className="responsive-grid grid-cols-2 lg:grid-cols-4 gap-8">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-96 w-full rounded-[2rem]" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-4 sm:gap-6 px-4">
+          {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+            <Skeleton key={i} className="aspect-[4/5] w-full rounded-2xl" />
           ))}
         </div>
       </div>
