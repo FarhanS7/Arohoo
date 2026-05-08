@@ -40,6 +40,13 @@ router.post('/profile/logo/:type', upload.single('logo'), merchantController.upl
 router.post('/profile/banner/:type', upload.single('banner'), merchantController.uploadBanner);
 
 /**
+ * @route   POST /api/v1/merchants/profile/size-chart
+ * @desc    Upload merchant size chart
+ * @access  Private (Merchant)
+ */
+router.post('/profile/size-chart', upload.single('sizeChart'), merchantController.uploadSizeChart);
+
+/**
  * @route   GET /api/v1/merchants/stats
  * @desc    Get merchant revenue and order analytics
  * @access  Private (Merchant)

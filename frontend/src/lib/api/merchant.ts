@@ -52,6 +52,15 @@ export const uploadMerchantBanner = async (file: File): Promise<any> => {
   return data.data;
 };
 
+export const uploadSizeChart = async (file: File): Promise<any> => {
+  const formData = new FormData();
+  formData.append("sizeChart", file);
+  const { data } = await api.post("/merchants/profile/size-chart", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data.data;
+};
+
 export const getPublicMerchantProfile = cache(async (slug: string): Promise<any> => {
   const { data } = await api.get(`/public/merchants/${slug}`);
   return data.data;

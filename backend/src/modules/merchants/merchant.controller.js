@@ -21,7 +21,8 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
         description: updatedMerchant.description,
         bannerUrl: updatedMerchant.bannerUrl,
         logo: updatedMerchant.logo,
-        address: updatedMerchant.address
+        address: updatedMerchant.address,
+        sizeChartUrl: updatedMerchant.sizeChartUrl
       }
     });
   } catch (error) {
@@ -43,7 +44,15 @@ export const getProfile = asyncHandler(async (req, res, next) => {
       description: true,
       bannerUrl: true,
       logo: true,
-      address: true
+      address: true,
+      sizeChartUrl: true,
+      categories: {
+        select: {
+          id: true,
+          name: true,
+          slug: true
+        }
+      }
     }
   });
 
@@ -134,6 +143,23 @@ export const uploadBanner = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     data: { bannerUrl: updatedMerchant.bannerUrl }
+  });
+});
+
+/**
+ * Controller to upload merchant size chart.
+ */
+export const uploadSizeChart = asyncHandler(async (req, res, next) => {
+  const { merchantId } = req.user;
+  if (!req.file) throw new AppError('Image file is required', 400);
+
+  // Upload to Cloudinary
+  const sizeChartUrl = await uploadToCloudinary(req.file.buffer, 'arohoo/merchants/size-charts');
+  const updatedMerchant = await merchantService.updateMerchantProfile(merchantId, { sizeChartUrl });
+
+  res.status(200).json({
+    success: true,
+    data: { sizeChartUrl: updatedMerchant.sizeChartUrl }
   });
 });
 

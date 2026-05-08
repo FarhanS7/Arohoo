@@ -9,5 +9,6 @@ export const updateMerchantProfileSchema = z.object({
   description: z.string().max(500, 'Description is too long').optional().nullable(),
   address: z.string().max(255, 'Address is too long').optional().nullable(),
   bannerUrl: z.string().url('Invalid banner URL').optional().nullable().or(z.literal('')),
-  logo: z.string().url('Invalid logo URL').optional().nullable().or(z.literal(''))
+  logo: z.string().url('Invalid logo URL').optional().nullable().or(z.literal('')),
+  sizeChartUrl: z.string().url('Invalid size chart URL').optional().nullable().or(z.literal(''))
 });

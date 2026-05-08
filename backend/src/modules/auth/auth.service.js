@@ -185,6 +185,13 @@ export class AuthService {
             storeName: true,
             slug: true,
             isApproved: true,
+            categories: {
+              select: {
+                id: true,
+                name: true,
+                slug: true
+              }
+            }
           }
         }
       }

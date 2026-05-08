@@ -29,6 +29,7 @@ export interface Product {
     storeName: string;
     slug: string;
     logo?: string;
+    sizeChartUrl?: string;
   };
   isTrending?: boolean;
   variants: ProductVariant[];

@@ -14,6 +14,7 @@ export interface AuthUser {
     storeName: string;
     slug: string;
     isApproved: boolean;
+    categories?: Array<{ id: string; name: string; slug: string }>;
   };
 }
 
