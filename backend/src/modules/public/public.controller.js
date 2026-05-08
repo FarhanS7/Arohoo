@@ -31,11 +31,11 @@ export const getPublicCategories = asyncHandler(async (req, res) => {
  * Public merchant list for trending brands/store discovery.
  */
 export const getPublicMerchants = asyncHandler(async (req, res) => {
-  const { isTrending, page, limit } = req.query;
+  const { isTrending, q, page, limit } = req.query;
   const p = parseInt(page) || 1;
   const l = parseInt(limit) || 20;
 
-  const result = await merchantService.getPublicMerchants({ isTrending }, p, l);
+  const result = await merchantService.getPublicMerchants({ isTrending, query: q }, p, l);
   sendResponse(res, 200, result);
 });
 

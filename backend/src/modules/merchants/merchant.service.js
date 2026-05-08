@@ -166,11 +166,111 @@ export class MerchantService {
    * @returns {Promise<Object>} Formatted merchant list with pagination.
    */
   async getPublicMerchants(filters = {}, page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+    const { query } = filters;
+
+    // 1. ADVANCED FTS SEARCH (If query provided)
+    if (query && query.trim().length > 0) {
+      const cacheKey = cacheUtil.generateKey('merchants:fts_search_v4', { query, page, limit });
+      const cached = cacheUtil.get(cacheKey);
+      if (cached) return cached;
+
+      // Merchant FTS + Trigram Similarity + Product/Category Match Check
+      // We surface brands if their name/desc matches OR if they sell products/categories matching the query
+      const rawResults = await this.prisma.$queryRaw`
+        SELECT m.id,
+               ts_rank_cd(
+                 setweight(to_tsvector('english', COALESCE(m."storeName", '')), 'A') ||
+                 setweight(to_tsvector('english', COALESCE(m.description, '')), 'B'),
+                 websearch_to_tsquery('english', ${query})
+               ) AS rank,
+               similarity(m."storeName", ${query}) AS similarity
+        FROM merchants m
+        WHERE 
+          m."isApproved" = true AND
+          (
+            (setweight(to_tsvector('english', COALESCE(m."storeName", '')), 'A') ||
+             setweight(to_tsvector('english', COALESCE(m.description, '')), 'B'))
+            @@ websearch_to_tsquery('english', ${query})
+            OR similarity(m."storeName", ${query}) > 0.2
+            OR EXISTS (
+              SELECT 1 FROM products p
+              LEFT JOIN categories c ON p."categoryId" = c.id
+              WHERE p."merchantId" = m.id AND
+              (
+                (to_tsvector('english', COALESCE(p.name, '')) || 
+                 to_tsvector('english', COALESCE(p.description, '')) || 
+                 to_tsvector('english', COALESCE(c.name, '')))
+                @@ websearch_to_tsquery('english', ${query})
+                OR similarity(p.name, ${query}) > 0.3
+                OR similarity(c.name, ${query}) > 0.4
+              )
+            )
+          )
+        ORDER BY rank DESC, similarity DESC
+        LIMIT ${limit} OFFSET ${skip}
+      `;
+
+      const merchantIds = rawResults.map(r => r.id);
+      
+      const countResult = await this.prisma.$queryRaw`
+        SELECT COUNT(*)::int as total
+        FROM merchants m
+        WHERE 
+          m."isApproved" = true AND
+          (
+            (setweight(to_tsvector('english', COALESCE(m."storeName", '')), 'A') ||
+             setweight(to_tsvector('english', COALESCE(m.description, '')), 'B'))
+            @@ websearch_to_tsquery('english', ${query})
+            OR similarity(m."storeName", ${query}) > 0.2
+            OR EXISTS (
+              SELECT 1 FROM products p
+              LEFT JOIN categories c ON p."categoryId" = c.id
+              WHERE p."merchantId" = m.id AND
+              (
+                (to_tsvector('english', COALESCE(p.name, '')) || 
+                 to_tsvector('english', COALESCE(p.description, '')) || 
+                 to_tsvector('english', COALESCE(c.name, '')))
+                @@ websearch_to_tsquery('english', ${query})
+                OR similarity(p.name, ${query}) > 0.3
+                OR similarity(c.name, ${query}) > 0.4
+              )
+            )
+          )
+      `;
+      const total = countResult[0]?.total || 0;
+
+      // Hydrate
+      const merchants = await this.prisma.merchant.findMany({
+        where: { id: { in: merchantIds } },
+        select: {
+          id: true,
+          storeName: true,
+          slug: true,
+          description: true,
+          logo: true,
+          bannerUrl: true,
+          isTrending: true
+        }
+      });
+
+      const data = merchantIds
+        .map(id => merchants.find(m => m.id === id))
+        .filter(Boolean);
+
+      const result = {
+        data,
+        meta: { page, limit, total }
+      };
+
+      cacheUtil.set(cacheKey, result, 300);
+      return result;
+    }
+
+    // 2. STANDARD FILTERED LISTING
     const cacheKey = cacheUtil.generateKey('merchants:public', { ...filters, page, limit });
     const cached = cacheUtil.get(cacheKey);
     if (cached) return cached;
-
-    const skip = (page - 1) * limit;
     
     const where = {
       isApproved: true,
@@ -198,14 +298,10 @@ export class MerchantService {
 
     const result = {
       data,
-      meta: {
-        page,
-        limit,
-        total
-      }
+      meta: { page, limit, total }
     };
 
-    cacheUtil.set(cacheKey, result, 300); // 5 mins
+    cacheUtil.set(cacheKey, result, 300);
     return result;
   }
 

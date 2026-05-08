@@ -180,8 +180,8 @@ export const getPublicProfile = asyncHandler(async (req, res, next) => {
  * Controller to list all public merchants with optional filters.
  */
 export const listPublic = asyncHandler(async (req, res, next) => {
-  const { isTrending, page, limit } = req.query;
-  const result = await merchantService.getPublicMerchants({ isTrending }, Number(page || 1), Number(limit || 20));
+  const { isTrending, q, page, limit } = req.query;
+  const result = await merchantService.getPublicMerchants({ isTrending, query: q }, Number(page || 1), Number(limit || 20));
 
   res.status(200).json({
     success: true,
