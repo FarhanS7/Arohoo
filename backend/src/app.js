@@ -3,6 +3,7 @@ import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
+import * as Sentry from "@sentry/node";
 import { AppError } from './common/errors/AppError.js';
 import { globalErrorHandler } from './common/middleware/error.middleware.js';
 import logger from './common/utils/logger.js';
@@ -33,6 +34,10 @@ app.get('/health', (req, res) => {
 });
 });
 
+app.get("/debug-sentry", function mainHandler(req, res) {
+  throw new Error("My first Sentry error!");
+});
+
 app.use('/api/v1', apiRouter);
 
 // 3. UNHANDLED ROUTES
@@ -41,6 +46,7 @@ app.all('*', (req, res, next) => {
 });
 
 // 4. GLOBAL ERROR HANDLER
+Sentry.setupExpressErrorHandler(app);
 app.use(globalErrorHandler);
 
 export default app;

@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import './config/sentry.js';
 import app from './app.js';
 import logger from './common/utils/logger.js';
 // In a real scenario, we'll import database connection here

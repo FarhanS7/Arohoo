@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import logger from '../utils/logger.js';
 
 /**
@@ -68,9 +69,10 @@ export const globalErrorHandler = (err, req, res, next) => {
     });
   }
 
-  // Log non-operational errors
+  // Log and report non-operational errors
   if (!err.isOperational) {
     logger.error(err);
+    Sentry.captureException(err);
   }
 
   return res.status(err.statusCode).json({
