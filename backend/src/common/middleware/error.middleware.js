@@ -33,6 +33,32 @@ export const globalErrorHandler = (err, req, res, next) => {
     }
   }
 
+  // Handle Multer Errors
+  if (err.name === 'MulterError') {
+    err.statusCode = 400;
+    err.status = 'fail';
+    err.isOperational = true;
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      err.message = 'File too large. Maximum size allowed is 10MB.';
+    } else if (err.code === 'LIMIT_FILE_COUNT') {
+      err.message = 'Too many files. Maximum allowed is 5.';
+    } else {
+      err.message = `Upload error: ${err.message}`;
+    }
+  }
+
+  // Handle JWT Errors
+  if (err.name === 'JsonWebTokenError') {
+    err.statusCode = 401;
+    err.message = 'Invalid token. Please log in again.';
+    err.isOperational = true;
+  }
+  if (err.name === 'TokenExpiredError') {
+    err.statusCode = 401;
+    err.message = 'Your token has expired! Please log in again.';
+    err.isOperational = true;
+  }
+
   if (process.env.NODE_ENV === 'development') {
     return res.status(err.statusCode).json({
       status: err.status,
@@ -42,19 +68,13 @@ export const globalErrorHandler = (err, req, res, next) => {
     });
   }
 
-  // Production response
-  if (err.isOperational) {
-    return res.status(err.statusCode).json({
-      status: err.status,
-      message: err.message
-    });
+  // Log non-operational errors
+  if (!err.isOperational) {
+    logger.error(err);
   }
 
-  // Log error using Winston
-  logger.error(err);
-
-  return res.status(500).json({
-    status: 'error',
-    message: 'Something went very wrong!'
+  return res.status(err.statusCode).json({
+    status: err.status,
+    message: err.message
   });
 };
