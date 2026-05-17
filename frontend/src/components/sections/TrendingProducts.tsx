@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const getCachedTrendingProducts = unstable_cache(
-  async () => productService.getTrendingProducts(10),
+  async () => productService.getTrendingProducts(1000),
   ["trending-products"],
   { revalidate: 60, tags: ["products", "trending"] }
 );
