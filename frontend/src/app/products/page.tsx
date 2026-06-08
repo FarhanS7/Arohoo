@@ -4,32 +4,43 @@ import FilterPanel from "@/features/products/components/FilterPanel";
 import ProductCard from "@/features/products/components/ProductCard";
 import ProductCardSkeleton from "@/features/products/components/ProductCardSkeleton";
 import { usePublicProducts } from "@/features/products/hooks/usePublicProducts";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import PageLayout from "@/components/layout/UX/PageLayout";
 import { Filter, X, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getPublicMerchants } from "@/lib/api/merchant";
 import Image from "next/image";
 import Link from "next/link";
+import debounce from "lodash.debounce";
 
 function ProductCatalogContent() {
-  const { 
-    products, 
-    loading, 
-    error, 
-    meta, 
-    params, 
-    updateParams 
+  const {
+    products,
+    loading,
+    error,
+    meta,
+    params,
+    updateParams
   } = usePublicProducts({ limit: 12 });
 
   const [searchInput, setSearchInput] = useState("");
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
-  // Fetch related brands based on search query
+  // Debounce search query for related brands (500ms)
+  const debouncedSearchQuery = useMemo(
+    () => debounce((query: string) => query, 500),
+    []
+  );
+
+  const debouncedQ = useMemo(() => {
+    return debouncedSearchQuery(params.q || "");
+  }, [params.q, debouncedSearchQuery]);
+
+  // Fetch related brands based on debounced search query
   const { data: brandResults, isLoading: loadingBrands } = useQuery({
-    queryKey: ["related-brands", params.q],
-    queryFn: () => getPublicMerchants({ q: params.q, limit: 10 }),
-    enabled: !!params.q,
+    queryKey: ["related-brands", debouncedQ],
+    queryFn: () => getPublicMerchants({ q: debouncedQ, limit: 10 }),
+    enabled: !!debouncedQ,
   });
 
   const relatedBrands = brandResults?.data || [];
