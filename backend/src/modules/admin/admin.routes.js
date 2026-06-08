@@ -15,6 +15,16 @@ const router = express.Router();
 router.use(protect);
 router.use(authorize('ADMIN'));
 
+// Monitoring endpoint (hidden, for data collection only)
+router.get('/monitoring/slow-queries', (req, res) => {
+  const slowQueries = global.__slowQueries || [];
+  res.json({
+    total: slowQueries.length,
+    queries: slowQueries.slice(-100), // Last 100 slow queries
+    timestamp: new Date().toISOString()
+  });
+});
+
 router.get('/stats', adminController.getPlatformStats);
 router.get('/merchants', adminController.getAllMerchants);
 router.get('/merchants/pending', adminController.getPendingMerchants);
