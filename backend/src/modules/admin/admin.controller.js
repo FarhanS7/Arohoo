@@ -136,14 +136,17 @@ export const getPlatformStats = asyncHandler(async (req, res, next) => {
 });
 
 /**
- * Controller to fetch all products for platform management.
+ * Controller to fetch all products for platform management with pagination.
  */
 export const getAllProducts = asyncHandler(async (req, res, next) => {
-  const products = await adminService.getAllProducts();
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 20;
+
+  const result = await adminService.getAllProducts(page, limit);
 
   res.status(200).json({
     success: true,
-    data: products
+    ...result
   });
 });
 

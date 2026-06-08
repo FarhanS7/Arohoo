@@ -288,34 +288,60 @@ export class AdminService {
   }
 
   /**
-   * Retrieves all products for platform-wide management.
-   * @returns {Promise<Array>} - List of all products.
+   * Retrieves all products for platform-wide management with pagination.
+   * @param {number} page - Page number (default: 1)
+   * @param {number} limit - Items per page (default: 20)
+   * @returns {Promise<Object>} - List of products with pagination metadata.
    */
-  async getAllProducts() {
-    return await this.prisma.product.findMany({
-      include: {
-        merchant: {
-          select: {
-            id: true,
-            storeName: true,
-            slug: true
+  async getAllProducts(page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+
+    const [products, total] = await Promise.all([
+      this.prisma.product.findMany({
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          name: true,
+          basePrice: true,
+          merchantId: true,
+          categoryId: true,
+          isTrending: true,
+          createdAt: true,
+          merchant: {
+            select: {
+              id: true,
+              storeName: true,
+              slug: true
+            }
+          },
+          category: {
+            select: {
+              id: true,
+              name: true
+            }
+          },
+          images: {
+            take: 1,
+            select: { url: true }
           }
         },
-        category: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        images: {
-          take: 1,
-          select: { url: true }
+        orderBy: {
+          createdAt: 'desc'
         }
-      },
-      orderBy: {
-        createdAt: 'desc'
+      }),
+      this.prisma.product.count()
+    ]);
+
+    return {
+      data: products,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        totalPages: Math.ceil(total / limit)
       }
-    });
+    };
   }
 
   /**
