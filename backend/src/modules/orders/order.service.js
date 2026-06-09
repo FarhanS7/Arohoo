@@ -210,9 +210,14 @@ export class OrderService {
 
     if (!order) throw new AppError('Order not found', 404);
 
-    // Multi-tenant check: Customers can only see their own orders
-    if (role === 'CUSTOMER' && order.userId !== userId) {
-      throw new AppError('Unauthorized: You can only view your own orders', 403);
+    // Multi-tenant check: Restrict registered customer orders; allow guest orders (userId is null) to be viewed by UUID
+    if (order.userId !== null) {
+      if (!role || !userId) {
+        throw new AppError('Unauthorized: You must be logged in to view this order', 401);
+      }
+      if (role === 'CUSTOMER' && order.userId !== userId) {
+        throw new AppError('Unauthorized: You can only view your own orders', 403);
+      }
     }
 
     // Role check: Merchants can only see orders if they have an item in it
