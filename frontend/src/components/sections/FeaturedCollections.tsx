@@ -59,15 +59,18 @@ export default function FeaturedCollections() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const handleNext = () => {
-    if (currentIndex < SLIDES.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
+  const handleDragEnd = (event: any, info: any) => {
+    const swipeThreshold = 50;
+    const { offset, velocity } = info;
 
-  const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+    if (offset.x < -swipeThreshold || velocity.x < -500) {
+      if (currentIndex < SLIDES.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      }
+    } else if (offset.x > swipeThreshold || velocity.x > 500) {
+      if (currentIndex > 0) {
+        setCurrentIndex(currentIndex - 1);
+      }
     }
   };
 
@@ -94,28 +97,16 @@ export default function FeaturedCollections() {
               Featured Collections
             </h2>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handlePrev}
-              disabled={currentIndex === 0}
-              className="w-10 h-10 rounded-full bg-white border border-neutral-200 flex items-center justify-center hover:bg-neutral-900 hover:text-white hover:border-neutral-900 disabled:opacity-20 disabled:hover:bg-white disabled:hover:text-neutral-900 disabled:hover:border-neutral-200 transition-all"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={handleNext}
-              disabled={currentIndex === SLIDES.length - 1}
-              className="w-10 h-10 rounded-full bg-white border border-neutral-200 flex items-center justify-center hover:bg-neutral-900 hover:text-white hover:border-neutral-900 disabled:opacity-20 disabled:hover:bg-white disabled:hover:text-neutral-900 disabled:hover:border-neutral-200 transition-all"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
         </div>
 
         {/* Track Wrap */}
         <div className="relative overflow-visible">
           <motion.div
-            className="flex gap-3"
+            className="flex gap-3 cursor-grab active:cursor-grabbing"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEnd}
             animate={{ x: getXOffset(currentIndex) }}
             transition={{ type: "spring", stiffness: 200, damping: 30 }}
           >
@@ -135,6 +126,7 @@ export default function FeaturedCollections() {
                   className="object-cover transition-transform duration-700 group-hover/slide:scale-[1.03]"
                   priority={idx < 2}
                   sizes="(max-width: 768px) 92vw, 65vw"
+                  draggable={false}
                 />
                 
                 {/* Subtle vignette overlay for depth */}
