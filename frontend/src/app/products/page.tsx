@@ -25,16 +25,20 @@ function ProductCatalogContent() {
 
   const [searchInput, setSearchInput] = useState("");
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [debouncedQ, setDebouncedQ] = useState("");
 
   // Debounce search query for related brands (500ms)
-  const debouncedSearchQuery = useMemo(
-    () => debounce((query: string) => query, 500),
+  const debouncedSetQ = useMemo(
+    () => debounce((query: string) => setDebouncedQ(query), 500),
     []
   );
 
-  const debouncedQ = useMemo(() => {
-    return debouncedSearchQuery(params.q || "");
-  }, [params.q, debouncedSearchQuery]);
+  useEffect(() => {
+    debouncedSetQ(params.q || "");
+    return () => {
+      debouncedSetQ.cancel();
+    };
+  }, [params.q, debouncedSetQ]);
 
   // Fetch related brands based on debounced search query
   const { data: brandResults, isLoading: loadingBrands } = useQuery({

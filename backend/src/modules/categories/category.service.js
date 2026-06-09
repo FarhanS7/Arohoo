@@ -52,6 +52,7 @@ export class CategoryService {
 
     const categories = await prisma.category.findMany({
       where: { isActive: true },
+      take: 100, // Limit unbounded growth
       orderBy: { displayOrder: 'asc' },
     });
 
@@ -143,6 +144,7 @@ export class CategoryService {
 
     const categories = await prisma.category.findMany({
       where: { isActive: true },
+      take: 100, // Limit unbounded growth
       select: {
         id: true,
         name: true,

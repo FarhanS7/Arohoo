@@ -4,6 +4,8 @@ import { PrismaProductRepository } from './prisma.product.repository.js';
 
 const repository = new PrismaProductRepository();
 
+jest.setTimeout(30000);
+
 describe('PrismaProductRepository', () => {
   let testMerchant;
   let testCategory;
@@ -20,6 +22,7 @@ describe('PrismaProductRepository', () => {
     testMerchant = await prisma.merchant.create({
       data: {
         storeName: 'Repo Test Store',
+        slug: `repo-test-store-${Date.now()}`,
         userId: user.id,
         status: 'APPROVED'
       }

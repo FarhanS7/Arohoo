@@ -285,8 +285,8 @@ export default function MerchantDetailView({
                       <p className="text-sm font-black text-neutral-900 tracking-tighter uppercase italic leading-none">{o.product.name}</p>
                     </td>
                     <td className="px-8 py-6">
-                       <p className="text-xs font-black text-neutral-900 uppercase tracking-tighter">{o.order.user.name}</p>
-                       <p className="text-[10px] font-bold text-neutral-400">{o.order.user.email}</p>
+                       <p className="text-xs font-black text-neutral-900 uppercase tracking-tighter">{o.order.user?.name || 'Guest Customer'}</p>
+                       <p className="text-[10px] font-bold text-neutral-400">{o.order.user?.email || 'Guest N/A'}</p>
                     </td>
                     <td className="px-8 py-6">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${

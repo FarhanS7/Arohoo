@@ -11,38 +11,55 @@ export class AdminService {
    * Includes associated user email.
    * @returns {Promise<Array>} - List of merchants.
    */
-  async getAllMerchants() {
-    const merchants = await this.prisma.merchant.findMany({
-      select: {
-        id: true,
-        storeName: true,
-        slug: true,
-        isApproved: true,
-        isTrending: true,
-        createdAt: true,
-        user: {
-          select: {
-            email: true,
-            name: true,
+  async getAllMerchants(page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+
+    const [merchants, total] = await Promise.all([
+      this.prisma.merchant.findMany({
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          storeName: true,
+          slug: true,
+          isApproved: true,
+          isTrending: true,
+          createdAt: true,
+          user: {
+            select: {
+              email: true,
+              name: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.merchant.count()
+    ]);
 
     // Format the response to flatten the email structure
-    return merchants.map((m) => ({
+    const data = merchants.map((m) => ({
       id: m.id,
       businessName: m.storeName,
       slug: m.slug,
-      ownerName: m.user.name,
-      email: m.user.email,
+      ownerName: m.user?.name || null,
+      email: m.user?.email || null,
       isApproved: m.isApproved,
       createdAt: m.createdAt,
       isTrending: m.isTrending
     }));
+
+    return {
+      data,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
   }
 
   /**
@@ -193,19 +210,36 @@ export class AdminService {
    * Retrieves all users in the system.
    * @returns {Promise<Array>} - List of users with basic info.
    */
-  async listUsers() {
-    return await this.prisma.user.findMany({
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        status: true,
-        createdAt: true
-      },
-      orderBy: {
-        createdAt: 'desc'
+  async listUsers(page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          status: true,
+          createdAt: true
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      }),
+      this.prisma.user.count()
+    ]);
+
+    return {
+      data: users,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        totalPages: Math.ceil(total / limit)
       }
-    });
+    };
   }
 
   /**
@@ -267,8 +301,17 @@ export class AdminService {
    * @returns {Promise<Object>} - Stats including revenue, counts of users, merchants, etc.
    */
   async getPlatformStats() {
+    const cacheKey = 'admin:platform_stats';
+    const cached = cacheUtil.get(cacheKey);
+    if (cached) return cached;
+
+    const statsWindow = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
+
     const [totalRevenue, totalMerchants, totalUsers, totalCategories] = await Promise.all([
       this.prisma.order.aggregate({
+        where: {
+          createdAt: { gte: statsWindow }
+        },
         _sum: {
           totalAmount: true
         }
@@ -278,13 +321,16 @@ export class AdminService {
       this.prisma.category.count()
     ]);
 
-    return {
+    const result = {
       totalRevenue: Number(totalRevenue._sum.totalAmount || 0),
       totalMerchants,
       totalUsers,
       totalCategories,
       updatedAt: new Date()
     };
+
+    cacheUtil.set(cacheKey, result, 600); // 10 minutes cache
+    return result;
   }
 
   /**
@@ -361,6 +407,8 @@ export class AdminService {
           }
         },
         products: {
+          take: 50,
+          orderBy: { createdAt: 'desc' },
           include: {
             images: { take: 1 },
             variants: true,
@@ -378,6 +426,7 @@ export class AdminService {
     // Fetch related orders (all orders containing items from this merchant)
     const orderItems = await this.prisma.orderItem.findMany({
       where: { merchantId },
+      take: 50,
       include: {
         order: {
           include: {
@@ -389,11 +438,14 @@ export class AdminService {
       orderBy: { createdAt: 'desc' }
     });
 
+    const statsWindow = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+
     // Reuse MerchantService-like stat aggregation
     const statsAggregate = await this.prisma.orderItem.aggregate({
       where: {
         merchantId,
-        status: { not: 'CANCELLED' }
+        status: { not: 'CANCELLED' },
+        createdAt: { gte: statsWindow }
       },
       _sum: {
         subtotal: true,
@@ -405,7 +457,11 @@ export class AdminService {
     });
 
     const deliveredCount = await this.prisma.orderItem.count({
-      where: { merchantId, status: 'DELIVERED' }
+      where: { 
+        merchantId, 
+        status: 'DELIVERED',
+        createdAt: { gte: statsWindow }
+      }
     });
 
     const stats = {

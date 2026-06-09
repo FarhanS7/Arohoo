@@ -99,6 +99,7 @@ model Order {
   updatedAt       DateTime    @updatedAt
 
   @@index([userId, status, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
   @@map("orders")
 }
 
@@ -122,6 +123,7 @@ model OrderItem {
 
   @@index([orderId])
   @@index([merchantId, status, createdAt(sort: Desc)])
+  @@index([merchantId, createdAt(sort: Desc)])
   @@map("order_items")
 }
 

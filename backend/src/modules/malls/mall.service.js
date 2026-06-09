@@ -20,6 +20,7 @@ export class MallService {
     if (cached) return cached;
 
     const malls = await prisma.mall.findMany({
+      take: 100, // Limit unbounded growth
       include: {
         _count: {
           select: { merchants: true },

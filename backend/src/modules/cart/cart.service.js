@@ -15,11 +15,31 @@ export class CartService {
   async getOrCreateCart(userId) {
     let cart = await prisma.cart.findUnique({
       where: { userId },
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        createdAt: true,
+        updatedAt: true,
         items: {
-          include: {
+          select: {
+            id: true,
+            cartId: true,
+            productVariantId: true,
+            quantity: true,
+            createdAt: true,
+            updatedAt: true,
             productVariant: {
-              include: {
+              select: {
+                id: true,
+                sku: true,
+                size: true,
+                color: true,
+                imageUrl: true,
+                price: true,
+                stock: true,
+                productId: true,
+                createdAt: true,
+                updatedAt: true,
                 product: {
                   select: { 
                     id: true, 
@@ -41,11 +61,31 @@ export class CartService {
     if (!cart) {
       cart = await prisma.cart.create({
         data: { userId },
-        include: {
+        select: {
+          id: true,
+          userId: true,
+          createdAt: true,
+          updatedAt: true,
           items: {
-            include: {
+            select: {
+              id: true,
+              cartId: true,
+              productVariantId: true,
+              quantity: true,
+              createdAt: true,
+              updatedAt: true,
               productVariant: {
-                include: {
+                select: {
+                  id: true,
+                  sku: true,
+                  size: true,
+                  color: true,
+                  imageUrl: true,
+                  price: true,
+                  stock: true,
+                  productId: true,
+                  createdAt: true,
+                  updatedAt: true,
                   product: {
                     select: { 
                       id: true, 

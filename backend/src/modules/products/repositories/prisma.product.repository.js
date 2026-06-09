@@ -160,25 +160,25 @@ export class PrismaProductRepository {
       // PostgreSQL Full-Text Search + Trigram Fuzzy Matching
       // We prioritize Name (Weight A) over Category (Weight B) and Description (Weight C)
       const rawResults = await prisma.$queryRaw`
-        SELECT p.id,
-               ts_rank_cd(
-                 setweight(to_tsvector('english', COALESCE(p.name, '')), 'A') ||
-                 setweight(to_tsvector('english', COALESCE(c.name, '')), 'B') ||
-                 setweight(to_tsvector('english', COALESCE(p.description, '')), 'C'),
-                 websearch_to_tsquery('english', ${query})
-               ) AS rank,
-               similarity(p.name, ${query}) AS similarity
-        FROM products p
-        LEFT JOIN categories c ON p."categoryId" = c.id
-        WHERE 
-          (
+        WITH search_candidates AS (
+          SELECT p.id, p.name, c.name as cat_name, p.description, p."categoryId"
+          FROM products p
+          LEFT JOIN categories c ON p."categoryId" = c.id
+          WHERE 
             (setweight(to_tsvector('english', COALESCE(p.name, '')), 'A') ||
              setweight(to_tsvector('english', COALESCE(c.name, '')), 'B') ||
              setweight(to_tsvector('english', COALESCE(p.description, '')), 'C'))
             @@ websearch_to_tsquery('english', ${query})
-          )
-          OR similarity(p.name, ${query}) > 0.2
-          OR similarity(c.name, ${query}) > 0.4
+        )
+        SELECT id,
+               ts_rank_cd(
+                 setweight(to_tsvector('english', COALESCE(name, '')), 'A') ||
+                 setweight(to_tsvector('english', COALESCE(cat_name, '')), 'B') ||
+                 setweight(to_tsvector('english', COALESCE(description, '')), 'C'),
+                 websearch_to_tsquery('english', ${query})
+               ) AS rank,
+               similarity(name, ${query}) AS similarity
+        FROM search_candidates
         ORDER BY rank DESC, similarity DESC
         LIMIT ${take} OFFSET ${skip}
       `;
@@ -187,18 +187,18 @@ export class PrismaProductRepository {
       
       // Get total count
       const countResult = await prisma.$queryRaw`
-        SELECT COUNT(*)::int as total
-        FROM products p
-        LEFT JOIN categories c ON p."categoryId" = c.id
-        WHERE 
-          (
+        WITH search_candidates AS (
+          SELECT p.id
+          FROM products p
+          LEFT JOIN categories c ON p."categoryId" = c.id
+          WHERE 
             (setweight(to_tsvector('english', COALESCE(p.name, '')), 'A') ||
              setweight(to_tsvector('english', COALESCE(c.name, '')), 'B') ||
              setweight(to_tsvector('english', COALESCE(p.description, '')), 'C'))
             @@ websearch_to_tsquery('english', ${query})
-          )
-          OR similarity(p.name, ${query}) > 0.2
-          OR similarity(c.name, ${query}) > 0.4
+        )
+        SELECT COUNT(*)::int as total
+        FROM search_candidates
       `;
       const total = countResult[0]?.total || 0;
 

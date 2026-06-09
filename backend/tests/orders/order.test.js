@@ -10,6 +10,7 @@ describe('OrderService', () => {
       $transaction: jest.fn((callback) => callback(mockPrisma)),
       productVariant: {
         findUnique: jest.fn(),
+        findMany: jest.fn(),
         update: jest.fn(),
       },
       order: {
@@ -37,6 +38,7 @@ describe('OrderService', () => {
         product: { merchantId: 'm1' }
       };
 
+      mockPrisma.productVariant.findMany.mockResolvedValue([mockVariant]);
       mockPrisma.productVariant.findUnique.mockResolvedValue(mockVariant);
       mockPrisma.order.create.mockResolvedValue({ id: 'ord1', totalAmount: 40 });
 
@@ -58,6 +60,7 @@ describe('OrderService', () => {
       };
 
       const mockVariant = { id: 'v1', sku: 'SKU-1', stock: 10, price: 5, product: { merchantId: 'm1' } };
+      mockPrisma.productVariant.findMany.mockResolvedValue([mockVariant]);
       mockPrisma.productVariant.findUnique.mockResolvedValue(mockVariant);
 
       await expect(orderService.createOrder(orderData))

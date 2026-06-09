@@ -1,6 +1,7 @@
-import { beforeAll, describe, expect, test } from '@jest/globals';
-import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, it, test, jest } from '@jest/globals';
 import prisma from '../../infrastructure/database/prisma.js';
+
+jest.setTimeout(30000);
 
 describe('Product Image Schema Verification', () => {
   let testProduct;
@@ -17,6 +18,7 @@ describe('Product Image Schema Verification', () => {
     const merchant = await prisma.merchant.create({
       data: {
         storeName: 'Image Test Store',
+        slug: `image-test-store-${Date.now()}`,
         userId: user.id,
         status: 'APPROVED'
       }

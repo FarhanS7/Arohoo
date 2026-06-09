@@ -24,12 +24,15 @@ export class MerchantService {
     const cached = cacheUtil.get(cacheKey);
     if (cached) return cached;
 
+    const statsWindow = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+
     // 1. Parallel fetch for all stats - Optimized: avoid sequential DB roundtrips
     const [statsAggregate, deliveredCount, lowStockProducts] = await Promise.all([
       this.prisma.orderItem.aggregate({
         where: {
           merchantId,
-          status: { not: 'CANCELLED' }
+          status: { not: 'CANCELLED' },
+          createdAt: { gte: statsWindow }
         },
         _sum: {
           subtotal: true,
@@ -42,7 +45,8 @@ export class MerchantService {
       this.prisma.orderItem.count({
         where: {
           merchantId,
-          status: 'DELIVERED'
+          status: 'DELIVERED',
+          createdAt: { gte: statsWindow }
         }
       }),
       this.prisma.productVariant.count({
@@ -178,35 +182,23 @@ export class MerchantService {
       // Merchant FTS + Trigram Similarity + Product/Category Match Check
       // We surface brands if their name/desc matches OR if they sell products/categories matching the query
       const rawResults = await this.prisma.$queryRaw`
-        SELECT m.id,
-               ts_rank_cd(
-                 setweight(to_tsvector('english', COALESCE(m."storeName", '')), 'A') ||
-                 setweight(to_tsvector('english', COALESCE(m.description, '')), 'B'),
-                 websearch_to_tsquery('english', ${query})
-               ) AS rank,
-               similarity(m."storeName", ${query}) AS similarity
-        FROM merchants m
-        WHERE 
-          m."isApproved" = true AND
-          (
+        WITH search_candidates AS (
+          SELECT m.id, m."storeName", m.description
+          FROM merchants m
+          WHERE 
+            m."isApproved" = true AND
             (setweight(to_tsvector('english', COALESCE(m."storeName", '')), 'A') ||
              setweight(to_tsvector('english', COALESCE(m.description, '')), 'B'))
             @@ websearch_to_tsquery('english', ${query})
-            OR similarity(m."storeName", ${query}) > 0.2
-            OR EXISTS (
-              SELECT 1 FROM products p
-              LEFT JOIN categories c ON p."categoryId" = c.id
-              WHERE p."merchantId" = m.id AND
-              (
-                (to_tsvector('english', COALESCE(p.name, '')) || 
-                 to_tsvector('english', COALESCE(p.description, '')) || 
-                 to_tsvector('english', COALESCE(c.name, '')))
-                @@ websearch_to_tsquery('english', ${query})
-                OR similarity(p.name, ${query}) > 0.3
-                OR similarity(c.name, ${query}) > 0.4
-              )
-            )
-          )
+        )
+        SELECT id,
+               ts_rank_cd(
+                 setweight(to_tsvector('english', COALESCE("storeName", '')), 'A') ||
+                 setweight(to_tsvector('english', COALESCE(description, '')), 'B'),
+                 websearch_to_tsquery('english', ${query})
+               ) AS rank,
+               similarity("storeName", ${query}) AS similarity
+        FROM search_candidates
         ORDER BY rank DESC, similarity DESC
         LIMIT ${limit} OFFSET ${skip}
       `;
@@ -214,29 +206,17 @@ export class MerchantService {
       const merchantIds = rawResults.map(r => r.id);
       
       const countResult = await this.prisma.$queryRaw`
-        SELECT COUNT(*)::int as total
-        FROM merchants m
-        WHERE 
-          m."isApproved" = true AND
-          (
+        WITH search_candidates AS (
+          SELECT m.id
+          FROM merchants m
+          WHERE 
+            m."isApproved" = true AND
             (setweight(to_tsvector('english', COALESCE(m."storeName", '')), 'A') ||
              setweight(to_tsvector('english', COALESCE(m.description, '')), 'B'))
             @@ websearch_to_tsquery('english', ${query})
-            OR similarity(m."storeName", ${query}) > 0.2
-            OR EXISTS (
-              SELECT 1 FROM products p
-              LEFT JOIN categories c ON p."categoryId" = c.id
-              WHERE p."merchantId" = m.id AND
-              (
-                (to_tsvector('english', COALESCE(p.name, '')) || 
-                 to_tsvector('english', COALESCE(p.description, '')) || 
-                 to_tsvector('english', COALESCE(c.name, '')))
-                @@ websearch_to_tsquery('english', ${query})
-                OR similarity(p.name, ${query}) > 0.3
-                OR similarity(c.name, ${query}) > 0.4
-              )
-            )
-          )
+        )
+        SELECT COUNT(*)::int as total
+        FROM search_candidates
       `;
       const total = countResult[0]?.total || 0;
 

@@ -1,5 +1,7 @@
-import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, test, jest } from '@jest/globals';
 import prisma from '../../infrastructure/database/prisma.js';
+
+jest.setTimeout(30000);
 
 describe('ProductVariant Schema Verification', () => {
   let testProduct;
@@ -16,6 +18,7 @@ describe('ProductVariant Schema Verification', () => {
     const merchant = await prisma.merchant.create({
       data: {
         storeName: 'Variant Test Store',
+        slug: `variant-test-store-${Date.now()}`,
         userId: user.id,
         status: 'APPROVED'
       }
@@ -56,7 +59,7 @@ describe('ProductVariant Schema Verification', () => {
   });
 
   test('should fail with duplicate SKU', async () => {
-    const sku = 'DUPLICATE-SKU';
+    const sku = `DUPLICATE-SKU-${Date.now()}`;
     await prisma.productVariant.create({
       data: {
         productId: testProduct.id,

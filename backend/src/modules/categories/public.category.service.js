@@ -19,6 +19,7 @@ export class PublicCategoryService {
     // 2. Fetch from database
     const categories = await prisma.category.findMany({
       where: { isActive: true },
+      take: 100, // Limit unbounded growth
       select: {
         id: true,
         name: true,

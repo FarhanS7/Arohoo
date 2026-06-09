@@ -7,11 +7,14 @@ const adminService = new AdminService();
  * Controller to handle admin operations.
  */
 export const getAllMerchants = asyncHandler(async (req, res, next) => {
-  const merchants = await adminService.getAllMerchants();
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 20;
+
+  const result = await adminService.getAllMerchants(page, limit);
 
   res.status(200).json({
     success: true,
-    data: merchants,
+    ...result,
   });
 });
 
@@ -59,11 +62,14 @@ export const rejectMerchant = asyncHandler(async (req, res, next) => {
  * Controller to list all users.
  */
 export const listUsers = asyncHandler(async (req, res, next) => {
-  const users = await adminService.listUsers();
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 20;
+
+  const result = await adminService.listUsers(page, limit);
 
   res.status(200).json({
     success: true,
-    data: users
+    ...result
   });
 });
 

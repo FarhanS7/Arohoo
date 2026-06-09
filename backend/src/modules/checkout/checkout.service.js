@@ -124,23 +124,24 @@ export class CheckoutService {
         }
       });
 
-      // 3. Create OrderItems and Reduce Stock
-      for (const item of summaryItems) {
-        // Create OrderItem
-        await tx.orderItem.create({
-          data: {
-            orderId: order.id,
-            productVariantId: item.productVariantId,
-            productId: item.productId,
-            merchantId: item.merchantId,
-            quantity: item.quantity,
-            price: item.price,
-            subtotal: item.subtotal,
-            status: 'PENDING'
-          }
-        });
+      // 3. Create OrderItems in bulk
+      const orderItemsData = summaryItems.map(item => ({
+        orderId: order.id,
+        productVariantId: item.productVariantId,
+        productId: item.productId,
+        merchantId: item.merchantId,
+        quantity: item.quantity,
+        price: item.price,
+        subtotal: item.subtotal,
+        status: 'PENDING'
+      }));
 
-        // Reduce stock with concurrent update check
+      await tx.orderItem.createMany({
+        data: orderItemsData
+      });
+
+      // 4. Reduce stock with concurrent update check
+      for (const item of summaryItems) {
         const updatedVariant = await tx.productVariant.update({
           where: { id: item.productVariantId },
           data: {
