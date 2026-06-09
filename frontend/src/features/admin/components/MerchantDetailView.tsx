@@ -9,6 +9,9 @@ import {
 import Image from "next/image";
 import { format } from "date-fns";
 
+import ProductModal from "@/features/products/components/ProductModal";
+import ProductForm from "@/features/products/components/ProductForm";
+
 interface MerchantDetailViewProps {
   merchant: any;
   onBack: () => void;
@@ -26,8 +29,8 @@ export default function MerchantDetailView({
 }: MerchantDetailViewProps) {
   const [activeTab, setActiveTab] = useState<"overview" | "products" | "orders">("overview");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
-  const [editFormData, setEditFormData] = useState<any>({});
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
 
   if (loadingDetails && !merchant) {
     return (
@@ -51,24 +54,9 @@ export default function MerchantDetailView({
     }
   };
 
-  const startEditing = (p: any) => {
-    setEditingProductId(p.id);
-    setEditFormData({
-      basePrice: p.basePrice,
-      name: p.name
-    });
-  };
-
-  const handleProductUpdate = async (productId: string) => {
-    setUpdatingId(productId);
-    try {
-      await onUpdateProduct(productId, editFormData);
-      setEditingProductId(null);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setUpdatingId(null);
-    }
+  const handleEditProductClick = (p: any) => {
+    setEditingProduct(p);
+    setIsProductModalOpen(true);
   };
 
   return (
@@ -199,68 +187,46 @@ export default function MerchantDetailView({
             <table className="min-w-full divide-y divide-neutral-100 text-left">
               <thead className="bg-neutral-50/50">
                 <tr>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Product</th>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Stock</th>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Price</th>
-                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400 text-right">Visibility</th>
+                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Product Details</th>
+                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Pricing</th>
+                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400">Inventory</th>
+                  <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-neutral-400 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-50">
-                {products.map((p: any) => (
-                  <tr key={p.id} className="hover:bg-neutral-50/30 transition-colors">
-                    <td className="px-8 py-6 flex items-center gap-4">
-                      <div className="relative w-12 h-12 rounded-xl bg-neutral-100 overflow-hidden shrink-0">
-                        {p.images?.[0]?.url && <Image src={p.images[0].url} alt={p.name} fill className="object-cover" />}
-                      </div>
-                      <div>
-                        <p className="text-sm font-black text-neutral-900 tracking-tighter uppercase italic leading-none">{p.name}</p>
-                        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-1">{p.category?.name}</p>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex items-center gap-2">
-                        <span className="text-neutral-400">৳</span>
-                        {editingProductId === p.id ? (
-                          <input 
-                            type="number"
-                            value={editFormData.basePrice}
-                            onChange={(e) => setEditFormData({ ...editFormData, basePrice: Number(e.target.value) })}
-                            className="w-20 bg-neutral-100 border-none rounded-lg px-2 py-1 text-sm font-black outline-none focus:ring-2 focus:ring-primary/20"
-                          />
-                        ) : (
-                          <span className="text-sm font-black text-neutral-900">{p.basePrice}</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-8 py-6 text-right">
-                       {editingProductId === p.id ? (
-                         <div className="flex items-center gap-2 ml-auto">
-                            <button 
-                              onClick={() => handleProductUpdate(p.id)}
-                              disabled={updatingId === p.id}
-                              className="px-4 py-2 bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-80 transition-all flex items-center gap-2"
-                            >
-                              {updatingId === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-                              Save
-                            </button>
-                            <button 
-                              onClick={() => setEditingProductId(null)}
-                              className="px-4 py-2 bg-neutral-100 text-neutral-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-black transition-all"
-                            >
-                              Cancel
-                            </button>
-                         </div>
-                       ) : (
+                {products.map((p: any) => {
+                  const totalStock = p.variants?.reduce((acc: number, v: any) => acc + (v.stock === -1 ? 0 : v.stock), 0) || 0;
+                  return (
+                    <tr key={p.id} className="hover:bg-neutral-50/30 transition-colors">
+                      <td className="px-8 py-6 flex items-center gap-4">
+                        <div className="relative w-12 h-12 rounded-xl bg-neutral-100 overflow-hidden shrink-0">
+                          {p.images?.[0]?.url && <Image src={p.images[0].url} alt={p.name} fill className="object-cover" />}
+                        </div>
+                        <div>
+                          <p className="text-sm font-black text-neutral-900 tracking-tighter uppercase italic leading-none">{p.name}</p>
+                          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-1">{p.category?.name}</p>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <span className="text-sm font-black text-neutral-900">৳{Number(p.basePrice).toLocaleString()}</span>
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-neutral-900">{totalStock} units</span>
+                          <span className="text-[10px] text-neutral-400 font-medium uppercase tracking-tighter">{p.variants?.length || 0} Variants</span>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6 text-right">
                          <button 
-                           onClick={() => startEditing(p)}
+                           onClick={() => handleEditProductClick(p)}
                            className="text-[10px] font-black uppercase tracking-widest text-neutral-300 hover:text-black transition-colors flex items-center gap-1 ml-auto"
                          >
                            <Settings className="w-3 h-3" /> Edit Item
                          </button>
-                       )}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -282,11 +248,18 @@ export default function MerchantDetailView({
                   <tr key={o.id} className="hover:bg-neutral-50/30 transition-colors">
                     <td className="px-8 py-6">
                       <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1">#{o.order.id.slice(0, 8)}</p>
-                      <p className="text-sm font-black text-neutral-900 tracking-tighter uppercase italic leading-none">{o.product.name}</p>
+                      <p className="text-sm font-black text-neutral-900 tracking-tighter uppercase italic leading-none mb-1.5">{o.product.name}</p>
+                      <p className="text-[10px] font-bold text-neutral-500">Qty: {o.quantity} × ৳{Number(o.price).toLocaleString()} | Subtotal: ৳{Number(o.subtotal).toLocaleString()}</p>
+                      <p className="text-[9px] font-medium text-neutral-400 mt-0.5">Order Total: ৳{Number(o.order.totalAmount).toLocaleString()} (incl. ৳{Number(o.order.shippingCost).toLocaleString()} shipping)</p>
                     </td>
                     <td className="px-8 py-6">
-                       <p className="text-xs font-black text-neutral-900 uppercase tracking-tighter">{o.order.user?.name || 'Guest Customer'}</p>
-                       <p className="text-[10px] font-bold text-neutral-400">{o.order.user?.email || 'Guest N/A'}</p>
+                       <p className="text-xs font-black text-neutral-900 uppercase tracking-tighter mb-0.5">{o.order.shippingName || o.order.user?.name || 'Guest Customer'}</p>
+                       <p className="text-[10px] font-bold text-neutral-600 mb-0.5">{o.order.shippingPhone || 'No Phone'}</p>
+                       <p className="text-[9px] font-medium text-neutral-400 mb-1.5">{o.order.user?.email || 'Guest Checkout'}</p>
+                       <div className="border-t border-neutral-100 pt-1 text-[10px] text-neutral-500 max-w-[220px] leading-tight">
+                         <span className="font-bold text-neutral-700">Deliver to: </span>
+                         {o.order.shippingAddress}, <span className="font-bold text-neutral-600">{o.order.shippingDistrict}</span>
+                       </div>
                     </td>
                     <td className="px-8 py-6">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
@@ -317,6 +290,36 @@ export default function MerchantDetailView({
           </div>
         )}
       </div>
+
+      {editingProduct && (
+        <ProductModal
+          isOpen={isProductModalOpen}
+          onClose={() => {
+            setIsProductModalOpen(false);
+            setEditingProduct(null);
+          }}
+          title={`Refining: ${editingProduct.name}`}
+        >
+          <ProductForm
+            initialData={editingProduct}
+            onSubmit={async (data) => {
+              setUpdatingId(editingProduct.id);
+              try {
+                await onUpdateProduct(editingProduct.id, data);
+                setIsProductModalOpen(false);
+                setEditingProduct(null);
+              } finally {
+                setUpdatingId(null);
+              }
+            }}
+            onCancel={() => {
+              setIsProductModalOpen(false);
+              setEditingProduct(null);
+            }}
+            loading={updatingId === editingProduct.id}
+          />
+        </ProductModal>
+      )}
     </div>
   );
 }

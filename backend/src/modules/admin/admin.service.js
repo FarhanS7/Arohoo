@@ -481,14 +481,60 @@ export class AdminService {
     };
   }
 
-  /**
-   * Updates any product's details (Admin-level bypass).
-   */
   async updateProductByAdmin(productId, data) {
-    return await this.prisma.product.update({
-      where: { id: productId },
-      data,
-      include: { variants: true }
+    const { variants, images, ...rest } = data;
+
+    return await this.prisma.$transaction(async (tx) => {
+      // 1. Update basic product fields
+      await tx.product.update({
+        where: { id: productId },
+        data: rest,
+      });
+
+      // 2. Sync variants if provided
+      if (variants && Array.isArray(variants)) {
+        const existingVariants = await tx.productVariant.findMany({ where: { productId } });
+        const incomingIds = variants.map(v => v.id).filter(Boolean);
+
+        // Delete variants that were removed
+        const variantsToRemove = existingVariants.filter(ev => !incomingIds.includes(ev.id));
+        if (variantsToRemove.length > 0) {
+           await tx.productVariant.deleteMany({
+              where: { id: { in: variantsToRemove.map(v => v.id) } }
+           });
+        }
+
+        // Upsert incoming variants
+        for (const variant of variants) {
+          const { id: varId, ...variantData } = variant;
+          if (variantData.price !== undefined) variantData.price = Number(variantData.price);
+          if (variantData.stock !== undefined) variantData.stock = Number(variantData.stock);
+
+          if (varId) {
+             await tx.productVariant.update({
+               where: { id: varId },
+               data: variantData
+             });
+          } else {
+             await tx.productVariant.create({
+               data: {
+                 ...variantData,
+                 productId
+               }
+             });
+          }
+        }
+      }
+
+      // Return fully hydrated updated product
+      return await tx.product.findUnique({
+        where: { id: productId },
+        include: {
+          variants: true,
+          images: true,
+          category: { select: { name: true } }
+        }
+      });
     });
   }
 
