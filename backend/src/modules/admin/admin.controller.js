@@ -8,7 +8,7 @@ const adminService = new AdminService();
  */
 export const getAllMerchants = asyncHandler(async (req, res, next) => {
   const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 20;
+  const limit = Number(req.query.limit) || 1000;
 
   const result = await adminService.getAllMerchants(page, limit);
 
@@ -63,7 +63,7 @@ export const rejectMerchant = asyncHandler(async (req, res, next) => {
  */
 export const listUsers = asyncHandler(async (req, res, next) => {
   const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 20;
+  const limit = Number(req.query.limit) || 1000;
 
   const result = await adminService.listUsers(page, limit);
 
@@ -146,7 +146,7 @@ export const getPlatformStats = asyncHandler(async (req, res, next) => {
  */
 export const getAllProducts = asyncHandler(async (req, res, next) => {
   const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 20;
+  const limit = Number(req.query.limit) || 1000;
 
   const result = await adminService.getAllProducts(page, limit);
 
