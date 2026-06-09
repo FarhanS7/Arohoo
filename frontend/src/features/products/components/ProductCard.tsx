@@ -17,7 +17,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
   return (
     <Link href={`/products/${product.id}`}>
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-gray-100 shadow-sm">
+      <div className="relative aspect-square sm:aspect-[4/5] w-full overflow-hidden rounded-2xl bg-gray-100 shadow-sm">
         <Image
           src={displayImage}
           alt={product.name}

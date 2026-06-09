@@ -43,7 +43,7 @@ export default async function TrendingProducts() {
               key={product.id} 
               className="group relative flex flex-col bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-neutral-100"
             >
-              <div className="relative aspect-[4/5] w-full overflow-hidden bg-neutral-50/50">
+              <div className="relative aspect-square sm:aspect-[4/5] w-full overflow-hidden bg-neutral-50/50">
                 {product.images?.[0] ? (
                   <Image
                     src={product.images[0].url}
@@ -61,8 +61,8 @@ export default async function TrendingProducts() {
                 {/* Visual Accent */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <div className="p-4 flex flex-col bg-white">
-                <h3 className="font-bold text-neutral-800 mb-1.5 text-xs sm:text-sm line-clamp-2 group-hover:text-primary transition-colors tracking-tight uppercase font-sans leading-tight">
+              <div className="p-3 sm:p-4 flex flex-col bg-white">
+                <h3 className="font-bold text-neutral-800 mb-1 sm:mb-1.5 text-xs sm:text-sm line-clamp-2 group-hover:text-primary transition-colors tracking-tight uppercase font-sans leading-tight">
                   {product.name}
                 </h3>
                 <div className="flex items-center justify-between mt-auto">
