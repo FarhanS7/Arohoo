@@ -15,8 +15,9 @@ import { getCachedTrendingProducts } from "@/components/sections/TrendingProduct
 
 export default function Home() {
   // Parallel pre-fetch (Starts fetches immediately to prevent sequential waterfalls)
-  getCachedTrendingBrands();
-  getCachedTrendingProducts();
+  // We use .catch() to avoid unhandled promise rejections during static builds when the API is down
+  getCachedTrendingBrands().catch(() => {});
+  getCachedTrendingProducts().catch(() => {});
 
   return (
     <PageLayout>
